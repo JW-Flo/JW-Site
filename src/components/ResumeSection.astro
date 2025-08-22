@@ -1,0 +1,84 @@
+---
+import resume from '../data/resume.json';
+---
+<section class="space-y-8">
+  <header>
+    <h1 class="text-3xl font-bold tracking-tight">Resume</h1>
+    <p class="text-slate-300 mt-2 max-w-2xl">{resume.summary}</p>
+  </header>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="space-y-6">
+      <div>
+        <h2 class="font-semibold text-brand">Core Skills</h2>
+        <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
+          {resume.skills.map(s => <li>{s}</li>)}
+        </ul>
+      </div>
+      {resume.tools && (
+        <div>
+          <h2 class="font-semibold text-brand">Tools & Platforms</h2>
+          <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
+            {resume.tools.map(t => <li>{t}</li>)}
+          </ul>
+        </div>
+      )}
+      {resume.highlights && (
+        <div>
+          <h2 class="font-semibold text-brand">Highlights</h2>
+          <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
+            {resume.highlights.map(h => <li>{h}</li>)}
+          </ul>
+        </div>
+      )}
+      <div>
+        <h2 class="font-semibold text-brand">Certifications</h2>
+        <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
+          {resume.certifications.map(c => <li>{c}</li>)}
+        </ul>
+      </div>
+      {resume.education && (
+        <div>
+          <h2 class="font-semibold text-brand">Education</h2>
+          <ul class="text-sm space-y-2 text-slate-300">
+            {resume.education.map(e => <li><span class="font-medium">{e.degree}</span> – {e.institution} ({e.period})</li>)}
+          </ul>
+        </div>
+      )}
+      <div>
+        <h2 class="font-semibold text-brand">Contact</h2>
+        <ul class="text-sm space-y-1 text-slate-300">
+          <li><a class="hover:text-brand" href={`mailto:${resume.contact.email}`}>{resume.contact.email}</a></li>
+          <li><a class="hover:text-brand" href={`https://github.com/${resume.contact.github}`} target="_blank" rel="noopener">GitHub</a></li>
+          <li><a class="hover:text-brand" href={`https://${resume.contact.linkedin}`} target="_blank" rel="noopener">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="md:col-span-2 space-y-10">
+      {resume.metrics && (
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+          <div class="p-3 border border-slate-800 rounded">
+            <p class="text-xl font-semibold">{resume.metrics.mean_time_to_detect_improvement}</p>
+            <p class="text-[11px] uppercase tracking-wide text-slate-400">MTTD Improvement</p>
+          </div>
+          <div class="p-3 border border-slate-800 rounded">
+            <p class="text-xl font-semibold">{resume.metrics.services_hardened}</p>
+            <p class="text-[11px] uppercase tracking-wide text-slate-400">Services Hardened</p>
+          </div>
+          <div class="p-3 border border-slate-800 rounded col-span-2 sm:col-span-1">
+            <p class="text-xl font-semibold">{resume.metrics.automation_coverage}</p>
+            <p class="text-[11px] uppercase tracking-wide text-slate-400">Automation Coverage</p>
+          </div>
+        </div>
+      )}
+      {resume.experience.map(job => (
+        <div>
+          <h3 class="font-semibold text-lg">{job.role} · {job.company}</h3>
+            <p class="text-xs uppercase tracking-wide text-slate-400 mb-2">{job.period}</p>
+          <ul class="list-disc list-inside text-sm space-y-1 text-slate-300">
+            {job.achievements.map(a => <li>{a}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

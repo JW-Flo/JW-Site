@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ResumeSection from '../components/ResumeSection.astro';
+---
+<BaseLayout title="Resume | Joe Whittle" description="Professional cybersecurity resume for Joe Whittle">
+  <div class="flex justify-end mb-4 print:hidden">
+    <button onclick="window.print()" class="px-3 py-1.5 text-xs font-medium border border-slate-700 rounded hover:border-brand transition">Print PDF</button>
+  </div>
+  <ResumeSection />
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+  url?: string;
+}
+const { title = 'Joe Whittle | Cybersecurity Engineer', description = 'Cybersecurity engineer, builder, and explorer.', url = 'https://JW-Flo.github.io/jw-site' } = Astro.props as Props;
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content="website" />
+<meta property="og:url" content={url} />
+<meta name="twitter:card" content="summary" />
+<script type="application/ld+json">{JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Joe Whittle',
+  jobTitle: 'Cybersecurity Engineer',
+  url,
+  sameAs: [
+    'https://github.com/JW-Flo',
+    'https://linkedin.com/in/joe-whittle',
+    'https://awhittlewandering.com'
+  ],
+  seekingWork: true,
+  knowsAbout: ['Cloud Security','Detection Engineering','Threat Modeling','Security Automation']
+})}</script>

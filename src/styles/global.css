@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-slate-950 text-slate-100 font-sans antialiased; }
+/* Removed .prose @apply prose-invert; since typography plugin not enabled and no elements use class="prose" */
+@media print {
+	body { background: #fff; color: #000; }
+	a { color: #000; text-decoration: none; }
+	header, footer, nav { display: none !important; }
+	.print\:hidden { display: none !important; }
+	.border-slate-800 { border-color: #555 !important; }
+}

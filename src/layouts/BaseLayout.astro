@@ -1,0 +1,35 @@
+---
+import SEO from '../components/SEO.astro';
+import '../styles/global.css';
+export interface Props { title?: string; description?: string; url?: string; }
+const { title = 'Joe Whittle | Cybersecurity Engineer', description = 'Cybersecurity engineer, builder, and explorer. Road‑tripping the US while securing systems.', url } = Astro.props as Props;
+---
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <SEO {title} {description} {url} />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <header class="py-6">
+      <nav class="max-w-5xl mx-auto flex gap-6 text-sm font-medium">
+        <a href="/" class="hover:text-brand">Home</a>
+        <a href="/about" class="hover:text-brand">About</a>
+        <a href="/resume" class="hover:text-brand">Resume</a>
+        <a href="/projects" class="hover:text-brand">Projects</a>
+        <a href="/blog" class="hover:text-brand">Blog</a>
+        <a href="/contact" class="hover:text-brand">Contact</a>
+        <a href="https://awhittlewandering.com" class="ml-auto text-brand" target="_blank" rel="noopener">Roadtrip Live →</a>
+      </nav>
+    </header>
+    <main class="flex-1 max-w-5xl mx-auto px-4 pb-16">
+      <slot />
+    </main>
+    <footer class="border-t border-slate-800 text-xs py-8 mt-auto">
+      <div class="max-w-5xl mx-auto flex flex-col md:flex-row gap-2 md:gap-4 items-center justify-between">
+        <p>&copy; {new Date().getFullYear()} Joe Whittle. All rights reserved.</p>
+        <p class="text-slate-400">Built with Astro & Tailwind. Free & maintenance-light.</p>
+      </div>
+    </footer>
+  </body>
+</html>

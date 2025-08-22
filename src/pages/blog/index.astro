@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const modules = import.meta.glob('./*.mdx', { eager: true });
+interface Frontmatter { title: string; pubDate: string; description?: string; }
+const posts = Object.entries(modules).map(([path, mod]: any) => {
+  const frontmatter: Frontmatter = mod.frontmatter;
+  return {
+    slug: path.replace('./','').replace(/\.mdx$/, ''),
+    title: frontmatter.title,
+    date: frontmatter.pubDate,
+    excerpt: frontmatter.description || ''
+  };
+}).sort((a,b) => (a.date < b.date ? 1 : -1));
+---
+<BaseLayout title="Blog | Joe Whittle" description="Writing on security engineering, telemetry and applied resilience">
+  <h1 class="text-3xl font-bold mb-8">Writing</h1>
+  <ul class="space-y-6">
+    {posts.map(p => (
+      <li>
+        <a href={`/blog/${p.slug}`} class="group block">
+          <h2 class="font-semibold text-xl group-hover:text-brand">{p.title}</h2>
+          <p class="text-xs uppercase tracking-wide text-slate-400">{p.date}</p>
+          <p class="text-sm text-slate-300 mt-1">{p.excerpt}</p>
+        </a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
