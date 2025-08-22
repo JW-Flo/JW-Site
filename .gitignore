@@ -1,0 +1,29 @@
+############################
+# Dependency directories
+node_modules/
+
+# Build artifacts
+dist/
+Dist/
+.astro/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Environment files
+.env
+.env.local
+
+# macOS metadata
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+
+# Misc
+coverage/
+tmp/
