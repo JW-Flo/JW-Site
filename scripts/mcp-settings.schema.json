@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MCP Settings",
+  "type": "object",
+  "required": ["name", "site", "description", "updated", "feeds", "blog", "assets", "sitemap", "repo"],
+  "properties": {
+    "name": {"type": "string"},
+    "site": {"type": "string", "format": "uri"},
+    "description": {"type": "string"},
+    "updated": {"type": "string", "format": "date-time"},
+    "feeds": {
+      "type": "object",
+      "required": ["rss", "json"],
+      "properties": {
+        "rss": {"type": "string", "format": "uri"},
+        "json": {"type": "string", "format": "uri"}
+      },
+      "additionalProperties": false
+    },
+    "blog": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slug", "url", "title"],
+        "properties": {
+          "slug": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "pubDate": {"type": ["string", "null"], "format": "date-time"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["socialCard"],
+      "properties": {
+        "socialCard": {"type": "string", "format": "uri"}
+      },
+      "additionalProperties": false
+    },
+    "sitemap": {"type": "string", "format": "uri"},
+    "repo": {"type": "string", "format": "uri"}
+  },
+  "additionalProperties": true
+}

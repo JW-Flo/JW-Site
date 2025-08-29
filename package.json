@@ -6,21 +6,20 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "lint": "eslint . --ext .ts,.tsx,.astro"
+    "preview": "astro preview"
   },
   "dependencies": {
     "astro": "^4.10.0",
     "@astrojs/tailwind": "^5.1.0",
-    "@astrojs/mdx": "^3.1.0",
+  "@astrojs/mdx": "^3.1.0",
+  "@astrojs/rss": "^4.0.7",
+  "@astrojs/sitemap": "^3.1.0",
     "tailwindcss": "^3.4.7",
     "postcss": "^8.4.41",
     "autoprefixer": "^10.4.20"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
-    "@types/node": "^20.14.10",
-    "eslint": "^8.57.0",
-    "eslint-plugin-astro": "^0.34.0"
+    "@types/node": "^20.14.10"
   }
 }

@@ -23,13 +23,15 @@ Site at <http://localhost:4321>
 - Blog posts: add new `.mdx` files under `src/pages/blog/` with frontmatter.
 - Projects: update array in `src/pages/projects.astro` (or later move to data file).
 
-## Deployment
+## Deployment (Cloudflare Pages – minimal)
 
-Push to `main` triggers GitHub Actions workflow `.github/workflows/deploy.yml` which builds & publishes to Pages.
+1. Connect repo to Cloudflare Pages.
+2. Build command: `npm run build`
+3. Output directory: `dist`
+4. (Optional) Set an environment variable `SITE_URL=https://yourdomain.tld` once you have a final custom domain. Otherwise fallback `https://jw-flo.github.io/JW-Site` is used for canonical URLs.
+5. First deploy; then add your custom domain in Pages settings (if using one) and re-run a build (or just trigger a new deploy) so canonical links update.
 
-Configure repository Settings > Pages: Source = GitHub Actions.
-
-Update `astro.config.mjs` site URL and `SEO.astro` canonical URL with your actual GitHub username.
+GitHub Pages (legacy) still works: just keep `astro.config.mjs` site or set `SITE_URL` during build.
 
 ## Principles
 
@@ -38,11 +40,48 @@ Update `astro.config.mjs` site URL and `SEO.astro` canonical URL with your actua
 - No backend, no database
 - Simple, readable code
 
-## Roadmap (optional future)
+## Minimal Maintenance Cheatsheet
 
-- Add dark/light toggle via CSS class
-- Generate blog index from `import.meta.glob`
-- Project data file for easier additions
+Add a blog post:
+
+1. Create `src/pages/blog/my-post.mdx`
+2. Include frontmatter:
+
+```mdx
+---
+title: My Post Title
+description: Short one-line description.
+pubDate: 2025-08-27
+---
+
+Content here.
+```
+
+1. Commit & push – feed & sitemap update automatically.
+
+Update resume:
+
+1. Edit `src/data/resume.json`
+2. Commit & push.
+
+Change canonical domain later:
+
+1. Set `SITE_URL` in Cloudflare Pages env vars (no trailing slash)
+2. Trigger new deploy (or push a commit)
+
+Customize metadata: edit `src/data/siteMeta.ts`.
+
+Things intentionally removed (simplicity):
+
+- Automated JSON schema validation
+- MCP settings generator (static file in `public/.well-known/`)
+- CI workflow & lint dependencies
+
+Future (optional):
+
+- Dark/light toggle
+- Tag filtering for blog
+- Reintroduce linting or content validation if needed
 
 ## License
 
