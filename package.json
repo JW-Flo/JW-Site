@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+  "preview": "astro preview",
+  "pages:dev": "wrangler pages dev ./dist --persist --compatibility-date=2025-08-29",
+  "deploy:preview": "wrangler pages deploy ./dist --branch preview",
+  "deploy": "wrangler pages deploy ./dist"
   },
   "dependencies": {
     "astro": "^4.10.0",
@@ -20,6 +23,7 @@
   },
   "devDependencies": {
     "typescript": "^5.5.4",
-    "@types/node": "^20.14.10"
+  "@types/node": "^20.14.10",
+  "wrangler": "^3.74.0"
   }
 }

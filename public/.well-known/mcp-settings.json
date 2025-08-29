@@ -1,24 +1,23 @@
 {
   "name": "JW Site MCP Context",
-  "site": "https://jw-flo.github.io/JW-Site",
+  "site": "https://example.pages.dev",
   "description": "Cybersecurity engineer, builder, and explorer. Road‑tripping the US while securing systems.",
   "updated": "2025-08-27T03:54:35.155Z",
   "feeds": {
-  "rss": "https://jw-flo.github.io/JW-Site/rss.xml",
-  "json": "https://jw-flo.github.io/JW-Site/feed.json"
+    "rss": "https://example.pages.dev/rss.xml",
+    "json": "https://example.pages.dev/feed.json"
   },
   "blog": [
     {
       "slug": "welcome",
-  "url": "https://jw-flo.github.io/JW-Site/blog/welcome/",
+      "url": "https://example.pages.dev/blog/welcome/",
       "title": "Welcome",
       "description": "Why I built this site and what I’m exploring next",
       "pubDate": "2025-08-21T00:00:00.000Z"
     }
   ],
   "assets": {
-  "socialCard": "https://jw-flo.github.io/JW-Site/social-card.svg"
+    "socialCard": "https://example.pages.dev/social-card.svg"
   },
-  "sitemap": "https://jw-flo.github.io/JW-Site/sitemap-index.xml",
-  "repo": "https://github.com/JW-Flo/JW-Site"
+  "sitemap": "https://example.pages.dev/sitemap-index.xml"
 }

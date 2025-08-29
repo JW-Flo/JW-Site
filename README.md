@@ -6,7 +6,7 @@ Static, low-maintenance cybersecurity engineering portfolio + human journey cont
 
 - Astro + MDX
 - TailwindCSS
-- GitHub Pages (static hosting)
+- Cloudflare Pages (primary hosting)
 
 ## Local Development
 
@@ -23,15 +23,35 @@ Site at <http://localhost:4321>
 - Blog posts: add new `.mdx` files under `src/pages/blog/` with frontmatter.
 - Projects: update array in `src/pages/projects.astro` (or later move to data file).
 
-## Deployment (Cloudflare Pages – minimal)
+## Deployment (Cloudflare Pages)
 
-1. Connect repo to Cloudflare Pages.
+You can deploy either through the Cloudflare Pages UI or locally with Wrangler.
+
+### One-time (UI)
+
+1. Create a new Pages project, point at this repo (or upload zip of `dist`).
 2. Build command: `npm run build`
 3. Output directory: `dist`
-4. (Optional) Set an environment variable `SITE_URL=https://yourdomain.tld` once you have a final custom domain. Otherwise fallback `https://jw-flo.github.io/JW-Site` is used for canonical URLs.
-5. First deploy; then add your custom domain in Pages settings (if using one) and re-run a build (or just trigger a new deploy) so canonical links update.
+4. Set env var `SITE_URL=https://yourdomain.tld` (no trailing slash) once domain is known.
+5. After first deploy, add any custom domain; trigger a redeploy so canonical URLs + feeds update.
 
-GitHub Pages (legacy) still works: just keep `astro.config.mjs` site or set `SITE_URL` during build.
+### Local (Wrangler CLI)
+
+Build then deploy:
+
+```bash
+npm run build
+npm run deploy:preview   # preview branch deploy
+npm run deploy           # production deploy
+```
+
+During development you can iterate on the already-built output (rarely needed) with:
+
+```bash
+npm run pages:dev
+```
+
+Historical note: GitHub Pages was the initial fallback; canonical generation now expects `SITE_URL` to be set for production.
 
 ## Principles
 
@@ -66,8 +86,8 @@ Update resume:
 
 Change canonical domain later:
 
-1. Set `SITE_URL` in Cloudflare Pages env vars (no trailing slash)
-2. Trigger new deploy (or push a commit)
+1. Update `SITE_URL` env var (Cloudflare Pages > Settings > Environment Variables or wrangler.toml vars).
+2. Trigger new deploy.
 
 Customize metadata: edit `src/data/siteMeta.ts`.
 

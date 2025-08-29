@@ -1,0 +1,12 @@
+name = "jw-site"
+compatibility_date = "2025-08-29"
+
+# Cloudflare Pages project build output
+pages_build_output_dir = "dist"
+
+[vars]
+# Set this in the Cloudflare dashboard or via `wrangler pages project create`.
+# For production, override with your canonical domain (e.g. https://joe.example).
+SITE_URL = "https://example.pages.dev"
+
+# If you later add KV / D1 / R2 bindings, document them here.

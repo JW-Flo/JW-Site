@@ -1,4 +1,6 @@
-const dynamicSiteUrl = import.meta.env.SITE_URL || 'https://jw-flo.github.io/JW-Site';
+// SITE_URL must be supplied via environment (Cloudflare Pages or local .env).
+// Fallback is only for local dev; do not rely on it for production canonical URLs.
+const dynamicSiteUrl = import.meta.env.SITE_URL || 'http://localhost:4321';
 
 export const siteMeta = {
   siteName: 'Joe Whittle',
