@@ -1,5 +1,5 @@
 // Response utilities for Astro API routes
-export function json(data: any, init?: ResponseInit): Response {
+export function json(data, init) {
   return new Response(JSON.stringify(data), {
     ...init,
     headers: {
@@ -9,7 +9,7 @@ export function json(data: any, init?: ResponseInit): Response {
   });
 }
 
-export function methodNotAllowed(method: string, allowed: string[]): Response {
+export function methodNotAllowed(method, allowed) {
   return new Response(
     `Method ${method} not allowed. Allowed methods: ${allowed.join(", ")}`,
     {
@@ -22,7 +22,7 @@ export function methodNotAllowed(method: string, allowed: string[]): Response {
   );
 }
 
-export function notFound(message = "Not found"): Response {
+export function notFound(message = "Not found") {
   return new Response(message, {
     status: 404,
     headers: {
@@ -31,7 +31,7 @@ export function notFound(message = "Not found"): Response {
   });
 }
 
-export function badRequest(message = "Bad request"): Response {
+export function badRequest(message = "Bad request") {
   return new Response(message, {
     status: 400,
     headers: {
@@ -40,7 +40,7 @@ export function badRequest(message = "Bad request"): Response {
   });
 }
 
-export function serverError(message = "Internal server error"): Response {
+export function serverError(message = "Internal server error") {
   return new Response(message, {
     status: 500,
     headers: {
