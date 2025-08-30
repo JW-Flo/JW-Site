@@ -2,67 +2,196 @@
 import resume from '../data/resume.json';
 ---
 <section class="space-y-8">
-  <header>
-    <h1 class="text-3xl font-bold tracking-tight">Resume</h1>
-    <p class="text-slate-300 mt-2 max-w-2xl">{resume.summary}</p>
-  </header>
+  <!-- Professional Summary -->
+  <div class="bg-dark/50 backdrop-blur-sm border border-neon-blue/30 rounded-lg p-6">
+    <h2 class="text-2xl font-bold text-neon-cyan mb-4">Professional Summary</h2>
+    <p class="text-slate-300 leading-relaxed text-lg">{resume.summary}</p>
+  </div>
+
   <div class="grid md:grid-cols-3 gap-8">
     <div class="space-y-6">
-      <div>
-        <h2 class="font-semibold text-brand">Core Skills</h2>
-        <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
-          {resume.skills.map(s => <li>{s}</li>)}
-        </ul>
+      <!-- Core Skills with Enhanced Design -->
+      <div class="bg-dark/50 backdrop-blur-sm border border-neon-blue/30 rounded-lg p-6">
+        <h2 class="font-semibold text-xl text-neon-blue mb-4 flex items-center">
+          <span class="w-2 h-2 bg-neon-blue rounded-full mr-3"></span>
+          Core Competencies
+        </h2>
+        <div class="space-y-3">
+          {resume.skills.map((skill, index) => (
+            <div class={`flex items-center space-x-3 p-2 rounded hover:bg-neon-blue/10 transition-colors ${
+              index < 6 ? 'animate-fade-in-up' : ''
+            }`}
+            style={`animation-delay: ${index * 0.1}s`}>
+              <div class="w-2 h-2 bg-neon-cyan rounded-full flex-shrink-0"></div>
+              <span class="text-slate-300 text-sm">{skill}</span>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <!-- Tools & Platforms -->
       {resume.tools && (
-        <div>
-          <h2 class="font-semibold text-brand">Tools & Platforms</h2>
-          <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
-            {resume.tools.map(t => <li>{t}</li>)}
-          </ul>
+        <div class="bg-dark/50 backdrop-blur-sm border border-neon-green/30 rounded-lg p-6">
+          <h2 class="font-semibold text-xl text-neon-green mb-4 flex items-center">
+            <span class="w-2 h-2 bg-neon-green rounded-full mr-3"></span>
+            Technical Arsenal
+          </h2>
+          <div class="grid grid-cols-1 gap-2">
+            {resume.tools.map((tool, index) => (
+              <div class={`px-3 py-2 bg-gradient-to-r from-neon-green/10 to-transparent border border-neon-green/20 rounded text-xs text-neon-green hover:border-neon-green transition-colors ${
+                index < 8 ? 'animate-fade-in-up' : ''
+              }`}
+              style={`animation-delay: ${index * 0.05}s`}>
+                {tool}
+              </div>
+            ))}
+          </div>
         </div>
       )}
-      {resume.highlights && (
-        <div>
-          <h2 class="font-semibold text-brand">Highlights</h2>
-          <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
-            {resume.highlights.map(h => <li>{h}</li>)}
-          </ul>
+
+      <!-- Certifications -->
+      <div class="bg-dark/50 backdrop-blur-sm border border-neon-pink/30 rounded-lg p-6">
+        <h2 class="font-semibold text-xl text-neon-pink mb-4 flex items-center">
+          <span class="w-2 h-2 bg-neon-pink rounded-full mr-3"></span>
+          Professional Certifications
+        </h2>
+        <div class="space-y-3">
+          {resume.certifications.map((cert, index) => (
+            <div class={`p-3 bg-gradient-to-r from-neon-pink/10 to-transparent border border-neon-pink/20 rounded hover:border-neon-pink/40 transition-colors ${
+              index < 4 ? 'animate-fade-in-up' : ''
+            }`}
+            style={`animation-delay: ${index * 0.1}s`}>
+              <div class="font-medium text-slate-300 text-sm">{cert.name}</div>
+              <div class="text-xs text-neon-pink mt-1">{cert.issuer}</div>
+              <div class="text-xs text-slate-400 mt-1">Issued: {cert.issued} • Expires: {cert.expires}</div>
+            </div>
+          ))}
         </div>
-      )}
-      <div>
-        <h2 class="font-semibold text-brand">Certifications</h2>
-        <ul class="text-sm space-y-1 list-disc list-inside text-slate-300">
-          {resume.certifications.map(c => <li>{c}</li>)}
-        </ul>
       </div>
+
+      <!-- Education -->
       {resume.education && (
-        <div>
-          <h2 class="font-semibold text-brand">Education</h2>
-          <ul class="text-sm space-y-2 text-slate-300">
-            {resume.education.map(e => <li><span class="font-medium">{e.degree}</span> – {e.institution} ({e.period})</li>)}
-          </ul>
+        <div class="bg-dark/50 backdrop-blur-sm border border-neon-yellow/30 rounded-lg p-6">
+          <h2 class="font-semibold text-xl text-neon-yellow mb-4 flex items-center">
+            <span class="w-2 h-2 bg-neon-yellow rounded-full mr-3"></span>
+            Education
+          </h2>
+          <div class="space-y-4">
+            {resume.education.map((edu, index) => (
+              <div class={`p-4 bg-gradient-to-r from-neon-yellow/10 to-transparent border border-neon-yellow/20 rounded hover:border-neon-yellow/40 transition-colors ${
+                index < 2 ? 'animate-fade-in-up' : ''
+              }`}
+              style={`animation-delay: ${index * 0.2}s`}>
+                <div class="font-medium text-slate-300 text-sm">{edu.degree}</div>
+                <div class="text-xs text-neon-yellow mt-1">{edu.institution}</div>
+                <div class="text-xs text-slate-400 mt-1">{edu.duration} • {edu.location}</div>
+                <ul class="mt-2 space-y-1">
+                  {edu.description.map(desc => (
+                    <li class="text-xs text-slate-400 flex items-start">
+                      <span class="text-neon-yellow mr-2">•</span>
+                      {desc}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       )}
-      <div>
-        <h2 class="font-semibold text-brand">Contact</h2>
-        <ul class="text-sm space-y-1 text-slate-300">
-          <li><a class="hover:text-brand" href={`mailto:${resume.contact.email}`}>{resume.contact.email}</a></li>
-          <li><a class="hover:text-brand" href={`https://github.com/${resume.contact.github}`} target="_blank" rel="noopener">GitHub</a></li>
-          <li><a class="hover:text-brand" href={`https://${resume.contact.linkedin}`} target="_blank" rel="noopener">LinkedIn</a></li>
-        </ul>
+
+      <!-- Contact -->
+      <div class="bg-dark/50 backdrop-blur-sm border border-neon-green/30 rounded-lg p-6">
+        <h2 class="font-semibold text-xl text-neon-green mb-4 flex items-center">
+          <span class="w-2 h-2 bg-neon-green rounded-full mr-3"></span>
+          Connect
+        </h2>
+        <div class="space-y-3">
+          <a class="flex items-center space-x-3 p-2 rounded hover:bg-neon-blue/10 transition-colors group" href={`mailto:${resume.contact.email}`}>
+            <div class="w-8 h-8 bg-neon-blue/20 rounded-full flex items-center justify-center group-hover:bg-neon-blue/30 transition-colors">
+              <span class="text-neon-blue text-sm">✉</span>
+            </div>
+            <span class="text-slate-300 group-hover:text-neon-blue transition-colors">{resume.contact.email}</span>
+          </a>
+          <a class="flex items-center space-x-3 p-2 rounded hover:bg-neon-blue/10 transition-colors group" href={`https://github.com/${resume.contact.github}`} target="_blank" rel="noopener">
+            <div class="w-8 h-8 bg-neon-blue/20 rounded-full flex items-center justify-center group-hover:bg-neon-blue/30 transition-colors">
+              <span class="text-neon-blue text-sm">⌨</span>
+            </div>
+            <span class="text-slate-300 group-hover:text-neon-blue transition-colors">GitHub</span>
+          </a>
+          <a class="flex items-center space-x-3 p-2 rounded hover:bg-neon-cyan/10 transition-colors group" href={`https://${resume.contact.linkedin}`} target="_blank" rel="noopener">
+            <div class="w-8 h-8 bg-neon-cyan/20 rounded-full flex items-center justify-center group-hover:bg-neon-cyan/30 transition-colors">
+              <span class="text-neon-cyan text-sm">💼</span>
+            </div>
+            <span class="text-slate-300 group-hover:text-neon-cyan transition-colors">LinkedIn</span>
+          </a>
+        </div>
       </div>
     </div>
-    <div class="md:col-span-2 space-y-10">
-      {resume.experience.map(job => (
-        <div>
-          <h3 class="font-semibold text-lg">{job.role} · {job.company}</h3>
-            <p class="text-xs uppercase tracking-wide text-slate-400 mb-2">{job.period}</p>
-          <ul class="list-disc list-inside text-sm space-y-1 text-slate-300">
-            {job.achievements.map(a => <li>{a}</li>)}
-          </ul>
+
+    <!-- Experience Section -->
+    <div class="md:col-span-2 space-y-8">
+      <h2 class="text-2xl font-bold text-neon-pink mb-6">Professional Experience</h2>
+      {resume.experience.map((job, jobIndex) => (
+        <div class={`bg-dark/50 backdrop-blur-sm border border-neon-cyan/30 rounded-lg p-6 hover:border-neon-cyan/50 transition-colors ${
+          jobIndex < 4 ? 'animate-fade-in-up' : ''
+        }`}
+        style={`animation-delay: ${jobIndex * 0.2}s`}>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+            <h3 class="text-xl font-bold text-neon-pink">{job.position}</h3>
+            <div class="text-right">
+              <div class="text-neon-cyan font-medium">{job.company}</div>
+              <div class="text-xs uppercase tracking-wide text-slate-400">{job.duration} • {job.location}</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            {job.description.map((desc, achIndex) => (
+              <div class={`flex items-start space-x-3 p-3 rounded hover:bg-neon-cyan/5 transition-colors ${
+                achIndex < 5 ? 'animate-fade-in-up' : ''
+              }`}
+              style={`animation-delay: ${jobIndex * 0.2 + achIndex * 0.1}s`}>
+                <div class="w-2 h-2 bg-neon-cyan rounded-full mt-2 flex-shrink-0"></div>
+                <span class="text-slate-300 leading-relaxed text-sm">{desc}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
   </div>
+
+  <!-- Key Achievements Highlight -->
+  {resume.highlights && (
+    <div class="bg-gradient-to-r from-neon-blue/10 via-neon-cyan/10 to-neon-green/10 border border-neon-cyan/30 rounded-lg p-6">
+      <h2 class="text-2xl font-bold text-neon-cyan mb-6 text-center">Key Achievements</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        {resume.highlights.map((highlight, index) => (
+          <div class={`flex items-start space-x-3 p-4 bg-dark/50 rounded hover:bg-dark/70 transition-colors ${
+            index < 11 ? 'animate-fade-in-up' : ''
+          }`}
+          style={`animation-delay: ${index * 0.1}s`}>
+            <div class="w-3 h-3 bg-neon-cyan rounded-full mt-1.5 flex-shrink-0"></div>
+            <span class="text-slate-300 text-sm leading-relaxed">{highlight}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
 </section>
+
+<style>
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+    opacity: 0;
+  }
+</style>

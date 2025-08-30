@@ -1,13 +1,28 @@
 // Space Invaders Game - Classic arcade shooter
 export class SpaceInvadersGame {
   constructor(canvas, gameManager) {
+    console.log("SpaceInvadersGame: constructor start", { canvas });
     this.canvas = canvas;
-    this.ctx = canvas.getContext("2d");
+    try {
+      this.ctx = canvas.getContext("2d");
+    } catch (e) {
+      console.error(
+        "SpaceInvadersGame: failed to get 2D context from provided canvas",
+        e
+      );
+      this.ctx = null;
+    }
     this.gameManager = gameManager;
 
+    if (!this.ctx) {
+      console.warn(
+        "SpaceInvadersGame: primary canvas 2D context is not available. Attempting fallback."
+      );
+    }
+
     // Arcade machine dimensions
-    this.arcadeWidth = canvas.width;
-    this.arcadeHeight = canvas.height;
+    this.arcadeWidth = (this.canvas && this.canvas.width) || 800;
+    this.arcadeHeight = (this.canvas && this.canvas.height) || 600;
     this.gameAreaWidth = 600; // Smaller game area
     this.gameAreaHeight = 400;
     this.gameAreaX = (this.arcadeWidth - this.gameAreaWidth) / 2;
@@ -17,15 +32,32 @@ export class SpaceInvadersGame {
     this.gameCanvas = document.createElement("canvas");
     this.gameCanvas.width = this.gameAreaWidth;
     this.gameCanvas.height = this.gameAreaHeight;
-    this.gameCtx = this.gameCanvas.getContext("2d");
+    try {
+      this.gameCtx = this.gameCanvas.getContext("2d");
+    } catch (e) {
+      console.error(
+        "SpaceInvadersGame: failed to get 2D context from internal gameCanvas",
+        e
+      );
+      this.gameCtx = null;
+    }
 
-    // Bind event handlers to preserve 'this' context
-    this.boundHandleKeyPress = (e) => this.handleKeyPress(e);
-    this.boundHandleKeyUp = (e) => this.handleKeyUp(e);
+    if (!this.ctx && this.gameCtx) {
+      // If the main canvas context is missing, use the internal canvas context for offscreen rendering
+      console.warn(
+        "SpaceInvadersGame: using internal gameCanvas context as primary renderer (main canvas ctx missing)"
+      );
+      this.ctx = this.gameCtx;
+    }
 
-    // Add event listeners
-    document.addEventListener("keydown", this.boundHandleKeyPress);
-    document.addEventListener("keyup", this.boundHandleKeyUp);
+    if (!this.ctx || !this.gameCtx) {
+      console.error("SpaceInvadersGame: missing canvas 2D contexts", {
+        ctx: !!this.ctx,
+        gameCtx: !!this.gameCtx,
+        canvas,
+      });
+      // Continue with reduced functionality but avoid throwing — GameManager will log instantiation errors upstream.
+    }
 
     // Game state
     this.player = {
@@ -70,6 +102,10 @@ export class SpaceInvadersGame {
       shoot: false,
     };
 
+    // Accuracy tracking
+    this.shotsFired = 0;
+    this.shotsHit = 0;
+
     this.initializeInvaders();
   }
 
@@ -113,7 +149,10 @@ export class SpaceInvadersGame {
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
-      this.gameManager.returnToMenu();
+      // Exit back to main website
+      if (this.gameManager && this.gameManager.overlay) {
+        this.gameManager.overlay.deactivate();
+      }
       return;
     }
 
@@ -185,18 +224,22 @@ export class SpaceInvadersGame {
       }
     } else {
       // Normal single shot
-      if (this.bullets.length < 3) {
+      const canShoot = this.bullets.length < 3;
+      if (canShoot) {
         this.bullets.push({
           x: this.player.x + this.player.width / 2 - 2,
           y: this.player.y,
           width: 4,
           height: 10,
         });
+      } else {
+        // Bullet limit reached, do nothing
       }
     }
 
     this.lastShot = now;
     this.gameManager.playSound("shoot");
+    this.shotsFired++; // Increment shots fired counter
   }
 
   update() {
@@ -346,6 +389,7 @@ export class SpaceInvadersGame {
           invader.alive = false;
           this.bullets.splice(bulletIndex, 1);
           this.score += 10;
+          this.shotsHit++; // Track successful hits
           this.gameManager.playSound("explosion");
         }
       });
@@ -449,6 +493,12 @@ export class SpaceInvadersGame {
   }
 
   draw() {
+    // Ensure contexts exist before drawing
+    if (!this.ctx) {
+      // If there's no rendering context, skip drawing but keep loop running for resilience
+      return;
+    }
+
     // Clear main canvas
     this.ctx.fillStyle = "#000000";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -484,19 +534,6 @@ export class SpaceInvadersGame {
     if (this.gameOver) {
       this.drawGameOver();
     }
-  }
-
-  drawStarfield() {
-    // Create a more detailed starfield
-    this.ctx.fillStyle = "#ffffff";
-    for (let i = 0; i < 100; i++) {
-      const x = (i * 37) % this.gameAreaWidth;
-      const y = (i * 23) % this.gameAreaHeight;
-      const brightness = Math.sin(i * 0.1) * 0.5 + 0.5;
-      this.ctx.globalAlpha = brightness * 0.8;
-      this.ctx.fillRect(x, y, 1, 1);
-    }
-    this.ctx.globalAlpha = 1;
   }
 
   drawPlayer() {
@@ -882,18 +919,34 @@ export class SpaceInvadersGame {
 
   drawAchievementStats() {
     const stats = [
-      { label: "Objects Rendered", value: this.invaders.length + this.bullets.length + this.invaderBullets.length },
+      {
+        label: "Objects Rendered",
+        value:
+          this.invaders.length +
+          this.bullets.length +
+          this.invaderBullets.length,
+      },
       { label: "Game Loop Cycles", value: Math.floor(Date.now() / 16.67) }, // Approximate frame count
       { label: "Memory Usage", value: "~2.1MB" },
-      { label: "Render Engine", value: "Canvas 2D" }
+      { label: "Render Engine", value: "Canvas 2D" },
     ];
 
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-    this.ctx.fillRect(this.canvas.width / 2 - 150, this.canvas.height / 2 + 90, 300, stats.length * 20 + 20);
+    this.ctx.fillRect(
+      this.canvas.width / 2 - 150,
+      this.canvas.height / 2 + 90,
+      300,
+      stats.length * 20 + 20
+    );
 
     this.ctx.strokeStyle = "#00ff00";
     this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(this.canvas.width / 2 - 150, this.canvas.height / 2 + 90, 300, stats.length * 20 + 20);
+    this.ctx.strokeRect(
+      this.canvas.width / 2 - 150,
+      this.canvas.height / 2 + 90,
+      300,
+      stats.length * 20 + 20
+    );
 
     this.ctx.fillStyle = "#00ff00";
     this.ctx.font = "10px monospace";
@@ -901,7 +954,11 @@ export class SpaceInvadersGame {
 
     stats.forEach((stat, index) => {
       const y = this.canvas.height / 2 + 110 + index * 18;
-      this.ctx.fillText(`${stat.label}: ${stat.value}`, this.canvas.width / 2 - 140, y);
+      this.ctx.fillText(
+        `${stat.label}: ${stat.value}`,
+        this.canvas.width / 2 - 140,
+        y
+      );
     });
 
     this.ctx.textAlign = "center";
@@ -1005,6 +1062,7 @@ export class SpaceInvadersGame {
   }
 
   drawGameToCanvas() {
+    if (!this.gameCtx) return;
     // Clear game canvas
     this.gameCtx.fillStyle = "#000000";
     this.gameCtx.fillRect(0, 0, this.gameAreaWidth, this.gameAreaHeight);
@@ -1416,7 +1474,11 @@ export class SpaceInvadersGame {
     this.ctx.fillStyle = "#00aaff";
     this.ctx.font = "8px monospace";
     this.ctx.textAlign = "center";
-    this.ctx.fillText("TECHNICAL DEMO | CANVAS 2D | REAL-TIME RENDERING", this.arcadeWidth / 2, specsY + 16);
+    this.ctx.fillText(
+      "TECHNICAL DEMO | CANVAS 2D | REAL-TIME RENDERING",
+      this.arcadeWidth / 2,
+      specsY + 16
+    );
   }
 
   drawStarfieldToCanvas() {
@@ -1477,19 +1539,41 @@ export class SpaceInvadersGame {
 
     // Nebula cloud effect using radial gradients
     const nebulaCenters = [
-      { x: this.gameAreaWidth * 0.2, y: this.gameAreaHeight * 0.3, color: "#ff0066" },
-      { x: this.gameAreaWidth * 0.8, y: this.gameAreaHeight * 0.7, color: "#0066ff" },
-      { x: this.gameAreaWidth * 0.6, y: this.gameAreaHeight * 0.2, color: "#6600ff" }
+      {
+        x: this.gameAreaWidth * 0.2,
+        y: this.gameAreaHeight * 0.3,
+        color: "#ff0066",
+      },
+      {
+        x: this.gameAreaWidth * 0.8,
+        y: this.gameAreaHeight * 0.7,
+        color: "#0066ff",
+      },
+      {
+        x: this.gameAreaWidth * 0.6,
+        y: this.gameAreaHeight * 0.2,
+        color: "#6600ff",
+      },
     ];
 
     nebulaCenters.forEach((nebula, index) => {
       const gradient = this.gameCtx.createRadialGradient(
-        nebula.x, nebula.y, 0,
-        nebula.x, nebula.y, 80 + Math.sin(time + index) * 20
+        nebula.x,
+        nebula.y,
+        0,
+        nebula.x,
+        nebula.y,
+        80 + Math.sin(time + index) * 20
       );
 
-      gradient.addColorStop(0, `rgba(${this.hexToRgb(nebula.color).join(', ')}, 0.1)`);
-      gradient.addColorStop(0.5, `rgba(${this.hexToRgb(nebula.color).join(', ')}, 0.05)`);
+      gradient.addColorStop(
+        0,
+        `rgba(${this.hexToRgb(nebula.color).join(", ")}, 0.1)`
+      );
+      gradient.addColorStop(
+        0.5,
+        `rgba(${this.hexToRgb(nebula.color).join(", ")}, 0.05)`
+      );
       gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
 
       this.gameCtx.fillStyle = gradient;
@@ -1499,11 +1583,13 @@ export class SpaceInvadersGame {
 
   hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16)
-    ] : [0, 0, 0];
+    return result
+      ? [
+          parseInt(result[1], 16),
+          parseInt(result[2], 16),
+          parseInt(result[3], 16),
+        ]
+      : [0, 0, 0];
   }
 
   drawInstructionsToCanvas() {
@@ -1512,13 +1598,23 @@ export class SpaceInvadersGame {
 
     // Instructions background with subtle animation
     this.gameCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
-    this.gameCtx.fillRect(10, this.gameAreaHeight - 60, this.gameAreaWidth - 20, 50);
+    this.gameCtx.fillRect(
+      10,
+      this.gameAreaHeight - 60,
+      this.gameAreaWidth - 20,
+      50
+    );
 
     // Animated border
     const borderAlpha = 0.5 + Math.sin(time * 2) * 0.2;
     this.gameCtx.strokeStyle = `rgba(255, 255, 255, ${borderAlpha})`;
     this.gameCtx.lineWidth = 1;
-    this.gameCtx.strokeRect(10, this.gameAreaHeight - 60, this.gameAreaWidth - 20, 50);
+    this.gameCtx.strokeRect(
+      10,
+      this.gameAreaHeight - 60,
+      this.gameAreaWidth - 20,
+      50
+    );
 
     // Main controls
     this.gameCtx.fillStyle = "#ffffff";
@@ -1528,7 +1624,11 @@ export class SpaceInvadersGame {
 
     this.gameCtx.fillStyle = "#cccccc";
     this.gameCtx.font = "10px monospace";
-    this.gameCtx.fillText("A/D or ←/→ : MOVE SHIP", 20, this.gameAreaHeight - 30);
+    this.gameCtx.fillText(
+      "A/D or ←/→ : MOVE SHIP",
+      20,
+      this.gameAreaHeight - 30
+    );
     this.gameCtx.fillText("SPACE : FIRE BULLET", 20, this.gameAreaHeight - 18);
     this.gameCtx.fillText("P : PAUSE GAME", 200, this.gameAreaHeight - 30);
     this.gameCtx.fillText("ESC : EXIT TO MENU", 200, this.gameAreaHeight - 18);
@@ -1550,7 +1650,7 @@ export class SpaceInvadersGame {
       "Real-time Physics",
       "Object-oriented Design",
       "Event-driven Architecture",
-      "60 FPS Game Loop"
+      "60 FPS Game Loop",
     ];
 
     const currentInfo = techInfo[Math.floor(time * 0.5) % techInfo.length];
@@ -1558,6 +1658,10 @@ export class SpaceInvadersGame {
     this.gameCtx.fillStyle = "#00ffff";
     this.gameCtx.font = "8px monospace";
     this.gameCtx.textAlign = "center";
-    this.gameCtx.fillText(`TECHNICAL DEMO: ${currentInfo}`, this.gameAreaWidth / 2, this.gameAreaHeight - 4);
+    this.gameCtx.fillText(
+      `TECHNICAL DEMO: ${currentInfo}`,
+      this.gameAreaWidth / 2,
+      this.gameAreaHeight - 4
+    );
   }
 }

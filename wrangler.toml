@@ -26,3 +26,24 @@ database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
 # Turnstile environment variables (set in Pages dashboard, not stored here):
 # - TURNSTILE_SECRET_KEY (Secret)
 # - PUBLIC_TURNSTILE_SITE_KEY (Build variable)
+
+# Additional KV namespaces for workflows
+[[kv_namespaces]]
+binding = "LEADERBOARD"
+id = "your-leaderboard-namespace-id"
+
+[[kv_namespaces]]
+binding = "ANALYTICS"
+id = "your-analytics-namespace-id"
+
+# Workflows configuration (implemented as functions for now)
+# These will be converted to proper workflows when Cloudflare Workflows supports them
+# [[workflows]]
+# name = "game-score-processor"
+# file = "workflows/game-score-processor.ts"
+# binding = "GAME_WORKFLOW"
+
+# [[workflows]]
+# name = "guestbook-cleanup"
+# file = "workflows/guestbook-cleanup.ts"
+# binding = "CLEANUP_WORKFLOW"

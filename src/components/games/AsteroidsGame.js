@@ -39,13 +39,40 @@ export class AsteroidsGame {
     // Power-up states
     this.shieldActive = false;
     this.shieldTimer = 0;
+    this.shieldStrength = 0; // Initialize shield strength
+    this.shieldRegenRate = 0.1; // Initialize shield regen rate
+    this.shieldRegenTimer = 0; // Initialize shield regen timer
     this.multiShot = false;
     this.multiShotTimer = 0;
     this.lastShot = 0;
     this.shootCooldown = 120; // milliseconds between shots
 
+    // Bullet properties
+    this.bulletDamage = 1; // Initialize bullet damage
+
+    // Hull properties
+    this.maxLives = 3; // Initialize max lives
+
     // Input state
     this.keys = {};
+
+    // Upgrade system
+    this.upgradePoints = 0;
+    this.upgrades = {
+      weapon: 0, // 0: normal, 1: triple shot, 2: rapid fire, 3: laser
+      shield: 0, // 0: none, 1: basic, 2: strong, 3: regenerating
+      speed: 0, // 0: normal, 1: fast, 2: very fast, 3: turbo
+      hull: 0, // 0: normal, 1: reinforced, 2: armored, 3: indestructible
+    };
+
+    // Accuracy tracking
+    this.shotsFired = 0;
+    this.shotsHit = 0;
+    this.accuracy = 0;
+
+    // Upgrade UI
+    this.showUpgradeMenu = false;
+    this.selectedUpgrade = 0;
 
     this.bindEvents();
     this.initializeAsteroids();
@@ -104,8 +131,14 @@ export class AsteroidsGame {
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
-      this.gameManager.returnToMenu();
-    } else if (this.gameOver) {
+      // Exit back to main website
+      if (this.gameManager && this.gameManager.overlay) {
+        this.gameManager.overlay.deactivate();
+      }
+      return;
+    }
+
+    if (this.gameOver) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         e.stopPropagation();
@@ -115,11 +148,61 @@ export class AsteroidsGame {
       e.preventDefault();
       e.stopPropagation();
       this.paused = !this.paused;
+    } else if (e.key === "u" || e.key === "U") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!this.gameOver && !this.paused) {
+        this.showUpgradeMenu = !this.showUpgradeMenu;
+      }
+    } else if (this.showUpgradeMenu) {
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectedUpgrade = (this.selectedUpgrade - 1 + 4) % 4;
+      } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectedUpgrade = (this.selectedUpgrade + 1) % 4;
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        this.purchaseUpgrade();
+      }
+    }
+  }
+
+  handleKeyDown(event) {
+    const key = event.key.toLowerCase();
+    this.keys[key] = true;
+
+    if (this.showUpgradeMenu) {
+      // Handle upgrade menu navigation
+      if (key === "arrowup" || key === "w") {
+        this.selectedUpgrade = Math.max(0, this.selectedUpgrade - 1);
+        event.preventDefault();
+      } else if (key === "arrowdown" || key === "s") {
+        this.selectedUpgrade = Math.min(3, this.selectedUpgrade + 1);
+        event.preventDefault();
+      } else if (key === "enter") {
+        this.purchaseUpgrade();
+        event.preventDefault();
+      } else if (key === "escape") {
+        this.showUpgradeMenu = false;
+        event.preventDefault();
+      }
+      return;
+    }
+
+    // Game controls
+    if (key === "p") {
+      this.paused = !this.paused;
+    } else if (key === "enter" && this.gameOver) {
+      this.restart();
     }
   }
 
   update() {
-    if (this.gameOver || this.paused) return;
+    if (this.paused || this.gameOver) return;
 
     this.updateShipMovement();
     this.updateBullets();
@@ -127,37 +210,29 @@ export class AsteroidsGame {
     this.updatePowerUps();
     this.handleShooting();
     this.checkCollisions();
+    this.updateAccuracy();
     this.checkWinLoseConditions();
   }
 
   updateShipMovement() {
     // Handle input with improved physics
-    const currentAcceleration = this.ship.speedBoost
-      ? this.ship.acceleration * 1.5
-      : this.ship.acceleration;
-    const currentRotationSpeed = this.ship.speedBoost
-      ? this.ship.rotationSpeed * 1.2
-      : this.ship.rotationSpeed;
-
     if (this.keys["arrowleft"] || this.keys["a"]) {
-      this.ship.angle -= currentRotationSpeed;
+      this.ship.angle -= this.ship.rotationSpeed;
     }
     if (this.keys["arrowright"] || this.keys["d"]) {
-      this.ship.angle += currentRotationSpeed;
+      this.ship.angle += this.ship.rotationSpeed;
     }
     if (this.keys["arrowup"] || this.keys["w"]) {
       // Apply acceleration in the direction the ship is facing
-      this.ship.vx += Math.cos(this.ship.angle) * currentAcceleration;
-      this.ship.vy += Math.sin(this.ship.angle) * currentAcceleration;
-    }
+      this.ship.vx += Math.cos(this.ship.angle) * this.ship.acceleration;
+      this.ship.vy += Math.sin(this.ship.angle) * this.ship.acceleration;
 
-    // Limit maximum speed
-    const speed = Math.sqrt(
-      this.ship.vx * this.ship.vx + this.ship.vy * this.ship.vy
-    );
-    if (speed > this.ship.maxSpeed) {
-      this.ship.vx = (this.ship.vx / speed) * this.ship.maxSpeed;
-      this.ship.vy = (this.ship.vy / speed) * this.ship.maxSpeed;
+      // Limit speed
+      const speed = Math.sqrt(this.ship.vx ** 2 + this.ship.vy ** 2);
+      if (speed > this.ship.maxSpeed) {
+        this.ship.vx = (this.ship.vx / speed) * this.ship.maxSpeed;
+        this.ship.vy = (this.ship.vy / speed) * this.ship.maxSpeed;
+      }
     }
 
     // Apply friction
@@ -210,6 +285,16 @@ export class AsteroidsGame {
       this.ship.speedBoost = false;
     }
 
+    // Shield regeneration
+    if (!this.shieldActive && this.shieldStrength > 0) {
+      this.shieldRegenTimer = (this.shieldRegenTimer || 0) + 1;
+      if (this.shieldRegenTimer >= 300 / this.shieldRegenRate) {
+        this.shieldActive = true;
+        this.shieldTimer = Date.now() + 5000; // Shield lasts 5 seconds when regenerated
+        this.shieldRegenTimer = 0;
+      }
+    }
+
     // Update power-ups
     this.powerUps = this.powerUps.filter((powerUp) => {
       powerUp.y += powerUp.vy;
@@ -255,7 +340,8 @@ export class AsteroidsGame {
       }
     } else {
       // Normal single shot
-      if (this.bullets.length < 6) {
+      const canShoot = this.bullets.length < 6;
+      if (canShoot) {
         this.bullets.push({
           x: this.ship.x + Math.cos(this.ship.angle) * this.ship.radius,
           y: this.ship.y + Math.sin(this.ship.angle) * this.ship.radius,
@@ -263,10 +349,13 @@ export class AsteroidsGame {
           vy: Math.sin(this.ship.angle) * this.bulletSpeed,
           life: 80,
         });
+      } else {
+        // Bullet limit reached, do nothing
       }
     }
 
     this.lastShot = now;
+    this.shotsFired++; // Track shots fired for accuracy
     this.gameManager.playSound("shoot");
   }
 
@@ -313,7 +402,21 @@ export class AsteroidsGame {
 
           // Remove asteroid
           this.asteroids.splice(asteroidIndex, 1);
-          this.score += 20 * asteroid.size;
+
+          // Award points based on asteroid size, accuracy, and bullet damage
+          const basePoints = 20 * asteroid.size;
+          const accuracyBonus = Math.floor(this.accuracy / 10); // Bonus points for accuracy
+          const damageBonus = Math.floor(this.bulletDamage * 5); // Bonus points for damage
+          const totalPoints = basePoints + accuracyBonus + damageBonus;
+
+          this.score += totalPoints;
+
+          // Award upgrade points
+          this.upgradePoints += asteroid.size;
+
+          // Track hit for accuracy
+          this.shotsHit++;
+
           this.gameManager.playSound("explosion");
         }
       });
@@ -368,17 +471,17 @@ export class AsteroidsGame {
     switch (type) {
       case "shield":
         this.shieldActive = true;
-        this.shieldTimer = 300; // Shield lasts for 300 frames
+        this.shieldTimer = Date.now() + 8000; // Shield lasts 8 seconds
         this.gameManager.playSound("powerUp");
         break;
       case "multiShot":
         this.multiShot = true;
-        this.multiShotTimer = 300; // Multi-shot lasts for 300 frames
+        this.multiShotTimer = Date.now() + 6000; // Multi-shot lasts 6 seconds
         this.gameManager.playSound("powerUp");
         break;
       case "speed":
         this.ship.speedBoost = true;
-        this.ship.speedBoostTimer = 180; // Speed boost lasts for 180 frames
+        this.ship.speedBoostTimer = Date.now() + 5000; // Speed boost lasts 5 seconds
         this.gameManager.playSound("powerUp");
         break;
     }
@@ -441,6 +544,15 @@ export class AsteroidsGame {
     this.shieldActive = false;
     this.multiShot = false;
     this.ship.speedBoost = false;
+    this.upgradePoints = 0;
+    this.shotsFired = 0;
+    this.shotsHit = 0;
+    this.accuracy = 0;
+    this.shieldStrength = 0;
+    this.shieldRegenRate = 0.1;
+    this.shieldRegenTimer = 0;
+    this.bulletDamage = 1;
+    this.maxLives = 3;
     this.initializeAsteroids();
   }
 
@@ -704,6 +816,78 @@ export class AsteroidsGame {
       this.ctx.fillStyle = "#ff4444";
       this.ctx.fillText("SPEED BOOST ACTIVE", 20, yOffset);
     }
+
+    // Upgrade points display
+    this.ctx.fillStyle = "#00ff00";
+    this.ctx.fillText(
+      `UPGRADE POINTS: ${this.upgradePoints}`,
+      this.canvas.width - 150,
+      30
+    );
+
+    // Accuracy display
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.fillText(
+      `ACCURACY: ${Math.round(this.accuracy)}%`,
+      this.canvas.width - 150,
+      50
+    );
+
+    // Upgrade menu
+    if (this.showUpgradeMenu) {
+      this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      this.ctx.fillRect(
+        this.canvas.width / 2 - 120,
+        this.canvas.height / 2 - 80,
+        240,
+        160
+      );
+      this.ctx.fillStyle = "#ffffff";
+      this.ctx.font = "18px monospace";
+      this.ctx.textAlign = "center";
+      this.ctx.fillText(
+        "UPGRADES",
+        this.canvas.width / 2,
+        this.canvas.height / 2 - 50
+      );
+
+      // Upgrade options with current levels and costs
+      const upgradeOptions = [
+        `Weapon Lv.${this.upgrades.weapon} (10pts)`,
+        `Shield Lv.${this.upgrades.shield} (25pts)`,
+        `Speed Lv.${this.upgrades.speed} (50pts)`,
+        `Hull Lv.${this.upgrades.hull} (100pts)`,
+      ];
+
+      this.ctx.font = "14px monospace";
+      for (let i = 0; i < upgradeOptions.length; i++) {
+        if (i === this.selectedUpgrade) {
+          this.ctx.fillStyle = "#00ff00";
+        } else {
+          this.ctx.fillStyle = "#ffffff";
+        }
+        this.ctx.fillText(
+          upgradeOptions[i],
+          this.canvas.width / 2,
+          this.canvas.height / 2 - 20 + i * 20
+        );
+      }
+
+      this.ctx.fillStyle = "#ffff00";
+      this.ctx.font = "12px monospace";
+      this.ctx.fillText(
+        "↑↓: Navigate • ENTER: Buy • ESC: Close",
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 50
+      );
+
+      this.ctx.fillStyle = "#00ff00";
+      this.ctx.fillText(
+        `Points: ${this.upgradePoints}`,
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 70
+      );
+    }
   }
 
   drawPaused() {
@@ -761,5 +945,87 @@ export class AsteroidsGame {
       this.canvas.width / 2,
       this.canvas.height - 15
     );
+  }
+
+  purchaseUpgrade() {
+    const upgradeCosts = [10, 25, 50, 100]; // Costs for levels 1, 2, 3, 4
+    const upgradeType = this.selectedUpgrade;
+    const currentLevel = this.upgrades[Object.keys(this.upgrades)[upgradeType]];
+
+    if (currentLevel >= 4) return; // Max level reached
+
+    const cost = upgradeCosts[currentLevel];
+
+    if (this.upgradePoints >= cost) {
+      this.upgradePoints -= cost;
+
+      switch (upgradeType) {
+        case 0: // Weapon upgrade
+          this.upgrades.weapon = currentLevel + 1;
+          this.applyWeaponUpgrade(currentLevel + 1);
+          break;
+        case 1: // Shield upgrade
+          this.upgrades.shield = currentLevel + 1;
+          this.applyShieldUpgrade(currentLevel + 1);
+          break;
+        case 2: // Speed upgrade
+          this.upgrades.speed = currentLevel + 1;
+          this.applySpeedUpgrade(currentLevel + 1);
+          break;
+        case 3: // Hull upgrade
+          this.upgrades.hull = currentLevel + 1;
+          this.applyHullUpgrade(currentLevel + 1);
+          break;
+      }
+
+      this.gameManager.playSound("powerUp");
+    } else {
+      // Not enough points - could add visual feedback here
+      this.gameManager.playSound("explosion");
+    }
+  }
+
+  applyWeaponUpgrade(level) {
+    switch (level) {
+      case 1:
+        this.bulletSpeed = 8; // Faster bullets
+        break;
+      case 2:
+        this.bulletSpeed = 10;
+        this.bulletDamage = 1.5; // More damage
+        break;
+      case 3:
+        this.bulletSpeed = 12;
+        this.bulletDamage = 2;
+        break;
+      case 4:
+        this.bulletSpeed = 15;
+        this.bulletDamage = 3;
+        this.multiShot = true; // Permanent multi-shot
+        break;
+    }
+  }
+
+  applyShieldUpgrade(level) {
+    this.shieldStrength = level;
+    this.shieldRegenRate = level * 0.1;
+  }
+
+  applySpeedUpgrade(level) {
+    this.ship.maxSpeed = 3 + level * 0.5;
+    this.ship.acceleration = 0.2 + level * 0.05;
+  }
+
+  applyHullUpgrade(level) {
+    this.maxLives = 3 + level;
+    this.lives = Math.min(this.lives + 1, this.maxLives); // Give extra life immediately
+  }
+
+  updateAccuracy() {
+    if (this.shotsFired > 0) {
+      this.accuracy = (this.shotsHit / this.shotsFired) * 100;
+    } else {
+      this.accuracy = 0;
+    }
   }
 }

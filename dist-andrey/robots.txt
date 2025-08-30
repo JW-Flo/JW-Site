@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://jw-flo.github.io/JW-Site/sitemap-index.xml

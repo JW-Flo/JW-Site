@@ -143,7 +143,10 @@ export class TetrisGame {
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
-      this.gameManager.returnToMenu();
+      // Exit back to main website
+      if (this.gameManager && this.gameManager.overlay) {
+        this.gameManager.overlay.deactivate();
+      }
       return;
     }
 
@@ -334,7 +337,7 @@ export class TetrisGame {
       // Level up every 10 lines
       if (Math.floor(this.lines / 10) + 1 > this.level) {
         this.level = Math.floor(this.lines / 10) + 1;
-        this.dropTime = Math.max(100, 1000 - (this.level - 1) * 50);
+        this.dropTime = Math.max(100, 1000 - this.level * 50);
         this.gameManager.playSound("levelUp");
       }
 

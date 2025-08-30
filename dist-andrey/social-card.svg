@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Joe Whittle – Cybersecurity Engineer">
-  <rect width="1200" height="630" fill="#0f766e"/>
-  <rect x="40" y="40" width="1120" height="550" fill="#0d4f4a" rx="28"/>
-  <text x="100" y="220" font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="72" font-weight="700" fill="white">Joe Whittle</text>
-  <text x="100" y="300" font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="40" fill="#b2f5ea">Cybersecurity Engineer</text>
-  <text x="100" y="380" font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="28" fill="#e0fdfa">Cloud • Detection • Automation • Telemetry</text>
-  <text x="100" y="450" font-family="system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif" font-size="22" fill="#ccfbf1">jw-flo.github.io/JW-Site</text>
-</svg>

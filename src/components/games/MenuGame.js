@@ -249,6 +249,7 @@ export class MenuGame {
       const y = menuStartY + index * itemSpacing;
       const isSelected = index === this.selectedGame;
       const isUnlocked = this.unlockedGames[index];
+      const requiredScore = this.gameManager.unlockRequirements[game];
 
       // Selection background
       if (isSelected) {
@@ -291,27 +292,58 @@ export class MenuGame {
         this.ctx.font = "bold 20px monospace";
         this.ctx.fillText("🔒", this.canvas.width / 2 + 120, y);
 
-        // Unlock requirements
-        const requiredScores = [0, 500, 1000, 0];
-        if (requiredScores[index] > 0) {
+        // Unlock requirements and progress
+        if (requiredScore > 0) {
+          const bestScore = this.gameManager.getBestScore(game);
+          const progressPercent = Math.min(
+            (bestScore / requiredScore) * 100,
+            100
+          );
+
           this.ctx.fillStyle = "#888888";
-          this.ctx.font = "14px monospace";
+          this.ctx.font = "12px monospace";
           this.ctx.fillText(
-            `${requiredScores[index]} pts to unlock`,
+            `${bestScore}/${requiredScore} pts (${Math.round(
+              progressPercent
+            )}%)`,
             this.canvas.width / 2,
-            y + 25
+            y + 20
+          );
+
+          // Progress bar
+          const barWidth = 150;
+          const barHeight = 4;
+          const barX = this.canvas.width / 2 - barWidth / 2;
+          const barY = y + 28;
+
+          // Background
+          this.ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+          this.ctx.fillRect(barX, barY, barWidth, barHeight);
+
+          // Progress
+          this.ctx.fillStyle = progressPercent >= 100 ? "#00ff00" : "#ffff00";
+          this.ctx.fillRect(
+            barX,
+            barY,
+            (barWidth * progressPercent) / 100,
+            barHeight
           );
         }
+      } else {
+        // Show unlocked indicator
+        this.ctx.fillStyle = "#00ff00";
+        this.ctx.font = "bold 16px monospace";
+        this.ctx.fillText("✓", this.canvas.width / 2 + 120, y);
       }
     });
   }
 
   drawInstructions() {
-    const instructionsY = this.canvas.height - 50;
+    const instructionsY = this.canvas.height - 100;
 
     // Background for instructions
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-    this.ctx.fillRect(0, instructionsY - 15, this.canvas.width, 50);
+    this.ctx.fillRect(0, instructionsY - 15, this.canvas.width, 100);
 
     // Instructions text
     this.ctx.fillStyle = "#ffffff";
@@ -328,7 +360,47 @@ export class MenuGame {
     this.ctx.fillText(
       "Mouse/Touchpad: Move • WASD/Arrows: Move • Space/Click: Shoot",
       this.canvas.width / 2,
-      instructionsY + 20
+      instructionsY + 18
+    );
+
+    // Achievement progress
+    const achievements = this.gameManager.achievements;
+    const unlockedCount = Object.values(achievements).filter(Boolean).length;
+    const totalAchievements = Object.keys(achievements).length;
+
+    this.ctx.fillStyle = "#ff6b35";
+    this.ctx.font = "12px monospace";
+    this.ctx.fillText(
+      `🏆 Achievements: ${unlockedCount}/${totalAchievements}`,
+      this.canvas.width / 2,
+      instructionsY + 35
+    );
+
+    // Unlock progress hint
+    const lockedGames = this.games.filter(
+      (game, index) => !this.unlockedGames[index]
+    );
+    if (lockedGames.length > 0) {
+      this.ctx.fillStyle = "#ffff00";
+      this.ctx.font = "11px monospace";
+      this.ctx.fillText(
+        "💡 Play games to earn points and unlock new challenges!",
+        this.canvas.width / 2,
+        instructionsY + 50
+      );
+    }
+
+    // Show current best scores
+    this.ctx.fillStyle = "#00aaff";
+    this.ctx.font = "10px monospace";
+    const bestScores = this.games.map((game) =>
+      this.gameManager.getBestScore(game)
+    );
+    const totalScore = bestScores.reduce((sum, score) => sum + score, 0);
+    this.ctx.fillText(
+      `Total Points: ${totalScore} | Best Scores: ${bestScores.join(" | ")}`,
+      this.canvas.width / 2,
+      instructionsY + 65
     );
   }
 

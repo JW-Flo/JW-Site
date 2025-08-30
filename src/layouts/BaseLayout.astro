@@ -1,6 +1,5 @@
 ---
 import SEO from '../components/SEO.astro';
-import { siteMeta } from '../data/siteMeta';
 import '../styles/global.css';
 export interface Props { title?: string; description?: string; url?: string; noIndex?: boolean; }
 const { title, description, url, noIndex } = Astro.props as Props;
@@ -17,142 +16,55 @@ const { title, description, url, noIndex } = Astro.props as Props;
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
     <SEO {title} {description} {url} noIndex={noIndex} />
   </head>
-  <body class="flex flex-col min-h-screen bg-dark text-white">
+  <body class="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
     <!-- Game Canvas Overlay -->
-    <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-50 opacity-0 transition-opacity duration-1000 cursor-pointer" style="background: rgba(0, 0, 0, 0.1);"></canvas>
+    <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
     
-    <!-- Professional Trigger Phrase -->
-    <div id="game-trigger" class="fixed bottom-4 right-4 text-xs text-slate-400 hover:text-blue-400 transition-colors duration-300 cursor-pointer opacity-30 hover:opacity-100 z-30">
-      Ready to explore <span id="trigger-word" class="font-bold underline">technical</span> demonstrations?
+    <!-- Enhanced Retro Trigger - More Prominent -->
+    <div id="game-trigger" class="fixed bottom-6 right-6 bg-gradient-to-r from-neon-cyan to-neon-pink text-black px-4 py-3 rounded-lg font-bold text-sm cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-neon z-30 border-2 border-neon-yellow">
+      🎮 Ready to explore <span id="trigger-word" class="underline">retro arcade</span>?
     </div>
     
-    <!-- Professional Leaderboard -->
-    <div id="leaderboard" class="fixed top-4 right-4 bg-slate-800 border border-blue-500 rounded-lg p-4 opacity-0 transition-opacity duration-500 z-30 max-w-xs">
-      <h3 class="text-blue-400 font-bold mb-2">🏆 Technical Demonstrations</h3>
-      <div id="leaderboard-list" class="text-sm space-y-1">
+    <!-- Enhanced Retro Leaderboard -->
+    <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur border-2 border-blue-500 rounded-xl p-6 opacity-0 transition-all duration-500 z-30 max-w-sm shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-blue-400 font-bold text-lg flex items-center">
+          🏆 Arcade Leaderboard
+        </h3>
+        <button id="close-leaderboard" class="text-slate-400 hover:text-red-400 text-xl font-bold">×</button>
+      </div>
+      <div id="leaderboard-list" class="text-sm space-y-2 max-h-64 overflow-y-auto">
         <!-- Leaderboard entries will be populated by JavaScript -->
       </div>
-      <button id="close-leaderboard" class="mt-2 text-xs text-slate-400 hover:text-blue-400">× Close</button>
     </div>
     
     <!-- Professional Navigation -->
-    <nav class="bg-slate-900 border-b border-blue-500 px-8 py-4">
+    <nav class="bg-slate-800/90 backdrop-blur border-b border-slate-700 px-4 md:px-8 py-4 relative z-40">
       <div class="flex justify-between items-center max-w-7xl mx-auto">
-        <a href="/" class="text-blue-400 hover:text-blue-300 transition font-bold text-lg">Joe Whittle</a>
-        <div class="flex space-x-6">
-          <a href="/projects" class="text-slate-300 hover:text-blue-400 transition">Projects</a>
-          <a href="/about" class="text-slate-300 hover:text-blue-400 transition">Bio</a>
-          <a href="/resume" class="text-slate-300 hover:text-blue-400 transition">Resume</a>
-          <a href="/contact" class="text-slate-300 hover:text-blue-400 transition">Contact</a>
+        <a href="/" class="text-blue-400 hover:text-blue-300 transition font-bold text-xl">Joe Whittle</a>
+        <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8 relative z-50">
+          <a href="/projects" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">Projects</a>
+          <a href="/about" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">About</a>
+          <a href="/resume" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">Resume</a>
+          <a href="/contact" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">Contact</a>
         </div>
       </div>
     </nav>
-    <main class="flex-1 p-8">
+    <main class="flex-1 p-4 md:p-8">
       <slot />
     </main>
-    <!-- Footer -->
-    <footer class="bg-dark border-t border-neon-blue p-4 text-center text-sm">
-      <p class="text-neon-pink">&copy; {new Date().getFullYear()} Joe Whittle. All rights reserved.</p>
-      <p class="text-slate-400">Built with Astro & Tailwind. Edgy & performant.</p>
-      <div class="flex justify-center space-x-4 mt-2">
-        <a href="https://github.com/JW-Flo" class="text-neon-blue hover:text-neon-green transition">GitHub</a>
-        <a href="https://www.linkedin.com/in/joseph-whittle-9920537b/" class="text-neon-blue hover:text-neon-green transition">LinkedIn</a>
+    <!-- Professional Footer -->
+    <footer class="bg-slate-800/90 backdrop-blur border-t border-slate-700 p-6 text-center">
+      <p class="text-slate-300 mb-2">&copy; {new Date().getFullYear()} Joe Whittle. All rights reserved.</p>
+      <p class="text-slate-400 text-sm mb-4">Built with Astro & Tailwind. Modern & performant.</p>
+      <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6">
+        <a href="https://github.com/JW-Flo" class="text-blue-400 hover:text-blue-300 transition-colors duration-200">GitHub</a>
+        <a href="https://www.linkedin.com/in/joseph-whittle-9920537b/" class="text-blue-400 hover:text-blue-300 transition-colors duration-200">LinkedIn</a>
       </div>
     </footer>
     
-    <!-- Game Script - Modular Architecture -->
-    <script>
-      class RetroArcade {
-        constructor() {
-          this.canvas = document.getElementById('game-canvas');
-          this.triggerWord = document.getElementById('trigger-word');
-          this.leaderboard = document.getElementById('leaderboard');
-          this.leaderboardList = document.getElementById('leaderboard-list');
-          this.closeLeaderboardBtn = document.getElementById('close-leaderboard');
-          
-          this.gameOverlay = null;
-          this.isActive = false;
-          
-          this.bindEvents();
-          console.log('🎯 Retro Arcade initialized - modular architecture ready!');
-        }
-        
-        bindEvents() {
-          // Trigger word activation
-          this.triggerWord.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.activateGame();
-          });
-          
-          // Leaderboard controls
-          this.closeLeaderboardBtn.addEventListener('click', () => {
-            this.hideLeaderboard();
-          });
-        }
-        
-        async activateGame() {
-          if (this.isActive) return;
-          
-          this.isActive = true;
-          this.canvas.style.pointerEvents = 'auto';
-          this.canvas.style.opacity = '0.8';
-          this.triggerWord.style.opacity = '0';
-          
-          // Apply retro styling to the entire page
-          document.body.classList.add('retro-active');
-          
-          // Initialize modular game overlay
-          const { GameOverlay } = await import('../components/GameOverlay.js');
-          this.gameOverlay = new GameOverlay(this.canvas);
-          
-          // Set up deactivation callback to properly clean up
-          this.gameOverlay.onDeactivate = () => {
-            this.deactivateGame();
-          };
-          
-          await this.gameOverlay.activate();
-          
-          this.showLeaderboard();
-          console.log('🎮 Retro Arcade activated - modular system!');
-        }
-        
-        deactivateGame() {
-          if (!this.isActive) return;
-          
-          this.isActive = false;
-          this.canvas.style.pointerEvents = 'none';
-          this.canvas.style.opacity = '0';
-          this.triggerWord.style.opacity = '0.3';
-          
-          // Remove retro styling from the entire page
-          document.body.classList.remove('retro-active');
-          
-          if (this.gameOverlay) {
-            this.gameOverlay.deactivate();
-            this.gameOverlay = null;
-          }
-          
-          this.hideLeaderboard();
-          console.log('Game deactivated successfully');
-        }
-        
-        showLeaderboard() {
-          if (this.gameOverlay) {
-            this.gameOverlay.showLeaderboard();
-          }
-        }
-        
-        hideLeaderboard() {
-          if (this.gameOverlay) {
-            this.gameOverlay.hideLeaderboard();
-          }
-        }
-      }
-      
-      // Initialize when DOM is ready
-      document.addEventListener('DOMContentLoaded', () => {
-        new RetroArcade();
-      });
-    </script>
+    <!-- Load client scripts as external modules to avoid hoisted inline script problems -->
+    <script type="module" src="/src/scripts/retro-arcade.client.js"></script>
+    <script type="module" src="/src/scripts/dev-easter-eggs.client.js"></script>
   </body>
 </html>

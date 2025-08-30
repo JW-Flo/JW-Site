@@ -1,12 +1,23 @@
 [
   {
+    "slug": "jw-site",
+    "name": "JW-Site Portfolio",
+    "description": "Interactive cybersecurity portfolio with retro arcade games, guestbook, and automated workflows. Built with Astro, Cloudflare, and modern security practices.",
+    "github": "https://github.com/JW-Flo/JW-Site",
+    "live": "/",
+    "tags": ["astro", "cloudflare", "games", "security", "workflows"],
+    "status": "production",
+    "featured": true
+  },
+  {
     "slug": "awhittlewandering",
     "name": "AWhittleWandering",
     "description": "Real-time telemetry + journey intelligence platform components showcased.",
     "github": "https://github.com/JW-Flo/AWhittleWandering",
     "live": "https://awhittlewandering.com",
     "tags": ["cloudflare", "edge", "telemetry"],
-    "status": "production"
+    "status": "production",
+    "featured": true
   },
   {
     "slug": "atlasit",
@@ -15,6 +26,25 @@
     "github": "https://github.com/JW-Flo/AtlasIT",
     "live": "https://atlasit.com",
     "tags": ["infra", "preview"],
-    "status": "preview"
+    "status": "preview",
+    "featured": true
+  },
+  {
+    "slug": "cloud-security-automation",
+    "name": "Cloud Security Automation",
+    "description": "Automated security workflows for AWS infrastructure using Terraform, Lambda, and CloudWatch. Includes vulnerability scanning, compliance monitoring, and incident response.",
+    "github": "https://github.com/JW-Flo/cloud-security-automation",
+    "live": null,
+    "tags": ["aws", "terraform", "security", "automation", "lambda"],
+    "status": "concept"
+  },
+  {
+    "slug": "threat-hunting-playbook",
+    "name": "Threat Hunting Playbook",
+    "description": "Comprehensive threat hunting methodologies and automated detection rules for enterprise environments. Includes SIEM queries, IOC enrichment, and response procedures.",
+    "github": "https://github.com/JW-Flo/threat-hunting-playbook",
+    "live": null,
+    "tags": ["threat-hunting", "siem", "detection", "splunk", "automation"],
+    "status": "concept"
   }
 ]

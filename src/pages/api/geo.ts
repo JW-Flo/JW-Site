@@ -1,9 +1,18 @@
 import type { APIRoute } from 'astro';
-import { json, methodNotAllowed } from '../../utils/responses.js';
+import { json, methodNotAllowed } from '../../../utils/responses.js';
 
 export const GET: APIRoute = async ({ request }) => {
-  const cf = (request as any).cf || {};
-  return json({ country: cf.country, city: cf.city, colo: cf.colo, asn: cf.asn, remaining: 20 });
+  // Get client IP from various headers
+  const clientIP = request.headers.get('CF-Connecting-IP') ||
+                   request.headers.get('X-Forwarded-For') ||
+                   request.headers.get('X-Real-IP') ||
+                   '127.0.0.1';
+
+  return json({
+    ip: clientIP,
+    timestamp: new Date().toISOString(),
+    userAgent: request.headers.get('User-Agent') || 'Unknown'
+  });
 };
 
 export const ALL: APIRoute = async ({ request }) => methodNotAllowed(request.method, ['GET']);

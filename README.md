@@ -10,12 +10,48 @@ Static, low-maintenance cybersecurity engineering portfolio + human journey cont
 
 ## Local Development
 
+### Option 1: Native Node.js (Recommended for development)
+
 ```bash
 npm install
 npm run dev
 ```
 
 Site at <http://localhost:4321>
+
+### Option 2: Docker (For consistent environments)
+
+```bash
+# Build and run with Docker Compose
+npm run dev:docker
+
+# Or manually:
+docker-compose up
+
+# Or build and run separately:
+docker-compose build
+docker-compose up -d
+```
+
+Site at <http://localhost:4321>
+
+#### Docker Commands
+
+```bash
+# Start development server
+npm run dev:docker
+
+# Build Docker image
+npm run docker:build
+
+# Start in background
+npm run docker:up
+
+# Stop containers
+npm run docker:down
+```
+
+Docker provides a consistent development environment across different machines and ensures all dependencies are properly isolated.
 
 ## Content Updates
 
@@ -153,3 +189,34 @@ The previous `/demo` section has been retired. Requests to `/demo` return a 410 
 ## License
 
 Personal proprietary unless otherwise specified.
+
+## Copyright Notice
+
+© 2025 Joe Whittle. All rights reserved.
+
+This portfolio and its contents, including but not limited to:
+
+- Original game implementations (Space Invaders, Asteroids, Pac-Man, Tetris)
+- Security automation workflows
+- Resume and professional content
+- Website design and code
+
+are the intellectual property of Joe Whittle. All games are original implementations created from scratch and do not copy proprietary game code or assets.
+
+### Game Implementations
+
+All arcade games featured in this portfolio are original JavaScript implementations created by Joe Whittle. They are not based on or copied from any proprietary game engines, code, or assets. The games serve as:
+
+- Interactive portfolio demonstrations
+- Technical skill showcases
+- Entertainment for visitors
+- Examples of modern web development with security considerations
+
+### Usage Rights
+
+- Personal portfolio use: ✅ Permitted
+- Educational reference: ✅ Permitted (with attribution)
+- Commercial use: ❌ Not permitted without explicit written consent
+- Code copying: ❌ Not permitted for commercial purposes
+
+For any questions regarding usage, licensing, or collaboration opportunities, please contact via the contact form or LinkedIn.

@@ -5,14 +5,26 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "astro dev",
+    "dev:docker": "docker-compose up",
     "build": "astro build",
     "preview": "astro preview",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
     "pages:dev": "wrangler pages dev ./dist --compatibility-date=2025-08-29",
     "deploy:preview": "wrangler pages deploy ./dist --branch preview",
     "deploy": "wrangler pages deploy ./dist",
-    "auth:login": "unset CLOUDFLARE_API_TOKEN && npx wrangler login"
+    "auth:login": "unset CLOUDFLARE_API_TOKEN && npx wrangler login",
+    "build:andrey": "SITE_URL=https://andreysergeevich.me astro build --out-dir dist-andrey --config astro-andrey.config.mjs",
+    "deploy:andrey:preview": "wrangler pages deploy ./dist-andrey --branch preview --config wrangler-andrey.toml",
+    "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "^3.1.0",
     "@astrojs/rss": "^4.0.7",
     "@astrojs/sitemap": "^3.1.0",
@@ -20,13 +32,21 @@
     "astro": "^4.10.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.41",
+    "puppeteer": "^24.17.1",
     "tailwindcss": "^3.4.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250830.0",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^20.14.10",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
     "eslint": "^9.34.0",
-    "typescript": "^5.5.4",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.8",
     "wrangler": "^4.33.1"
   }
 }

@@ -1,125 +1,131 @@
 {
-  "name": "Joseph Whittle",
+  "name": "Joe Whittle",
   "title": "Security Engineer",
-  "location": "Austin, TX (Hybrid / Remote)",
-  "summary": "Security Engineer with progressive growth from IT operations to incident response and cloud security. Led response for 50+ cloud incidents, automated workflows eliminating manual toil, and drove measurable improvements across IAM, endpoint, vulnerability, and compliance domains.",
+  "location": "Austin, TX 78723",
+  "contact": {
+    "email": "joe.whittle6600@gmail.com",
+    "phone": "+1 706-461-2998",
+    "github": "JW-Flo",
+    "linkedin": "linkedin.com/in/joseph-whittle-9920537b"
+  },
+  "summary": "Security Engineer with hands-on experience in incident response, IAM, endpoint security, automation, and vulnerability management. Proven ability to lead responses to cloud-based incidents and to implement automation that reduces operational toil and improves detection and response times.",
   "skills": [
-    "Incident Response",
+    "Threat Detection & Incident Response",
     "Cloud Security (AWS)",
-    "Identity & Access Management (Okta)",
-    "Vulnerability Management",
-    "Endpoint Security / EDR",
-    "Automation & Scripting (Python, SQL, Bash, PowerShell)",
-    "Database Querying & Analytics",
-    "SIEM / Event Monitoring",
-    "Network Fundamentals (CCNA)",
-    "Asset Lifecycle Management",
-    "Compliance (SOC2 / GDPR / CCPA)",
-    "NIST Framework Alignment"
+    "Identity & Access Management (Okta, AWS IAM)",
+    "Endpoint Security",
+    "Vulnerability Assessment & Management",
+    "Infrastructure as Code (Terraform)",
+    "Containerization (Docker)",
+    "Security Information & Event Management (SIEM)",
+    "Python Scripting",
+    "Bash & PowerShell",
+    "SQL",
+    "Systems Engineering",
+    "Network Security",
+    "DevOps Integration",
+    "Compliance (SOC2, GDPR, NIST)",
+    "Automation & Orchestration",
+    "Monitoring & Alerting",
+    "Incident Playbooks"
   ],
   "highlights": [
-    "Directed response efforts for 50+ cloud security incidents; reduced resolution time 40%",
-    "Implemented centralized Okta IdP integrating 150+ applications; onboarding cycle time reduced 30% and access changes streamlined 50%",
-    "Led migration to next-gen EDR/RMM (e.g., Datto EDR) increasing detection/response speed 60% and reducing false positives 30%",
-    "Developed Python & SQL automation for IOC enrichment saving ~20 hours/week and improving detection fidelity",
-    "Built comprehensive SQL dashboards for security metrics tracking and executive reporting",
-    "Created SQL queries for automated threat hunting and anomaly detection across 500+ endpoints",
-    "Optimized event monitoring & alert tuning (Datto EDR) boosting team efficiency 25% and trimming alert noise",
-    "Enforced IAM least privilege in AWS & Okta cutting over-permissioned access 45%",
-    "Automated DSAR workflows improving GDPR/CCPA compliance and reducing customer service labor 35%",
-    "Maintained 98% closure rate for high-priority vulnerabilities while halving remediation cycle time",
-    "Partnered with IT to design automation workflows lowering operational overhead 40% (provisioning & access control)"
+    "Directed response efforts for 50+ cloud-based security incidents, improving resolution time by 40% through automation and playbooks.",
+    "Implemented centralized IdP with Okta for 150+ applications, reducing onboarding time by ~30% and improving access efficiency.",
+    "Led transition to next-generation endpoint solutions improving detection and response by 60%.",
+    "Automated IOC enrichment and detection workflows saving ~20 hours per week.",
+    "Maintained 98% closure rate for high-priority vulnerabilities through CVSS-driven remediation workflows."
   ],
   "experience": [
     {
-      "role": "Security Engineer (Jr., I, II)",
       "company": "FloSports",
-      "period": "Mar 2021 – May 2025",
-      "achievements": [
-        "Directed response efforts for 50+ cloud security incidents; implemented playbooks & automation reducing resolution time 40%",
-        "Implemented centralized Okta IdP integrating 150+ applications; onboarding cycle time reduced 30% and access changes streamlined 50%",
-        "Led migration to next-gen EDR/RMM (e.g., Datto EDR) increasing detection/response speed 60% and reducing false positives 30%",
-        "Developed Python & SQL automation for IOC enrichment saving ~20 hours/week and improving detection fidelity",
-        "Built comprehensive SQL dashboards for security metrics tracking and executive reporting",
-        "Created SQL queries for automated threat hunting and anomaly detection across 500+ endpoints",
-        "Optimized event monitoring & alert tuning (Datto EDR) boosting team efficiency 25% and trimming alert noise",
-        "Enforced IAM least privilege in AWS & Okta cutting over-permissioned access 45%",
-        "Automated DSAR workflows improving GDPR/CCPA compliance and reducing customer service labor 35%",
-        "Maintained 98% closure rate for high-priority vulnerabilities while halving remediation cycle time",
-        "Partnered with IT to design automation workflows lowering operational overhead 40% (provisioning & access control)"
+      "position": "Security Engineer",
+      "duration": "March 2021 - May 2025",
+      "location": "Austin, TX (remote/hybrid)",
+      "description": [
+        "Incident Response Leadership: Directed response efforts for 50+ cloud-based security incidents, improving resolution time by 40% through process automation and incident playbooks.",
+        "Identity & Access Management: Implemented centralized IdP with Okta, integrating 150+ apps and improving onboarding and access management efficiency.",
+        "Endpoint Security: Managed and transitioned endpoint security to next-gen EDR/RMM solutions, improving detection and response times by ~60%.",
+        "Automation & Scripting: Developed Python and SQL scripts for IOC enrichment, reducing manual work by ~20 hours/week and improving detection accuracy.",
+        "Event Monitoring Optimization: Enhanced event monitoring and alerting, reducing false positives by ~30% and improving team efficiency by ~25%.",
+        "IAM Policy Enforcement: Defined and enforced IAM policies in AWS and Okta, reducing over-permissioned access by ~45%.",
+        "Compliance & Data Privacy: Automated DSAR workflows to improve GDPR/CCPA handling and reduce customer service workload.",
+        "Vulnerability Management: Led CVSS-based remediation efforts, reducing resolution time by ~50% and maintaining a 98% SLA closure rate for high-priority items.",
+        "IT Operations Automation: Contributed to IT management automation and provisioning workflows, reducing operational overhead by ~40%."
       ]
     },
     {
-      "role": "IT Systems Engineer",
       "company": "FloSports",
-      "period": "Mar 2020 – Mar 2021",
-      "achievements": [
-        "Deployed & administered corporate Cisco network (2 floors / 40,000 sq ft) with VLAN segmentation & core redundancy",
-        "Owned Windows/Linux systems imaging, patching, and lifecycle management",
-        "Integrated IAM workflows between AD & Okta sustaining RBAC policy integrity",
-        "Delivered Tier 2–3 escalation support for infrastructure, VPN, and networking",
-        "Supported access reviews & SOC2-aligned control audits"
+      "position": "IT Systems Engineer",
+      "duration": "March 2020 - March 2021",
+      "location": "",
+      "description": [
+        "Deployed and administered corporate Cisco networking across multiple floors; implemented VLAN segmentation and core switch redundancy.",
+        "Managed Windows/Linux systems administration including imaging, patching, and endpoint lifecycle management.",
+        "Integrated IAM workflows between Active Directory and Okta; maintained RBAC policy integrity.",
+        "Provided Tier 2–3 support for infrastructure, VPN, and networking; participated in access reviews and SOC2-aligned audits."
       ]
     },
     {
-      "role": "Information Technology Associate",
       "company": "FloSports",
-      "period": "Aug 2019 – Mar 2020",
-      "achievements": [
-        "Resolved 95% of hardware/software tickets within 24 hours elevating user satisfaction & reliability",
-        "Assisted network administration & monitoring improving network uptime 20%",
-        "Managed lifecycle of 500+ IT assets with zero inventory discrepancies",
-        "Coordinated deployment & configuration of systems aligned to infra standards",
-        "Executed logistics & equipment setups for high-demand company events"
+      "position": "Information Technology Associate",
+      "duration": "August 2019 - March 2020",
+      "location": "",
+      "description": [
+        "Provided technical support resolving ~95% of hardware and software issues within 24 hours, improving reliability and user satisfaction.",
+        "Assisted with network administration and monitoring, contributing to a 20% improvement in network uptime.",
+        "Managed lifecycle of 500+ IT assets with accurate tracking and zero inventory discrepancies.",
+        "Supported deployment and configuration of IT systems to meet business needs."
       ]
     },
     {
-      "role": "Logistics Coordinator",
       "company": "FloSports",
-      "period": "Mar 2018 – Mar 2019",
-      "achievements": [
-        "Managed asset inventory & field logistics across 20+ event teams; optimized shipment tracking & lifecycle visibility"
+      "position": "Logistics Coordinator",
+      "duration": "March 2018 - March 2019",
+      "location": "",
+      "description": [
+        "Managed asset inventory and field logistics across 20+ event teams; coordinated hardware shipments and lifecycle tracking."
       ]
     },
     {
-      "role": "11B Infantryman – Team Leader",
       "company": "U.S. Army",
-      "period": "Jan 2015 – Jan 2017",
-      "achievements": [
-        "Led combat team during Afghanistan deployment executing mission-critical objectives under high-pressure conditions"
+      "position": "11B Infantryman – Team Leader",
+      "duration": "January 2015 - January 2017",
+      "location": "",
+      "description": [
+        "Led a combat team during deployment to Afghanistan; executed mission-critical objectives under high-pressure conditions."
       ]
     }
   ],
-  "tools": [
-    "AWS",
-    "Okta",
-    "Datto EDR",
-    "Python",
-    "SQL",
-    "Bash",
-    "PowerShell",
-    "PostgreSQL",
-    "MySQL",
-    "Cisco Networking",
-    "Active Directory",
-    "EDR / RMM",
-    "SIEM",
-    "Automation Scripting"
-  ],
   "education": [
-    { "degree": "BASc, Computer Systems Technology", "institution": "Austin Community College", "focus": "Security / Systems", "period": "2024" }
+    {
+      "institution": "Austin Community College",
+      "degree": "BASc, Computer Systems Technology",
+      "duration": "2024",
+      "location": "Austin, TX",
+      "description": []
+    }
   ],
   "certifications": [
-    "CompTIA A+",
-    "AWS Cloud Practitioner",
-    "Cisco CCNA",
-    "CompTIA Security+",
-    "CompTIA Network+",
-    "Okta Certified Administrator"
+    { "name": "A+", "issuer": "CompTIA", "issued": "" },
+    { "name": "AWS Certified Cloud Practitioner", "issuer": "Amazon Web Services", "issued": "" },
+    { "name": "Cisco CCNA", "issuer": "Cisco", "issued": "" },
+    { "name": "CompTIA Security+", "issuer": "CompTIA", "issued": "" },
+    { "name": "Network+", "issuer": "CompTIA", "issued": "" },
+    { "name": "Okta Certified Administrator", "issuer": "Okta", "issued": "" },
+    { "name": "Certified Ethical Hacker (CEH)", "issuer": "EC-Council", "issued": "" }
   ],
-  "contact": {
-    "email": "joe.whittle6600@gmail.com",
-    "github": "JW-Flo",
-    "linkedin": "linkedin.com/in/joseph-whittle-9920537b"
-  }
+  "tools": [
+    "AWS (EC2, S3)",
+    "Terraform",
+    "Docker",
+    "Bash",
+    "PowerShell",
+    "Python",
+    "SIEM",
+    "Datto EDR",
+    "Cisco Networking",
+    "SQL",
+    "Windows/Linux administration"
+  ]
 }

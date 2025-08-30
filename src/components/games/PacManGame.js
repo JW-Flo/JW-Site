@@ -2,14 +2,14 @@
 export class PacManGame {
   constructor(canvas, gameManager) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext("2d");
     this.gameManager = gameManager;
 
     // Bind event handlers
     this.boundHandleKeyPress = (e) => this.handleKeyPress(e);
 
     // Add event listeners
-    document.addEventListener('keydown', this.boundHandleKeyPress);
+    document.addEventListener("keydown", this.boundHandleKeyPress);
 
     // Game state
     this.pacman = {
@@ -20,7 +20,7 @@ export class PacManGame {
       nextDx: 0,
       nextDy: 0,
       mouthAngle: 0,
-      mouthDir: 1
+      mouthDir: 1,
     };
 
     this.ghosts = [];
@@ -40,33 +40,114 @@ export class PacManGame {
 
     // Maze layout (1 = wall, 0 = empty, 2 = dot, 3 = power pellet)
     this.maze = [
-      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-      [1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1],
-      [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
-      [1,3,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,3,1],
-      [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
-      [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-      [1,2,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,2,1],
-      [1,2,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,2,1],
-      [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1,2,2,2,2,2,1],
-      [1,1,1,1,1,1,2,1,1,1,1,2,2,2,2,2,2,1,1,1,1,2,1,1,1,1,1,1],
-      [1,1,1,1,1,1,2,1,1,1,1,2,2,2,2,2,2,1,1,1,1,2,1,1,1,1,1,1],
-      [1,1,1,1,1,1,2,1,2,2,2,2,2,0,0,2,2,2,2,2,2,1,2,1,1,1,1,1],
-      [1,1,1,1,1,1,2,1,2,1,1,2,0,0,0,0,2,1,1,2,1,2,1,1,1,1,1,1],
-      [1,1,1,1,1,1,2,1,2,1,1,2,0,0,0,0,2,1,1,2,1,2,1,1,1,1,1,1],
-      [0,0,0,0,0,0,2,2,2,1,1,2,0,0,0,0,2,1,1,2,2,2,0,0,0,0,0,0],
-      [1,1,1,1,1,1,2,1,2,1,1,2,0,0,0,0,2,1,1,2,1,2,1,1,1,1,1,1],
-      [1,1,1,1,1,1,2,1,2,1,1,2,2,2,2,2,2,1,1,2,1,2,1,1,1,1,1,1],
-      [1,1,1,1,1,1,2,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1,2,1,1,1,1,1],
-      [1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1],
-      [1,2,1,1,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1],
-      [1,3,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,3,1],
-      [1,1,1,2,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,1,2,1,1,1,1],
-      [1,1,1,2,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,1,2,1,1,1,1],
-      [1,2,2,2,2,2,2,1,2,2,2,2,2,1,1,2,2,2,2,2,2,1,2,2,2,2,2,1],
-      [1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1],
-      [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+      [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 1,
+      ],
+      [
+        1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 2, 1,
+      ],
+      [
+        1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 3, 1,
+      ],
+      [
+        1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 2, 1,
+      ],
+      [
+        1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 1,
+      ],
+      [
+        1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1,
+        1, 1, 2, 1,
+      ],
+      [
+        1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1,
+        1, 1, 2, 1,
+      ],
+      [
+        1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2,
+        2, 2, 2, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 1, 2, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 0, 0, 0, 0, 2, 1, 1, 2, 1, 2, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 0, 0, 0, 0, 2, 1, 1, 2, 1, 2, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 1, 2, 0, 0, 0, 0, 2, 1, 1, 2, 2, 2, 0, 0,
+        0, 0, 0, 0,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 0, 0, 0, 0, 2, 1, 1, 2, 1, 2, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 2, 1, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 1,
+      ],
+      [
+        1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1,
+        1, 1, 2, 1,
+      ],
+      [
+        1, 3, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1,
+        2, 2, 3, 1,
+      ],
+      [
+        1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2,
+        1, 1, 1, 1,
+      ],
+      [
+        1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2,
+        2, 2, 2, 1,
+      ],
+      [
+        1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 2, 1,
+      ],
+      [
+        1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 1,
+      ],
+      [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1,
+      ],
     ];
 
     this.initializeGame();
@@ -90,10 +171,38 @@ export class PacManGame {
 
     // Initialize ghosts
     this.ghosts = [
-      { x: 13, y: 11, color: '#ff0000', mode: 'scatter', targetX: 25, targetY: 0 }, // Blinky
-      { x: 14, y: 11, color: '#ffb8ff', mode: 'scatter', targetX: 2, targetY: 0 },  // Pinky
-      { x: 13, y: 13, color: '#00ffff', mode: 'scatter', targetX: 27, targetY: 27 }, // Inky
-      { x: 14, y: 13, color: '#ffb852', mode: 'scatter', targetX: 0, targetY: 27 }   // Clyde
+      {
+        x: 13,
+        y: 11,
+        color: "#ff0000",
+        mode: "scatter",
+        targetX: 25,
+        targetY: 0,
+      }, // Blinky
+      {
+        x: 14,
+        y: 11,
+        color: "#ffb8ff",
+        mode: "scatter",
+        targetX: 2,
+        targetY: 0,
+      }, // Pinky
+      {
+        x: 13,
+        y: 13,
+        color: "#00ffff",
+        mode: "scatter",
+        targetX: 27,
+        targetY: 27,
+      }, // Inky
+      {
+        x: 14,
+        y: 13,
+        color: "#ffb852",
+        mode: "scatter",
+        targetX: 0,
+        targetY: 27,
+      }, // Clyde
     ];
   }
 
@@ -105,19 +214,22 @@ export class PacManGame {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
     }
-    document.removeEventListener('keydown', this.boundHandleKeyPress);
+    document.removeEventListener("keydown", this.boundHandleKeyPress);
   }
 
   handleKeyPress(e) {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
-      this.gameManager.returnToMenu();
+      // Exit back to main website
+      if (this.gameManager && this.gameManager.overlay) {
+        this.gameManager.overlay.deactivate();
+      }
       return;
     }
 
     if (this.gameOver) {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         e.stopPropagation();
         this.restart();
@@ -125,7 +237,7 @@ export class PacManGame {
       return;
     }
 
-    if (e.key === 'p' || e.key === 'P') {
+    if (e.key === "p" || e.key === "P") {
       e.preventDefault();
       e.stopPropagation();
       this.paused = !this.paused;
@@ -136,33 +248,33 @@ export class PacManGame {
 
     // Set next direction (will be applied when possible)
     switch (e.key) {
-      case 'ArrowLeft':
-      case 'a':
-      case 'A':
+      case "ArrowLeft":
+      case "a":
+      case "A":
         e.preventDefault();
         e.stopPropagation();
         this.pacman.nextDx = -1;
         this.pacman.nextDy = 0;
         break;
-      case 'ArrowRight':
-      case 'd':
-      case 'D':
+      case "ArrowRight":
+      case "d":
+      case "D":
         e.preventDefault();
         e.stopPropagation();
         this.pacman.nextDx = 1;
         this.pacman.nextDy = 0;
         break;
-      case 'ArrowUp':
-      case 'w':
-      case 'W':
+      case "ArrowUp":
+      case "w":
+      case "W":
         e.preventDefault();
         e.stopPropagation();
         this.pacman.nextDx = 0;
         this.pacman.nextDy = -1;
         break;
-      case 'ArrowDown':
-      case 's':
-      case 'S':
+      case "ArrowDown":
+      case "s":
+      case "S":
         e.preventDefault();
         e.stopPropagation();
         this.pacman.nextDx = 0;
@@ -192,7 +304,7 @@ export class PacManGame {
     if (this.dots.length === 0 && this.powerPellets.length === 0) {
       this.level++;
       this.initializeGame();
-      this.gameManager.playSound('levelUp');
+      this.gameManager.playSound("levelUp");
     }
   }
 
@@ -229,22 +341,28 @@ export class PacManGame {
     const pacmanGridY = Math.floor(this.pacman.y);
 
     // Check dots
-    this.dots = this.dots.filter(dot => {
-      if (Math.floor(dot.x) === pacmanGridX && Math.floor(dot.y) === pacmanGridY) {
+    this.dots = this.dots.filter((dot) => {
+      if (
+        Math.floor(dot.x) === pacmanGridX &&
+        Math.floor(dot.y) === pacmanGridY
+      ) {
         this.score += 10;
-        this.gameManager.playSound('shoot');
+        this.gameManager.playSound("shoot");
         return false;
       }
       return true;
     });
 
     // Check power pellets
-    this.powerPellets = this.powerPellets.filter(pellet => {
-      if (Math.floor(pellet.x) === pacmanGridX && Math.floor(pellet.y) === pacmanGridY) {
+    this.powerPellets = this.powerPellets.filter((pellet) => {
+      if (
+        Math.floor(pellet.x) === pacmanGridX &&
+        Math.floor(pellet.y) === pacmanGridY
+      ) {
         this.score += 50;
         this.powerMode = true;
         this.powerModeTimer = 600; // 10 seconds at 60fps
-        this.gameManager.playSound('powerUp');
+        this.gameManager.playSound("powerUp");
         return false;
       }
       return true;
@@ -258,7 +376,7 @@ export class PacManGame {
   }
 
   updateGhosts() {
-    this.ghosts.forEach(ghost => {
+    this.ghosts.forEach((ghost) => {
       this.updateGhostPosition(ghost);
       this.checkGhostCollision(ghost);
     });
@@ -301,8 +419,10 @@ export class PacManGame {
 
   tryAlternativeDirections(ghost) {
     const directions = [
-      { x: 1, y: 0 }, { x: -1, y: 0 },
-      { x: 0, y: 1 }, { x: 0, y: -1 }
+      { x: 1, y: 0 },
+      { x: -1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: -1 },
     ];
 
     for (const dir of directions) {
@@ -320,7 +440,10 @@ export class PacManGame {
   }
 
   checkGhostCollision(ghost) {
-    if (Math.abs(ghost.x - this.pacman.x) < 1 && Math.abs(ghost.y - this.pacman.y) < 1) {
+    if (
+      Math.abs(ghost.x - this.pacman.x) < 1 &&
+      Math.abs(ghost.y - this.pacman.y) < 1
+    ) {
       if (this.powerMode) {
         this.handlePacmanEatsGhost(ghost);
       } else {
@@ -333,17 +456,17 @@ export class PacManGame {
     ghost.x = 13 + Math.random() * 2;
     ghost.y = 11 + Math.random() * 4;
     this.score += 200;
-    this.gameManager.playSound('explosion');
+    this.gameManager.playSound("explosion");
   }
 
   handleGhostEatsPacman() {
     this.lives--;
     if (this.lives <= 0) {
       this.gameOver = true;
-      this.gameManager.playSound('gameOver');
+      this.gameManager.playSound("gameOver");
     } else {
       this.resetPacman();
-      this.gameManager.playSound('explosion');
+      this.gameManager.playSound("explosion");
     }
   }
 
@@ -369,7 +492,7 @@ export class PacManGame {
 
   draw() {
     // Clear canvas
-    this.ctx.fillStyle = '#000000';
+    this.ctx.fillStyle = "#000000";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw starfield
@@ -408,7 +531,7 @@ export class PacManGame {
   }
 
   drawStarfield() {
-    this.ctx.fillStyle = '#ffffff';
+    this.ctx.fillStyle = "#ffffff";
     for (let i = 0; i < 50; i++) {
       const x = (i * 37) % this.canvas.width;
       const y = (i * 23) % this.canvas.height;
@@ -420,7 +543,7 @@ export class PacManGame {
     for (let y = 0; y < this.maze.length; y++) {
       for (let x = 0; x < this.maze[y].length; x++) {
         if (this.maze[y][x] === 1) {
-          this.ctx.fillStyle = '#0000ff';
+          this.ctx.fillStyle = "#0000ff";
           this.ctx.fillRect(
             x * this.cellSize,
             y * this.cellSize,
@@ -433,8 +556,8 @@ export class PacManGame {
   }
 
   drawDots() {
-    this.ctx.fillStyle = '#ffff00';
-    this.dots.forEach(dot => {
+    this.ctx.fillStyle = "#ffff00";
+    this.dots.forEach((dot) => {
       this.ctx.beginPath();
       this.ctx.arc(
         dot.x * this.cellSize + this.cellSize / 2,
@@ -449,8 +572,8 @@ export class PacManGame {
 
   drawPowerPellets() {
     const time = Date.now() * 0.01;
-    this.powerPellets.forEach(pellet => {
-      this.ctx.fillStyle = '#ffff00';
+    this.powerPellets.forEach((pellet) => {
+      this.ctx.fillStyle = "#ffff00";
       const size = 6 + Math.sin(time) * 2;
       this.ctx.beginPath();
       this.ctx.arc(
@@ -469,23 +592,27 @@ export class PacManGame {
     const y = this.pacman.y * this.cellSize + this.cellSize / 2;
     const radius = this.cellSize / 2 - 2;
 
-    this.ctx.fillStyle = '#ffff00';
+    this.ctx.fillStyle = "#ffff00";
     this.ctx.beginPath();
 
     // Calculate mouth direction
     let startAngle = 0;
     let endAngle = Math.PI * 2;
 
-    if (this.pacman.dx > 0) { // Right
+    if (this.pacman.dx > 0) {
+      // Right
       startAngle = this.pacman.mouthAngle;
       endAngle = Math.PI * 2 - this.pacman.mouthAngle;
-    } else if (this.pacman.dx < 0) { // Left
+    } else if (this.pacman.dx < 0) {
+      // Left
       startAngle = Math.PI + this.pacman.mouthAngle;
       endAngle = Math.PI - this.pacman.mouthAngle;
-    } else if (this.pacman.dy > 0) { // Down
+    } else if (this.pacman.dy > 0) {
+      // Down
       startAngle = Math.PI / 2 + this.pacman.mouthAngle;
       endAngle = Math.PI / 2 - this.pacman.mouthAngle;
-    } else if (this.pacman.dy < 0) { // Up
+    } else if (this.pacman.dy < 0) {
+      // Up
       startAngle = -Math.PI / 2 + this.pacman.mouthAngle;
       endAngle = -Math.PI / 2 - this.pacman.mouthAngle;
     }
@@ -496,85 +623,105 @@ export class PacManGame {
   }
 
   drawGhosts() {
-    this.ghosts.forEach(ghost => {
+    this.ghosts.forEach((ghost) => {
       const x = ghost.x * this.cellSize + this.cellSize / 2;
       const y = ghost.y * this.cellSize + this.cellSize / 2;
       const width = this.cellSize - 4;
       const height = this.cellSize - 4;
 
       // Ghost body
-      this.ctx.fillStyle = this.powerMode ? '#0000ff' : ghost.color;
+      this.ctx.fillStyle = this.powerMode ? "#0000ff" : ghost.color;
       this.ctx.beginPath();
-      this.ctx.arc(x, y - height/4, width/2, Math.PI, 0);
-      this.ctx.lineTo(x + width/2, y + height/4);
-      this.ctx.lineTo(x + width/3, y);
-      this.ctx.lineTo(x + width/6, y + height/4);
+      this.ctx.arc(x, y - height / 4, width / 2, Math.PI, 0);
+      this.ctx.lineTo(x + width / 2, y + height / 4);
+      this.ctx.lineTo(x + width / 3, y);
+      this.ctx.lineTo(x + width / 6, y + height / 4);
       this.ctx.lineTo(x, y);
-      this.ctx.lineTo(x - width/6, y + height/4);
-      this.ctx.lineTo(x - width/3, y);
-      this.ctx.lineTo(x - width/2, y + height/4);
+      this.ctx.lineTo(x - width / 6, y + height / 4);
+      this.ctx.lineTo(x - width / 3, y);
+      this.ctx.lineTo(x - width / 2, y + height / 4);
       this.ctx.closePath();
       this.ctx.fill();
 
       // Eyes
-      this.ctx.fillStyle = '#ffffff';
+      this.ctx.fillStyle = "#ffffff";
       this.ctx.beginPath();
-      this.ctx.arc(x - width/4, y - height/6, width/6, 0, Math.PI * 2);
-      this.ctx.arc(x + width/4, y - height/6, width/6, 0, Math.PI * 2);
+      this.ctx.arc(x - width / 4, y - height / 6, width / 6, 0, Math.PI * 2);
+      this.ctx.arc(x + width / 4, y - height / 6, width / 6, 0, Math.PI * 2);
       this.ctx.fill();
 
-      this.ctx.fillStyle = '#000000';
+      this.ctx.fillStyle = "#000000";
       this.ctx.beginPath();
-      this.ctx.arc(x - width/4, y - height/6, width/10, 0, Math.PI * 2);
-      this.ctx.arc(x + width/4, y - height/6, width/10, 0, Math.PI * 2);
+      this.ctx.arc(x - width / 4, y - height / 6, width / 10, 0, Math.PI * 2);
+      this.ctx.arc(x + width / 4, y - height / 6, width / 10, 0, Math.PI * 2);
       this.ctx.fill();
     });
   }
 
   drawUI() {
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.font = '16px monospace';
-    this.ctx.textAlign = 'left';
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.font = "16px monospace";
+    this.ctx.textAlign = "left";
     this.ctx.fillText(`SCORE: ${this.score}`, 20, 30);
     this.ctx.fillText(`LIVES: ${this.lives}`, 20, 50);
     this.ctx.fillText(`LEVEL: ${this.level}`, 20, 70);
 
     if (this.powerMode) {
-      this.ctx.fillStyle = '#ffff00';
-      this.ctx.fillText('POWER MODE!', 20, 90);
+      this.ctx.fillStyle = "#ffff00";
+      this.ctx.fillText("POWER MODE!", 20, 90);
     }
   }
 
   drawPaused() {
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#ffff00';
-    this.ctx.font = 'bold 36px monospace';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('PAUSED', this.canvas.width / 2, this.canvas.height / 2);
-    this.ctx.font = '16px monospace';
-    this.ctx.fillText('Press P to resume', this.canvas.width / 2, this.canvas.height / 2 + 50);
+    this.ctx.fillStyle = "#ffff00";
+    this.ctx.font = "bold 36px monospace";
+    this.ctx.textAlign = "center";
+    this.ctx.fillText("PAUSED", this.canvas.width / 2, this.canvas.height / 2);
+    this.ctx.font = "16px monospace";
+    this.ctx.fillText(
+      "Press P to resume",
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 50
+    );
   }
 
   drawGameOver() {
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#ff0000';
-    this.ctx.font = 'bold 36px monospace';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('GAME OVER', this.canvas.width / 2, this.canvas.height / 2 - 50);
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.font = '24px monospace';
-    this.ctx.fillText(`FINAL SCORE: ${this.score}`, this.canvas.width / 2, this.canvas.height / 2);
-    this.ctx.font = '16px monospace';
-    this.ctx.fillText('Press ENTER to restart', this.canvas.width / 2, this.canvas.height / 2 + 50);
+    this.ctx.fillStyle = "#ff0000";
+    this.ctx.font = "bold 36px monospace";
+    this.ctx.textAlign = "center";
+    this.ctx.fillText(
+      "GAME OVER",
+      this.canvas.width / 2,
+      this.canvas.height / 2 - 50
+    );
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.font = "24px monospace";
+    this.ctx.fillText(
+      `FINAL SCORE: ${this.score}`,
+      this.canvas.width / 2,
+      this.canvas.height / 2
+    );
+    this.ctx.font = "16px monospace";
+    this.ctx.fillText(
+      "Press ENTER to restart",
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 50
+    );
   }
 
   drawInstructions() {
-    this.ctx.fillStyle = '#888888';
-    this.ctx.font = '12px monospace';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('A/D: Move • W/S: Turn • Eat dots & power pellets • Avoid ghosts • P: Pause • ESC: Menu', this.canvas.width / 2, this.canvas.height - 20);
+    this.ctx.fillStyle = "#888888";
+    this.ctx.font = "12px monospace";
+    this.ctx.textAlign = "center";
+    this.ctx.fillText(
+      "A/D: Move • W/S: Turn • Eat dots & power pellets • Avoid ghosts • P: Pause • ESC: Menu",
+      this.canvas.width / 2,
+      this.canvas.height - 20
+    );
   }
 
   restart() {

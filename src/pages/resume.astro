@@ -1,12 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ResumeSection from '../components/ResumeSection.astro';
+import resume from '../data/resume.json';
 ---
 <BaseLayout title="Resume | Joe Whittle" description="Professional cybersecurity resume for Joe Whittle">
   <div class="flex justify-end mb-4 print:hidden">
-    <button onclick="window.print()" class="px-3 py-1.5 text-xs font-medium border border-slate-700 rounded hover:border-brand transition">Print PDF</button>
+    <button onclick="window.print()" class="px-3 py-1.5 text-xs font-medium border border-neon-cyan text-neon-cyan rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon">Print PDF</button>
   </div>
+
+  <!-- Name and Title Header -->
+  <div class="text-center mb-8 pb-6 border-b border-neon-blue/20">
+    <h1 class="text-4xl md:text-5xl font-bold text-neon-pink mb-2 tracking-tight">{resume.name}</h1>
+    <h2 class="text-xl md:text-2xl text-neon-cyan font-medium mb-2">{resume.title}</h2>
+    <p class="text-neon-green text-sm md:text-base">{resume.location}</p>
+  </div>
+
   <ResumeSection />
+
   <script type="application/ld+json">{JSON.stringify({
     '@context':'https://schema.org',
     '@type':'CreativeWork',
