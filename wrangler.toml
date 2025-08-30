@@ -5,21 +5,19 @@ compatibility_date = "2025-08-29"
 pages_build_output_dir = "dist"
 
 [vars]
-# Set this in the Cloudflare dashboard or via `wrangler pages project create`.
-# For production, override with your canonical domain (e.g. https://joe.example).
-SITE_URL = "https://example.pages.dev"
+# Production site URL - update this with your custom domain later
+SITE_URL = "https://jw-site-7q2.pages.dev"
 
 # If you later add KV / D1 / R2 bindings, document them here.
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-# TODO: Replace with actual namespace id after manual creation (script fallback)
 id = "33fcae0c755840f996bfbb3ca3f9394f"
+preview_id = "ec6a2c7250064a89b0fa71accdaf51ba"
 # Namespace used for rate limiting buckets (keys rl:*). Previously VISITS; renamed for clarity.
 
 [[d1_databases]]
 binding = "DB"
-# Replace with actual database name & id (use: npx wrangler d1 list)
 database_name = "guestbook_demo"
 database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
 
@@ -27,14 +25,16 @@ database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
 # - TURNSTILE_SECRET_KEY (Secret)
 # - PUBLIC_TURNSTILE_SITE_KEY (Build variable)
 
-# Additional KV namespaces for workflows
+# Additional KV namespaces for game features
 [[kv_namespaces]]
 binding = "LEADERBOARD"
-id = "your-leaderboard-namespace-id"
+id = "4792010013254ed7815b2d66adb9a50e"
+preview_id = "508f61d2b5d6442bae53fbe541698360"
 
 [[kv_namespaces]]
 binding = "ANALYTICS"
-id = "your-analytics-namespace-id"
+id = "3dd7938561f5402bb41760edda181030"
+preview_id = "64323cab0ce447d182e8a5038461e6d3"
 
 # Workflows configuration (implemented as functions for now)
 # These will be converted to proper workflows when Cloudflare Workflows supports them
