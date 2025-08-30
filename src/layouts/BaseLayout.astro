@@ -20,13 +20,19 @@ const { title, description, url, noIndex } = Astro.props as Props;
     <!-- Game Canvas Overlay -->
     <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
     
-    <!-- Enhanced Retro Trigger - More Prominent -->
-    <div id="game-trigger" class="fixed bottom-6 right-6 bg-gradient-to-r from-neon-cyan to-neon-pink text-black px-4 py-3 rounded-lg font-bold text-sm cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-neon z-30 border-2 border-neon-yellow">
-      🎮 Ready to explore <span id="trigger-word" class="underline">retro arcade</span>?
+    <!-- Enhanced Game Trigger - More Professional & Prominent -->
+    <div id="game-trigger" class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 text-white px-6 py-4 rounded-xl font-semibold text-sm cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-blue-500/25 z-40 border border-blue-400/50 backdrop-blur-sm">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">🎮</span>
+        <div>
+          <div class="font-bold">Ready to explore <span id="trigger-word" class="underline decoration-blue-300">retro arcade</span>?</div>
+          <div class="text-xs text-blue-100 opacity-80">Click to start gaming</div>
+        </div>
+      </div>
     </div>
     
-    <!-- Enhanced Retro Leaderboard -->
-    <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur border-2 border-blue-500 rounded-xl p-6 opacity-0 transition-all duration-500 z-30 max-w-sm shadow-2xl">
+    <!-- Enhanced Professional Leaderboard -->
+    <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-6 opacity-0 transition-all duration-500 z-40 max-w-sm shadow-2xl shadow-slate-900/50">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-blue-400 font-bold text-lg flex items-center">
           🏆 Arcade Leaderboard
@@ -38,28 +44,34 @@ const { title, description, url, noIndex } = Astro.props as Props;
       </div>
     </div>
     
-    <!-- Professional Navigation -->
-    <nav class="bg-slate-800/90 backdrop-blur border-b border-slate-700 px-4 md:px-8 py-4 relative z-40">
+    <!-- Enhanced Professional Navigation -->
+    <nav class="bg-slate-900/95 backdrop-blur-sm border-b border-slate-600 px-4 md:px-8 py-5 relative z-40 shadow-lg shadow-slate-900/50">
       <div class="flex justify-between items-center max-w-7xl mx-auto">
-        <a href="/" class="text-blue-400 hover:text-blue-300 transition font-bold text-xl">Joe Whittle</a>
+        <a href="/" class="text-blue-400 hover:text-blue-300 transition-colors duration-200 font-bold text-xl tracking-wide">Joe Whittle</a>
         <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8 relative z-50">
-          <a href="/projects" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">Projects</a>
-          <a href="/about" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">About</a>
-          <a href="/resume" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">Resume</a>
-          <a href="/contact" class="text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium nav-link">Contact</a>
+          <a href="/projects" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-3 py-1 rounded-md hover:bg-slate-800/50">Projects</a>
+          <a href="/about" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-3 py-1 rounded-md hover:bg-slate-800/50">About</a>
+          <a href="/resume" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-3 py-1 rounded-md hover:bg-slate-800/50">Resume</a>
+          <a href="/contact" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-3 py-1 rounded-md hover:bg-slate-800/50">Contact</a>
         </div>
       </div>
     </nav>
-    <main class="flex-1 p-4 md:p-8">
+    <main class="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
       <slot />
     </main>
-    <!-- Professional Footer -->
-    <footer class="bg-slate-800/90 backdrop-blur border-t border-slate-700 p-6 text-center">
-      <p class="text-slate-300 mb-2">&copy; {new Date().getFullYear()} Joe Whittle. All rights reserved.</p>
-      <p class="text-slate-400 text-sm mb-4">Built with Astro & Tailwind. Modern & performant.</p>
-      <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6">
-        <a href="https://github.com/JW-Flo" class="text-blue-400 hover:text-blue-300 transition-colors duration-200">GitHub</a>
-        <a href="https://www.linkedin.com/in/joseph-whittle-9920537b/" class="text-blue-400 hover:text-blue-300 transition-colors duration-200">LinkedIn</a>
+    <!-- Enhanced Professional Footer -->
+    <footer class="bg-slate-900/95 backdrop-blur-sm border-t border-slate-600 p-8 text-center shadow-lg shadow-slate-900/50">
+      <div class="max-w-4xl mx-auto">
+        <p class="text-slate-300 mb-3 font-medium">&copy; {new Date().getFullYear()} Joe Whittle. All rights reserved.</p>
+        <p class="text-slate-400 text-sm mb-6">Built with Astro & Tailwind. Modern, secure & performant.</p>
+        <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-8">
+          <a href="https://github.com/JW-Flo" class="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center justify-center space-x-2">
+            <span>GitHub</span>
+          </a>
+          <a href="https://www.linkedin.com/in/joseph-whittle-9920537b/" class="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center justify-center space-x-2">
+            <span>LinkedIn</span>
+          </a>
+        </div>
       </div>
     </footer>
     
@@ -166,8 +178,16 @@ const { title, description, url, noIndex } = Astro.props as Props;
             }
             document.body.classList.remove("game-mode");
 
-            // Show error message to user
-            window.alert("Sorry, there was an issue loading the game. Please try again or check the console for details.");
+            // Show error message to user with more details
+            const errorMsg = `Sorry, there was an issue loading the game: ${error.message}. Please check the console for details.`;
+            window.alert(errorMsg);
+            
+            // Also add a visual error indicator on the trigger
+            const trigger = document.getElementById("game-trigger");
+            if (trigger) {
+              trigger.innerHTML = `<div class="flex items-center space-x-2"><span class="text-2xl">❌</span><div><div class="font-bold">Game Error</div><div class="text-xs opacity-80">Check console</div></div></div>`;
+              trigger.className = trigger.className.replace("from-blue-600 via-blue-500 to-purple-600", "from-red-600 via-red-500 to-red-600");
+            }
           }
         }
 
