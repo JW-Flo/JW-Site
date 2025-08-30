@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Edge Demo">
+  <p>Below are live calls hitting edge functions.</p>
+  <div class="space-y-4 mt-6" id="demo"></div>
+  <script>
+    async function fetchJSON(path){
+      const r = await fetch(path); return r.json();
+    }
+    (async () => {
+      const geo = await fetchJSON('/geo');
+      const visits = await fetchJSON('/visits');
+      const r2 = await fetchJSON('/r2/list');
+      document.getElementById('demo').innerHTML = `
+        <pre class="p-2 bg-gray-100 overflow-auto text-xs">Geo: ${JSON.stringify(geo,null,2)}</pre>
+        <pre class="p-2 bg-gray-100 overflow-auto text-xs">Visits KV: ${JSON.stringify(visits,null,2)}</pre>
+        <pre class="p-2 bg-gray-100 overflow-auto text-xs">R2 List: ${JSON.stringify(r2,null,2)}</pre>
+      `;
+    })();
+  </script>
+</BaseLayout>

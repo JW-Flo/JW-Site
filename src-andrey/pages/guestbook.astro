@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Guestbook (D1 + Turnstile)">
+  <form id="gb" class="space-y-2 mb-6">
+    <input name="name" placeholder="Name (optional)" class="border px-2 py-1 w-full" />
+    <textarea name="message" placeholder="Message" class="border px-2 py-1 w-full" required></textarea>
+    <div id="cf-turnstile" class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY"></div>
+    <button class="bg-black text-white px-3 py-1" type="submit">Sign</button>
+  </form>
+  <ul id="entries" class="space-y-3 text-sm"></ul>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script>
+    async function load(){
+      const r = await fetch('/guestbook');
+      const data = await r.json();
+      const list = document.getElementById('entries');
+      list.innerHTML = data.map(e => `<li><strong>${e.name}</strong> — ${e.message}</li>`).join('');
+    }
+    document.getElementById('gb').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const form = ev.target;
+      const body = {
+        name: form.name.value,
+        message: form.message.value,
+        turnstileToken: window.turnstile?.getResponse?.()
+      };
+      const r = await fetch('/guestbook', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      if (r.ok) { form.reset(); window.turnstile.reset(); load(); }
+      else alert('Error');
+    });
+    load();
+  </script>
+</BaseLayout>

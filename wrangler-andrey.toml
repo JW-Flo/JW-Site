@@ -1,0 +1,22 @@
+name = "andreysergeevich"
+compatibility_date = "2025-08-29"
+pages_build_output_dir = "dist-andrey"
+
+[vars]
+SITE_URL = "https://andreysergeevich.me"
+
+# Placeholder bindings to fill after creation
+# kv_namespaces = [ { binding = "VISITS", id = "<KV_NAMESPACE_ID>" } ]
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "guestbook"
+# database_id = "<D1_DB_ID>"
+# [[r2_buckets]]
+# binding = "MEDIA"
+# bucket_name = "media"
+# [[queues.producers]]
+# binding = "EVENT_QUEUE"
+# queue = "site-events"
+# [[durable_objects.bindings]]
+# name = "ROOM_STATE"
+# class_name = "RoomState"

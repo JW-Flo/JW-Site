@@ -6,24 +6,30 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-  "preview": "astro preview",
-  "pages:dev": "wrangler pages dev ./dist --persist --compatibility-date=2025-08-29",
-  "deploy:preview": "wrangler pages deploy ./dist --branch preview",
-  "deploy": "wrangler pages deploy ./dist"
+    "preview": "astro preview",
+    "pages:dev": "wrangler pages dev ./dist --persist --compatibility-date=2025-08-29",
+    "deploy:preview": "wrangler pages deploy ./dist --branch preview",
+    "deploy": "wrangler pages deploy ./dist",
+    "auth:login": "unset CLOUDFLARE_API_TOKEN && npx wrangler login",
+    "build:andrey": "astro build --config astro.andrey.config.mjs",
+    "pages:dev:andrey": "wrangler pages dev ./dist-andrey --persist --config wrangler-andrey.toml --compatibility-date=2025-08-29",
+    "deploy:andrey:preview": "wrangler pages deploy ./dist-andrey --branch preview --config wrangler-andrey.toml",
+    "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml"
   },
   "dependencies": {
-    "astro": "^4.10.0",
+    "@astrojs/mdx": "^3.1.0",
+    "@astrojs/rss": "^4.0.7",
+    "@astrojs/sitemap": "^3.1.0",
     "@astrojs/tailwind": "^5.1.0",
-  "@astrojs/mdx": "^3.1.0",
-  "@astrojs/rss": "^4.0.7",
-  "@astrojs/sitemap": "^3.1.0",
-    "tailwindcss": "^3.4.7",
+    "astro": "^4.10.0",
+    "autoprefixer": "^10.4.20",
     "postcss": "^8.4.41",
-    "autoprefixer": "^10.4.20"
+    "tailwindcss": "^3.4.7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250830.0",
+    "@types/node": "^20.14.10",
     "typescript": "^5.5.4",
-  "@types/node": "^20.14.10",
-  "wrangler": "^3.74.0"
+    "wrangler": "^4.33.1"
   }
 }

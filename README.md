@@ -53,6 +53,26 @@ npm run pages:dev
 
 Historical note: GitHub Pages was the initial fallback; canonical generation now expects `SITE_URL` to be set for production.
 
+### Auth (Wrangler OAuth Recommended)
+
+Fast path:
+
+```bash
+npm run auth:login
+```
+
+What the script does: unsets any `CLOUDFLARE_API_TOKEN` (so Wrangler doesn't force token mode) then launches the browser OAuth flow (`wrangler login`). Credentials are stored under `~/.wrangler`.
+
+Manual steps if you prefer:
+
+```bash
+unset CLOUDFLARE_API_TOKEN
+npx wrangler login
+wrangler whoami
+```
+
+If you previously exported a token in your shell profile, remove that line and re-source it before logging in. Avoid pasting API tokens into commits or chat.
+
 ## Principles
 
 - Minimal attack surface (static output only)

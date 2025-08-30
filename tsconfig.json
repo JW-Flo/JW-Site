@@ -6,10 +6,10 @@
     "strict": true,
     "jsx": "preserve",
     "jsxImportSource": "react",
-    "types": ["node"],
+  "types": ["node", "@cloudflare/workers-types"],
     "baseUrl": ".",
     "paths": {}
   },
-  "include": ["src"],
+  "include": ["src", "src-andrey", "functions"],
   "exclude": ["node_modules","dist"]
 }
