@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { GameManager } from "../utils/GameManager.js";
 
 describe("GameManager", () => {
@@ -54,6 +54,13 @@ describe("GameManager", () => {
     };
 
     gameManager = new GameManager(mockOverlay);
+  });
+
+  afterEach(async () => {
+    // Clean up any running games to prevent animation frame errors
+    if (gameManager && gameManager.isActive) {
+      await gameManager.deactivate();
+    }
   });
 
   describe("Initialization", () => {
