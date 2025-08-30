@@ -14,7 +14,8 @@
     "build:andrey": "astro build --config astro.andrey.config.mjs",
     "pages:dev:andrey": "wrangler pages dev ./dist-andrey --persist --config wrangler-andrey.toml --compatibility-date=2025-08-29",
     "deploy:andrey:preview": "wrangler pages deploy ./dist-andrey --branch preview --config wrangler-andrey.toml",
-    "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml"
+  "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml",
+  "patch:andrey:bindings": "node scripts/patch-bindings.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",
