@@ -3,7 +3,7 @@ import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 
-const SITE_URL = process.env.SITE_URL || "https://andreysergeevich.me";
+const SITE_URL = process.env.SITE_URL || "https://jw-site-7q2.pages.dev";
 
 export default defineConfig({
   // Canonical site URL used by Astro for absolute links & sitemap
