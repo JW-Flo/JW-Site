@@ -209,8 +209,21 @@ const { title, description, url, noIndex } = Astro.props as Props;
       document.addEventListener("DOMContentLoaded", () => {
         try {
           window.retroArcade = new RetroArcade();
+          // Add visible confirmation that script loaded
+          console.log("🎯 RetroArcade initialized successfully!");
+          
+          // Add a small visual indicator in the page title for testing
+          setTimeout(() => {
+            if (window.retroArcade && window.retroArcade.canvas) {
+              document.title = "🎮 " + document.title;
+            }
+          }, 1000);
         } catch (e) {
           console.error("Failed to initialize RetroArcade for testing", e);
+          // Add error indicator
+          setTimeout(() => {
+            document.title = "❌ " + document.title;
+          }, 1000);
         }
       });
     </script>
