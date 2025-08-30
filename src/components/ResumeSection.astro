@@ -54,22 +54,6 @@ import resume from '../data/resume.json';
       </div>
     </div>
     <div class="md:col-span-2 space-y-10">
-      {resume.metrics && (
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
-          <div class="p-3 border border-slate-800 rounded">
-            <p class="text-xl font-semibold">{resume.metrics.mean_time_to_detect_improvement}</p>
-            <p class="text-[11px] uppercase tracking-wide text-slate-400">MTTD Improvement</p>
-          </div>
-          <div class="p-3 border border-slate-800 rounded">
-            <p class="text-xl font-semibold">{resume.metrics.services_hardened}</p>
-            <p class="text-[11px] uppercase tracking-wide text-slate-400">Services Hardened</p>
-          </div>
-          <div class="p-3 border border-slate-800 rounded col-span-2 sm:col-span-1">
-            <p class="text-xl font-semibold">{resume.metrics.automation_coverage}</p>
-            <p class="text-[11px] uppercase tracking-wide text-slate-400">Automation Coverage</p>
-          </div>
-        </div>
-      )}
       {resume.experience.map(job => (
         <div>
           <h3 class="font-semibold text-lg">{job.role} · {job.company}</h3>

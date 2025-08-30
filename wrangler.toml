@@ -10,3 +10,19 @@ pages_build_output_dir = "dist"
 SITE_URL = "https://example.pages.dev"
 
 # If you later add KV / D1 / R2 bindings, document them here.
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+# TODO: Replace with actual namespace id after manual creation (script fallback)
+id = "33fcae0c755840f996bfbb3ca3f9394f"
+# Namespace used for rate limiting buckets (keys rl:*). Previously VISITS; renamed for clarity.
+
+[[d1_databases]]
+binding = "DB"
+# Replace with actual database name & id (use: npx wrangler d1 list)
+database_name = "guestbook_demo"
+database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
+
+# Turnstile environment variables (set in Pages dashboard, not stored here):
+# - TURNSTILE_SECRET_KEY (Secret)
+# - PUBLIC_TURNSTILE_SITE_KEY (Build variable)

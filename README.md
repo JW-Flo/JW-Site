@@ -53,57 +53,14 @@ npm run pages:dev
 
 Historical note: GitHub Pages was the initial fallback; canonical generation now expects `SITE_URL` to be set for production.
 
-### Second Demo Site (andreysergeevich.me) – Automated Provisioning
+### Staging Workflow
 
-This repo also contains a Cloudflare platform showcase (Astro config: `astro.andrey.config.mjs`) using KV, D1, R2, and Turnstile via Pages Functions in `functions/`.
+Use a `staging` branch for pre-production validation:
 
-One-shot provisioning + config patch:
-
-```bash
-./scripts/provision-andrey.sh
-```
-
-What the script does:
-
-1. Ensures Wrangler auth (launches `wrangler login` if needed).
-2. Creates KV namespace `VISITS` and appends a `[[kv_namespaces]]` block to `wrangler-andrey.toml`.
-3. Creates D1 database `andrey_guestbook`, appends `[[d1_databases]]`, seeds table `entries`.
-4. Creates R2 bucket `MEDIA`, appends `[[r2_buckets]]` binding.
-5. Leaves Turnstile (captcha) for manual dashboard step.
-
-After running:
-
-1. Create Turnstile site & secret in Cloudflare Dashboard (Security > Turnstile).
-2. Add secret as environment variable `TURNSTILE_SECRET_KEY` in the Pages project (do NOT add to toml / commit).
-3. Replace placeholder site key in `src-andrey/pages/guestbook.astro`.
-4. Build & preview deploy:
-
-```bash
-npm run build:andrey
-npm run deploy:andrey:preview
-```
-
-1. Promote to production:
-
-```bash
-npm run deploy:andrey
-```
-
-Local dev (functions + static output):
-
-```bash
-npm run pages:dev:andrey
-```
-
-Feature endpoints/pages:
-
-- `/edge-demo/` – fetches geo, visit counter, R2 list
-- `/geo` – edge geo JSON (function)
-- `/visits` – KV counter (function)
-- `/r2/list` – R2 object listing (function)
-- `/guestbook` – D1 + Turnstile-backed guestbook (GET/POST)
-
-Future expansion placeholders (commented in `wrangler-andrey.toml`): Queues, Durable Objects.
+1. Push feature branches & open PRs – CI builds preview deployments (Cloudflare Pages preview environment).
+2. Merge into `staging` – automatic staging deploy (configure Cloudflare project to map branch `staging` to staging URL).
+3. Final QA on staging URL (security headers, APIs, structured data).
+4. Merge staging → main for production deploy.
 
 ### Auth (Wrangler OAuth Recommended)
 
@@ -174,6 +131,24 @@ Future (optional):
 - Dark/light toggle
 - Tag filtering for blog
 - Reintroduce linting or content validation if needed
+
+## Smoke Tests
+
+Simple script to hit key endpoints (run while dev server is up):
+
+```bash
+chmod +x scripts/smoke.sh # first run
+./scripts/smoke.sh http://localhost:4321
+```
+
+## API Endpoints (Current)
+
+- `GET /api/guestbook` – recent guestbook entries
+- `POST /api/guestbook` – add entry (Turnstile token required)
+- `GET /api/guestbook/stats` – counts & latest entries
+- `GET /api/geo` – Cloudflare edge geo metadata (rate limited)
+
+The previous `/demo` section has been retired. Requests to `/demo` return a 410 page. All functionality now under `/api/*`.
 
 ## License
 

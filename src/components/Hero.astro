@@ -1,30 +1,33 @@
 ---
 ---
-<section class="space-y-6">
-  <h1 class="text-4xl font-bold tracking-tight leading-tight">
-    Security Engineering with <span class="text-brand">Measurable Impact</span>
-  </h1>
-  <p class="text-lg text-slate-300 max-w-2xl">
-    I design and automate defensive controls that shrink detection & response time. Currently shipping a real-time telemetry & journey intelligence platform while completing a 48‑state EV roadtrip.
+<section class="text-center py-20 geometric-bg relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-transparent via-neon-blue/5 to-transparent animate-pulse"></div>
+  <h1 class="text-6xl font-bold font-sans glitch relative z-10" data-text="Joe Whittle">Joe Whittle</h1>
+  <p id="typing-text" class="text-2xl text-neon-pink mt-4 font-mono relative z-10"></p>
+  <p class="text-lg text-slate-300 max-w-2xl mx-auto mt-6 relative z-10">
+    Cybersecurity engineer blending edgy tech with measurable impact. Protecting digital frontiers through innovation and expertise.
   </p>
-  <div class="flex flex-wrap gap-3">
-    <a href="/resume" class="px-4 py-2 bg-brand rounded text-white text-sm font-medium hover:bg-brand-dark transition">Resume</a>
-    <a href="/projects" class="px-4 py-2 bg-slate-800 rounded text-sm font-medium hover:bg-slate-700 transition">Projects</a>
-    <a href="/blog" class="px-4 py-2 bg-slate-800 rounded text-sm font-medium hover:bg-slate-700 transition">Writing</a>
-    <a href="https://awhittlewandering.com" class="px-4 py-2 bg-slate-800 rounded text-sm font-medium hover:bg-slate-700 transition" target="_blank" rel="noopener">Live Roadtrip ↗</a>
-  </div>
-  <div class="grid sm:grid-cols-3 gap-4 pt-4">
-    <div class="p-3 border border-slate-800 rounded">
-      <p class="text-xl font-semibold">40%</p>
-      <p class="text-[11px] uppercase tracking-wide text-slate-400">MTTD Reduction</p>
-    </div>
-    <div class="p-3 border border-slate-800 rounded">
-      <p class="text-xl font-semibold">50+</p>
-      <p class="text-[11px] uppercase tracking-wide text-slate-400">Services Hardened</p>
-    </div>
-    <div class="p-3 border border-slate-800 rounded">
-      <p class="text-xl font-semibold">85%</p>
-      <p class="text-[11px] uppercase tracking-wide text-slate-400">Task Automation</p>
-    </div>
+  <div class="flex justify-center space-x-4 mt-8 relative z-10">
+    <a href="/projects" class="px-6 py-3 bg-neon-blue text-dark font-bold rounded hover-neon transition pulse-neon">Explore Projects</a>
+    <a href="/contact" class="px-6 py-3 border border-neon-pink text-neon-pink font-bold rounded hover:bg-neon-pink hover:text-dark transition">Get in Touch</a>
   </div>
 </section>
+
+<script>
+  const text = "Building secure systems, one step at a time";
+  const typingText = document.getElementById('typing-text');
+  let index = 0;
+
+  function typeWriter() {
+    if (index < text.length) {
+      typingText.innerHTML += text.charAt(index);
+      index++;
+      setTimeout(typeWriter, 100);
+    }
+  }
+
+  // Start typing animation when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(typeWriter, 1000);
+  });
+</script>

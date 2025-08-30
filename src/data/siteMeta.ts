@@ -12,12 +12,12 @@ export const siteMeta = {
   author: 'Joe Whittle',
   sameAs: [
     'https://github.com/JW-Flo',
-    'https://linkedin.com/in/joe-whittle',
+    'https://www.linkedin.com/in/joseph-whittle-9920537b/',
     'https://awhittlewandering.com'
   ]
 };
 
 export function buildTitle(pageTitle?: string) {
   if (!pageTitle || pageTitle === siteMeta.defaultTitle) return siteMeta.defaultTitle;
-  return siteMeta.titleTemplate.replace('%s', pageTitle);
+  return pageTitle;
 }

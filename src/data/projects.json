@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "awhittlewandering",
+    "name": "AWhittleWandering",
+    "description": "Real-time telemetry + journey intelligence platform components showcased.",
+    "github": "https://github.com/JW-Flo/AWhittleWandering",
+    "live": "https://awhittlewandering.com",
+    "tags": ["cloudflare", "edge", "telemetry"],
+    "status": "production"
+  },
+  {
+    "slug": "atlasit",
+    "name": "AtlasIT",
+    "description": "Lightweight operations / infra preview deployment.",
+    "github": "https://github.com/JW-Flo/AtlasIT",
+    "live": "https://atlasit.com",
+    "tags": ["infra", "preview"],
+    "status": "preview"
+  }
+]

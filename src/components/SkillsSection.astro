@@ -1,0 +1,22 @@
+---
+import resume from '../data/resume.json';
+---
+<section class="py-20 relative">
+  <div class="absolute inset-0 bg-gradient-to-l from-transparent via-neon-pink/5 to-transparent"></div>
+  <h2 class="text-4xl font-bold font-sans text-center text-neon-green mb-12 relative z-10">Skills & Expertise</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto relative z-10">
+    {resume.skills.slice(0, 8).map(skill => (
+      <div class="p-4 border border-neon-blue rounded hover-neon transition transform hover:scale-105 text-center">
+        <p class="text-neon-blue font-bold">{skill}</p>
+      </div>
+    ))}
+  </div>
+  <div class="mt-12 text-center relative z-10">
+    <h3 class="text-2xl font-bold text-neon-pink mb-4">Certifications</h3>
+    <div class="flex flex-wrap justify-center gap-4">
+      {resume.certifications.map(cert => (
+        <span class="px-3 py-1 bg-neon-green/10 border border-neon-green rounded text-neon-green text-sm hover-neon transition">{cert}</span>
+      ))}
+    </div>
+  </div>
+</section>

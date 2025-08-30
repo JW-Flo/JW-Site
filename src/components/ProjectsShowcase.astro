@@ -1,0 +1,20 @@
+---
+import projects from '../data/projects.json';
+---
+<section class="py-20 relative">
+  <div class="absolute inset-0 bg-gradient-to-r from-transparent via-neon-green/5 to-transparent"></div>
+  <h2 class="text-4xl font-bold font-sans text-center text-neon-blue mb-12 relative z-10">Projects Showcase</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+    {projects.map(p => (
+      <div class="bg-dark border border-neon-green rounded-lg p-6 hover:scale-110 hover:rotate-1 hover-neon transition-all duration-300 transform group">
+        <h3 class="text-xl font-bold text-neon-pink group-hover:text-neon-blue transition-colors">{p.name}</h3>
+        <p class="text-slate-300 mt-2 group-hover:text-white transition-colors">{p.description}</p>
+        <div class="flex space-x-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          <a href={p.github} class="text-neon-blue hover:text-neon-green transition">GitHub</a>
+          <a href={p.live} class="text-neon-blue hover:text-neon-green transition">Live Demo</a>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">Tags: {p.tags.join(', ')}</p>
+      </div>
+    ))}
+  </div>
+</section>

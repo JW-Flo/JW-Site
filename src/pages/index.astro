@@ -1,21 +1,33 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import ProjectsShowcase from '../components/ProjectsShowcase.astro';
+import SkillsSection from '../components/SkillsSection.astro';
+import BioSection from '../components/BioSection.astro';
+import ContactSection from '../components/ContactSection.astro';
 ---
 <BaseLayout title="Joe Whittle | Cybersecurity Engineer" description="Portfolio, projects, resume & journey of a cybersecurity engineer exploring America.">
+  <script type="application/ld+json">{JSON.stringify({
+    '@context':'https://schema.org',
+    '@type':'Person',
+    name:'Joseph (Joe) Whittle',
+    alternateName: 'Andrey Sergeevich',
+    jobTitle:'Cybersecurity Engineer',
+    url: import.meta.env.SITE_URL || 'https://example.pages.dev',
+    sameAs:[
+      'https://www.linkedin.com/in/joseph-whittle-9920537b/',
+      'https://github.com/JW-Flo'
+    ]
+  })}</script>
+  <script type="application/ld+json">{JSON.stringify({
+    '@context':'https://schema.org',
+    '@type':'WebSite',
+    name:'Joe Whittle Portfolio',
+    url: import.meta.env.SITE_URL || 'https://example.pages.dev'
+  })}</script>
   <Hero />
-  <section class="mt-16 grid md:grid-cols-3 gap-8">
-    <div>
-      <h2 class="font-semibold mb-2 text-brand">Core Focus</h2>
-      <p class="text-sm text-slate-300">Cloud security, detection engineering, threat modeling, secure automation, resilience.</p>
-    </div>
-    <div>
-      <h2 class="font-semibold mb-2 text-brand">Recent Project</h2>
-      <p class="text-sm text-slate-300">A real-time Tesla telemetry & journey intelligence platform: mapping, analytics, caching, security hardening.</p>
-    </div>
-    <div>
-      <h2 class="font-semibold mb-2 text-brand">Values</h2>
-      <p class="text-sm text-slate-300">Clarity, pragmatism, curiosity, defense-in-depth, measurable impact.</p>
-    </div>
-  </section>
+  <SkillsSection />
+  <ProjectsShowcase />
+  <BioSection />
+  <ContactSection />
 </BaseLayout>

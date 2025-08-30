@@ -7,15 +7,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "pages:dev": "wrangler pages dev ./dist --persist --compatibility-date=2025-08-29",
+    "pages:dev": "wrangler pages dev ./dist --compatibility-date=2025-08-29",
     "deploy:preview": "wrangler pages deploy ./dist --branch preview",
     "deploy": "wrangler pages deploy ./dist",
-    "auth:login": "unset CLOUDFLARE_API_TOKEN && npx wrangler login",
-    "build:andrey": "astro build --config astro.andrey.config.mjs",
-    "pages:dev:andrey": "wrangler pages dev ./dist-andrey --persist --config wrangler-andrey.toml --compatibility-date=2025-08-29",
-    "deploy:andrey:preview": "wrangler pages deploy ./dist-andrey --branch preview --config wrangler-andrey.toml",
-  "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml",
-  "patch:andrey:bindings": "node scripts/patch-bindings.js"
+    "auth:login": "unset CLOUDFLARE_API_TOKEN && npx wrangler login"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",
@@ -30,6 +25,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250830.0",
     "@types/node": "^20.14.10",
+    "eslint": "^9.34.0",
     "typescript": "^5.5.4",
     "wrangler": "^4.33.1"
   }

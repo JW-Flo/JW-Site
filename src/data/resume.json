@@ -9,8 +9,8 @@
     "Identity & Access Management (Okta)",
     "Vulnerability Management",
     "Endpoint Security / EDR",
-    "Automation & Scripting (Python, Bash, PowerShell)",
-    "SQL",
+    "Automation & Scripting (Python, SQL, Bash, PowerShell)",
+    "Database Querying & Analytics",
     "SIEM / Event Monitoring",
     "Network Fundamentals (CCNA)",
     "Asset Lifecycle Management",
@@ -18,12 +18,17 @@
     "NIST Framework Alignment"
   ],
   "highlights": [
-    "Directed response across 50+ cloud incidents; reduced resolution time 40%",
-    "Centralized Okta IdP for 150+ applications; onboarding time cut 30%",
-    "60% faster endpoint detection & response via next-gen EDR migration",
-    "Cut over-permissioned access 45% with IAM policy enforcement",
-    "Automated IOC enrichment saving ~20 hours weekly manual effort",
-    "98% SLA closure rate on high-priority vulnerabilities"
+    "Directed response efforts for 50+ cloud security incidents; reduced resolution time 40%",
+    "Implemented centralized Okta IdP integrating 150+ applications; onboarding cycle time reduced 30% and access changes streamlined 50%",
+    "Led migration to next-gen EDR/RMM (e.g., Datto EDR) increasing detection/response speed 60% and reducing false positives 30%",
+    "Developed Python & SQL automation for IOC enrichment saving ~20 hours/week and improving detection fidelity",
+    "Built comprehensive SQL dashboards for security metrics tracking and executive reporting",
+    "Created SQL queries for automated threat hunting and anomaly detection across 500+ endpoints",
+    "Optimized event monitoring & alert tuning (Datto EDR) boosting team efficiency 25% and trimming alert noise",
+    "Enforced IAM least privilege in AWS & Okta cutting over-permissioned access 45%",
+    "Automated DSAR workflows improving GDPR/CCPA compliance and reducing customer service labor 35%",
+    "Maintained 98% closure rate for high-priority vulnerabilities while halving remediation cycle time",
+    "Partnered with IT to design automation workflows lowering operational overhead 40% (provisioning & access control)"
   ],
   "experience": [
     {
@@ -35,6 +40,8 @@
         "Implemented centralized Okta IdP integrating 150+ applications; onboarding cycle time reduced 30% and access changes streamlined 50%",
         "Led migration to next-gen EDR/RMM (e.g., Datto EDR) increasing detection/response speed 60% and reducing false positives 30%",
         "Developed Python & SQL automation for IOC enrichment saving ~20 hours/week and improving detection fidelity",
+        "Built comprehensive SQL dashboards for security metrics tracking and executive reporting",
+        "Created SQL queries for automated threat hunting and anomaly detection across 500+ endpoints",
         "Optimized event monitoring & alert tuning (Datto EDR) boosting team efficiency 25% and trimming alert noise",
         "Enforced IAM least privilege in AWS & Okta cutting over-permissioned access 45%",
         "Automated DSAR workflows improving GDPR/CCPA compliance and reducing customer service labor 35%",
@@ -83,19 +90,16 @@
       ]
     }
   ],
-  "metrics": {
-    "mean_time_to_detect_improvement": "40% faster incident resolution",
-    "services_hardened": 150,
-    "automation_coverage": "~20 hrs/week toil eliminated"
-  },
   "tools": [
     "AWS",
     "Okta",
     "Datto EDR",
     "Python",
+    "SQL",
     "Bash",
     "PowerShell",
-    "SQL",
+    "PostgreSQL",
+    "MySQL",
     "Cisco Networking",
     "Active Directory",
     "EDR / RMM",
@@ -116,6 +120,6 @@
   "contact": {
     "email": "joe.whittle6600@gmail.com",
     "github": "JW-Flo",
-    "linkedin": "linkedin.com/in/joe-whittle"
+    "linkedin": "linkedin.com/in/joseph-whittle-9920537b"
   }
 }
