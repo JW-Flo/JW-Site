@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Personal Site – Joe Whittle
 
 Static, low-maintenance cybersecurity engineering portfolio + human journey context.
@@ -220,3 +221,7 @@ All arcade games featured in this portfolio are original JavaScript implementati
 - Code copying: ❌ Not permitted for commercial purposes
 
 For any questions regarding usage, licensing, or collaboration opportunities, please contact via the contact form or LinkedIn.
+=======
+# JW-Site
+JW-Public Site
+>>>>>>> e70f17c7dc3f05e5d50f62b7c53b28bc354d91fb
