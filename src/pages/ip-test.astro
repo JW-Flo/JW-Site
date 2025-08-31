@@ -1,0 +1,115 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="IP Tracker Test">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold text-blue-400 mb-8">🌐 IP Tracker Test</h1>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-slate-800 rounded-lg p-6 border border-slate-600">
+        <h2 class="text-xl font-bold text-green-400 mb-4">✅ What's Working</h2>
+        <ul class="space-y-2 text-slate-300">
+          <li>• IP address detection from multiple sources</li>
+          <li>• Location information (city, country, region)</li>
+          <li>• Security status assessment</li>
+          <li>• Connection type detection</li>
+          <li>• VPN/Proxy detection (where supported)</li>
+          <li>• ISP information</li>
+          <li>• Cloudflare headers integration</li>
+          <li>• Privacy-focused data handling</li>
+        </ul>
+      </div>
+      
+      <div class="bg-slate-800 rounded-lg p-6 border border-slate-600">
+        <h2 class="text-xl font-bold text-yellow-400 mb-4">🔒 Privacy & Security</h2>
+        <ul class="space-y-2 text-slate-300">
+          <li>• HTTPS connection verification</li>
+          <li>• Local network detection</li>
+          <li>• User-agent truncation for privacy</li>
+          <li>• No persistent storage of sensitive data</li>
+          <li>• Bot detection capabilities</li>
+          <li>• CORS-friendly API endpoints</li>
+          <li>• Fallback when external APIs fail</li>
+          <li>• No tracking cookies or fingerprinting</li>
+        </ul>
+      </div>
+      
+      <div class="bg-slate-800 rounded-lg p-6 border border-slate-600">
+        <h2 class="text-xl font-bold text-blue-400 mb-4">🎯 Features</h2>
+        <ul class="space-y-2 text-slate-300">
+          <li>• Real-time IP information display</li>
+          <li>• Expandable details on click</li>
+          <li>• Multiple fallback data sources</li>
+          <li>• Smooth animations and transitions</li>
+          <li>• Mobile-responsive design</li>
+          <li>• Error handling and graceful degradation</li>
+          <li>• Professional security assessment</li>
+          <li>• Network performance indicators</li>
+        </ul>
+      </div>
+      
+      <div class="bg-slate-800 rounded-lg p-6 border border-slate-600">
+        <h2 class="text-xl font-bold text-purple-400 mb-4">🚀 Usage Instructions</h2>
+        <ul class="space-y-2 text-slate-300">
+          <li>1. Look for the IP tracker in the bottom-left corner</li>
+          <li>2. It will automatically detect your IP and location</li>
+          <li>3. Click to expand for detailed information</li>
+          <li>4. Security status updates based on your connection</li>
+          <li>5. Works on all pages throughout the site</li>
+          <li>6. Respects privacy with minimal data collection</li>
+          <li>7. Updates in real-time as you navigate</li>
+          <li>8. Provides educational security insights</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="mt-8 bg-slate-800 rounded-lg p-6 border border-slate-600">
+      <h2 class="text-xl font-bold text-red-400 mb-4">🔧 Technical Details</h2>
+      <div class="grid md:grid-cols-3 gap-4 text-sm">
+        <div>
+          <h3 class="font-bold text-blue-400 mb-2">Data Sources</h3>
+          <ul class="space-y-1 text-slate-300">
+            <li>• Internal API (/api/ip-info)</li>
+            <li>• Cloudflare headers</li>
+            <li>• IPApi.co (external)</li>
+            <li>• IPify.org (fallback)</li>
+            <li>• Browser connection API</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold text-green-400 mb-2">Headers Used</h3>
+          <ul class="space-y-1 text-slate-300">
+            <li>• CF-Connecting-IP</li>
+            <li>• CF-IPCountry</li>
+            <li>• CF-IPCity</li>
+            <li>• CF-Region</li>
+            <li>• X-Forwarded-For</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold text-yellow-400 mb-2">Security Checks</h3>
+          <ul class="space-y-1 text-slate-300">
+            <li>• HTTPS verification</li>
+            <li>• Local IP detection</li>
+            <li>• VPN/Proxy identification</li>
+            <li>• Bot detection</li>
+            <li>• DNS over HTTPS support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-8 bg-gradient-to-r from-blue-600/20 to-green-600/20 rounded-lg p-6 border border-blue-500/30">
+      <h2 class="text-xl font-bold text-white mb-4">🎉 Ready to Use!</h2>
+      <p class="text-slate-300 mb-4">
+        The IP tracker is now active on all pages of your site. It provides visitors with transparency about their connection 
+        while demonstrating your technical expertise in network security and privacy-conscious development.
+      </p>
+      <p class="text-slate-400 text-sm">
+        The component automatically falls back to simpler detection methods if external services are unavailable, 
+        ensuring it always provides some level of functionality for visitors.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

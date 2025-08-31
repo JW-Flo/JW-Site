@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import projects from '../../data/projects.json';
+
+export const prerender = true;
+
 export async function getStaticPaths() {
   return projects.map(p => ({ params: { slug: p.slug }, props: { project: p } }));
 }

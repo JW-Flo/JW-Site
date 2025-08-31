@@ -148,6 +148,13 @@ export class AsteroidsGame {
       e.preventDefault();
       e.stopPropagation();
       this.paused = !this.paused;
+    } else if (e.key === "s" || e.key === "S") {
+      e.preventDefault();
+      e.stopPropagation();
+      // Manual score save
+      if (!this.gameOver && this.score > 0) {
+        this.gameManager.saveScore("Asteroids", this.score);
+      }
     } else if (e.key === "u" || e.key === "U") {
       e.preventDefault();
       e.stopPropagation();
@@ -446,6 +453,10 @@ export class AsteroidsGame {
           if (this.lives <= 0) {
             this.gameOver = true;
             this.gameManager.playSound("gameOver");
+            // Save the score when game ends
+            if (this.score > 0) {
+              this.gameManager.saveScore("Asteroids", this.score);
+            }
           }
         }
       }
@@ -936,7 +947,7 @@ export class AsteroidsGame {
     this.ctx.font = "12px monospace";
     this.ctx.textAlign = "center";
     this.ctx.fillText(
-      "A/D: Turn • W/↑: Thrust • Space: Shoot • P: Pause • ESC: Menu",
+      "A/D: Turn • W/↑: Thrust • Space: Shoot • P: Pause • S: Save Score • ESC: Menu",
       this.canvas.width / 2,
       this.canvas.height - 30
     );

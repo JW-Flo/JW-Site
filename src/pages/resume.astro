@@ -5,17 +5,71 @@ import resume from '../data/resume.json';
 ---
 <BaseLayout title="Resume | Joe Whittle" description="Professional cybersecurity resume for Joe Whittle">
   <div class="flex justify-end mb-4 print:hidden">
-    <button onclick="window.print()" class="px-3 py-1.5 text-xs font-medium border border-neon-cyan text-neon-cyan rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon">Print PDF</button>
+    <button id="printBtn" class="px-4 py-2 text-sm font-medium border border-neon-cyan text-neon-cyan rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon">
+      📄 Print PDF
+    </button>
   </div>
 
   <!-- Name and Title Header -->
-  <div class="text-center mb-8 pb-6 border-b border-neon-blue/20">
-    <h1 class="text-4xl md:text-5xl font-bold text-neon-pink mb-2 tracking-tight">{resume.name}</h1>
-    <h2 class="text-xl md:text-2xl text-neon-cyan font-medium mb-2">{resume.title}</h2>
+  <div class="text-center mb-6 pb-4 border-b border-neon-blue/20 print-header">
+    <h1 class="text-3xl md:text-4xl font-bold text-neon-pink mb-2 tracking-tight">{resume.name}</h1>
+    <h2 class="text-lg md:text-xl text-neon-cyan font-medium mb-1">{resume.title}</h2>
     <p class="text-neon-green text-sm md:text-base">{resume.location}</p>
   </div>
 
   <ResumeSection />
+
+  <script>
+    document.getElementById('printBtn')?.addEventListener('click', () => {
+      // Force print styles to be applied
+      document.body.classList.add('printing');
+      
+      // Small delay to ensure styles are applied
+      setTimeout(() => {
+        window.print();
+        document.body.classList.remove('printing');
+      }, 100);
+    });
+  </script>
+
+  <style>
+    @media print {
+      /* Print styles for header */
+      .print-header h1 {
+        color: #000 !important;
+        font-size: 24px !important;
+        margin-bottom: 4px !important;
+      }
+      
+      .print-header h2 {
+        color: #000 !important;
+        font-size: 18px !important;
+        margin-bottom: 2px !important;
+      }
+      
+      .print-header p {
+        color: #666 !important;
+        font-size: 14px !important;
+      }
+      
+      .print-header {
+        border-bottom: 2px solid #000 !important;
+        margin-bottom: 16px !important;
+        padding-bottom: 8px !important;
+      }
+      
+      /* Ensure page fits well */
+      @page {
+        margin: 0.5in;
+        size: letter;
+      }
+      
+      body {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+      }
+    }
+  </style>
 
   <script type="application/ld+json">{JSON.stringify({
     '@context':'https://schema.org',

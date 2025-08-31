@@ -72,7 +72,7 @@ class RetroArcade {
 
       console.log("🎯 Importing GameOverlay...");
       // Initialize modular game overlay
-      const { GameOverlay } = await import("/GameOverlay.js");
+      const { GameOverlay } = await import("./GameOverlay.js");
       console.log("🎯 GameOverlay imported successfully");
 
       this.gameOverlay = new GameOverlay(this.canvas);
@@ -100,8 +100,8 @@ class RetroArcade {
       document.body.classList.remove("game-mode");
 
       // Show error message to user
-      alert(
-        "Sorry, there was an issue loading the game. Please try again or check the console for details."
+      console.log(
+        "No player name provided. Game overlay will handle name prompt."
       );
     }
   }

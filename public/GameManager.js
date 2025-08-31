@@ -6,19 +6,32 @@ export class GameManager {
     this.overlay = overlay;
     this.currentGame = null;
     this.isActive = false;
-    this.games = ["Space Invaders", "Pac-Man", "Tetris", "Asteroids"];
-    this.unlockedGames = [true, false, false, true]; // Space Invaders and Asteroids unlocked
+    
+    // Game progression order - start with simple games
+    this.games = ["Asteroids", "Pac-Man", "Tetris", "Space Invaders"];
+    this.unlockedGames = [true, false, false, false]; // Only Asteroids unlocked initially
 
     // Load unlocked games from localStorage
     this.loadUnlockedGames();
 
-    // Unlock requirements for each game
+    // Unlock requirements and score multipliers for each game
     this.unlockRequirements = {
-      "Space Invaders": 0, // Always unlocked
-      "Pac-Man": 500,
-      Tetris: 1000,
-      Asteroids: 0, // Always unlocked
+      "Asteroids": 0, // Always unlocked (starter game)
+      "Pac-Man": 150, // Unlock after 150 points in Asteroids
+      "Tetris": 300, // Unlock after combined 300 points
+      "Space Invaders": 500, // Final game - most challenging
     };
+
+    // Score multipliers for playing multiple games
+    this.scoreMultipliers = {
+      "Asteroids": 1.0, // Base multiplier
+      "Pac-Man": 1.2, // 20% bonus
+      "Tetris": 1.5, // 50% bonus  
+      "Space Invaders": 2.0, // 100% bonus - hardest game
+    };
+
+    // Track total score across all games for leaderboard positioning
+    this.totalPlayerScore = this.loadTotalScore();
 
     // Leaderboard data
     this.leaderboardData = this.loadLeaderboard();
@@ -27,7 +40,7 @@ export class GameManager {
     this.achievements = this.loadAchievements();
     this.checkAchievements();
 
-    console.log("🎯 Game Manager initialized");
+    console.log("🎯 Game Manager initialized with progressive unlock system");
   }
 
   async activate() {
@@ -90,8 +103,8 @@ export class GameManager {
                 GameClass = exp;
                 break;
               }
-            } catch (e) {
-              // ignore problematic getters
+            } catch (gameError) {
+              console.warn(`Error accessing export ${k}:`, gameError);
             }
           }
         }
@@ -133,45 +146,75 @@ export class GameManager {
         "Anonymous Recruiter"
       );
       if (playerName) {
-        // Save to local leaderboard
+        // Apply score multiplier for progression incentive
+        const multiplier = this.scoreMultipliers[gameName] || 1.0;
+        const bonusScore = Math.floor(score * multiplier);
+        const bonusPoints = bonusScore - score;
+
+        // Save to local leaderboard with bonus
         this.leaderboardData.push({
           name: playerName,
-          score: score,
+          score: bonusScore,
+          baseScore: score,
           game: gameName,
+          multiplier: multiplier,
         });
         this.leaderboardData.sort((a, b) => b.score - a.score);
         this.leaderboardData = this.leaderboardData.slice(0, 10);
         this.saveLeaderboard();
         this.overlay.updateLeaderboard(this.leaderboardData);
 
-        // Check for game unlocks
-        this.checkForUnlocks(gameName, score);
+        // Update total player score for unlock calculations
+        this.totalPlayerScore += bonusScore;
+        this.saveTotalScore();
+
+        // Show score breakdown if bonus applied
+        if (bonusPoints > 0) {
+          console.log(`🎉 Score: ${score} + ${bonusPoints} bonus (${multiplier}x multiplier) = ${bonusScore} total!`);
+          // Show in overlay instead of alert
+          if (this.overlay && this.overlay.showMessage) {
+            this.overlay.showMessage(`🎉 Score: ${score} + ${bonusPoints} bonus = ${bonusScore} total!`);
+          }
+        }
+
+        // Check for game unlocks based on total score
+        this.checkForUnlocks(playerName, this.totalPlayerScore);
 
         // Check for achievements
         this.checkAchievements();
 
-        // Submit to Cloudflare workflow for processing
+        // Submit to Cloudflare workflow for processing with player stats
         try {
-          await this.submitScoreToWorkflow(gameName, score, playerName);
+          const workflowResult = await this.submitScoreToWorkflow(gameName, bonusScore, playerName);
+          if (workflowResult && workflowResult.success) {
+            console.log("✅ Score successfully stored in Cloudflare KV");
+          }
         } catch (error) {
           console.error("Failed to submit score to workflow:", error);
-          // Continue with local save even if workflow fails
+          // Continue with local save as fallback
         }
       }
     }
   }
 
-  checkForUnlocks(gameName, score) {
-    // Check if this score unlocks any games
+  checkForUnlocks(playerName, totalScore) {
+    const newUnlocks = [];
+    
+    // Check if total score unlocks any games
     Object.entries(this.unlockRequirements).forEach(([game, requiredScore]) => {
-      if (score >= requiredScore && !this.isGameUnlocked(game)) {
-        this.unlockGame(game);
-        console.log(`🎉 Game unlocked: ${game}!`);
-
-        // Show unlock notification
-        this.showUnlockNotification(game);
+      const gameIndex = this.games.indexOf(game);
+      if (totalScore >= requiredScore && !this.unlockedGames[gameIndex]) {
+        this.unlockedGames[gameIndex] = true;
+        newUnlocks.push(game);
+        console.log(`🎉 Game unlocked: ${game}! Total score: ${totalScore}`);
       }
     });
+
+    if (newUnlocks.length > 0) {
+      this.saveUnlockedGames();
+      // Show unlock notification for each new game
+      newUnlocks.forEach(game => this.showUnlockNotification(game));
+    }
   }
 
   showUnlockNotification(gameName) {
@@ -500,6 +543,49 @@ export class GameManager {
         }
       `;
       document.head.appendChild(style);
+    }
+  }
+
+  // Total score tracking for progressive unlocks
+  loadTotalScore() {
+    const saved = window.localStorage.getItem("retroArcadeTotalScore");
+    return saved ? parseInt(saved, 10) : 0;
+  }
+
+  saveTotalScore() {
+    window.localStorage.setItem("retroArcadeTotalScore", this.totalPlayerScore.toString());
+  }
+
+  // Enhanced player stats for guestbook verification
+  async updatePlayerStats(playerName, gameName, score) {
+    try {
+      // Update local storage for guestbook verification
+      const playerKey = `player-${playerName}`;
+      const existingStats = window.localStorage.getItem(playerKey);
+      
+      const stats = existingStats ? JSON.parse(existingStats) : {
+        playerName: playerName,
+        bestScore: 0,
+        totalScore: 0,
+        gamesPlayed: [],
+        lastPlayed: null
+      };
+
+      // Update stats
+      stats.bestScore = Math.max(stats.bestScore, score);
+      stats.totalScore += score;
+      stats.lastPlayed = Date.now();
+      
+      if (!stats.gamesPlayed.includes(gameName)) {
+        stats.gamesPlayed.push(gameName);
+      }
+
+      // Save updated stats
+      window.localStorage.setItem(playerKey, JSON.stringify(stats));
+      
+      console.log(`Updated player stats for ${playerName}:`, stats);
+    } catch (error) {
+      console.error("Failed to update player stats:", error);
     }
   }
 }
