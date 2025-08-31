@@ -2,20 +2,17 @@
 // Cookie Consent Component for GDPR/CCPA compliance
 ---
 
-<div id="cookie-consent" class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-cyan-500/30 p-4 z-[1200] shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out pointer-events-auto">
-  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-    <div class="flex-1">
-      <h3 class="text-cyan-400 font-semibold mb-2">Cookie & Privacy Notice</h3>
-      <p class="text-gray-300 text-sm leading-relaxed">
-        We use cookies and analytics to improve your experience and understand how our security tools are used. 
-        This helps us enhance our cybersecurity services. We collect:
-      </p>
-      <ul class="text-gray-400 text-xs mt-2 space-y-1">
-        <li>• Security scanner usage patterns (anonymous)</li>
-        <li>• Performance metrics for tool optimization</li>
-        <li>• Geographic regions for threat intelligence</li>
-        <li>• Browser compatibility data</li>
-      </ul>
+<div id="cookie-consent" class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-cyan-500/30 px-3 py-2 z-[1200] shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out pointer-events-auto text-sm">
+  <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+    <div class="flex-1 leading-snug">
+      <span class="text-cyan-400 font-semibold">Cookies:</span>
+      <span class="text-gray-300"> Essential for site & security features. Optional analytics & research improve tools.</span>
+      <button id="cc-more" class="text-cyan-400 underline text-xs ml-2">details</button>
+      <div id="cc-details" class="hidden mt-1 text-xs text-gray-400 space-y-1">
+        <div>Anonymous scanner usage & performance metrics</div>
+        <div>Geographic region (hashed IP) for threat intel</div>
+        <div>Browser compatibility data</div>
+      </div>
     </div>
     
     <div class="flex flex-col sm:flex-row gap-2 min-w-fit">
@@ -381,6 +378,15 @@
     }
   }
   
+  // Toggle details
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t && t.id === 'cc-more') {
+      const d = document.getElementById('cc-details');
+      if (d) d.classList.toggle('hidden');
+    }
+  });
+
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {

@@ -5,6 +5,7 @@ import ProjectsShowcase from '../components/ProjectsShowcase.astro';
 import SkillsSection from '../components/SkillsSection.astro';
 import BioSection from '../components/BioSection.astro';
 import ContactSection from '../components/ContactSection.astro';
+import WaitlistWidget from '../components/WaitlistWidget.astro';
 ---
 <BaseLayout title="Joe Whittle | Cybersecurity Engineer" description="Portfolio, projects, resume & journey of a cybersecurity engineer exploring America.">
   <script type="application/ld+json">{JSON.stringify({
@@ -26,6 +27,9 @@ import ContactSection from '../components/ContactSection.astro';
     url: import.meta.env.SITE_URL || 'https://example.pages.dev'
   })}</script>
   <Hero />
+  <div class="px-4">
+    <WaitlistWidget />
+  </div>
   <SkillsSection />
   <ProjectsShowcase />
   <BioSection />

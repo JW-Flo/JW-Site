@@ -183,6 +183,38 @@ chmod +x scripts/smoke.sh # first run
 - `POST /api/guestbook` – add entry (Turnstile token required)
 - `GET /api/guestbook/stats` – counts & latest entries
 - `GET /api/geo` – Cloudflare edge geo metadata (rate limited)
+- `GET /api/waitlist` – waitlist count (feature-flag: `FEATURE_WAITLIST`)
+- `POST /api/waitlist` – join waitlist (feature-flag: `FEATURE_WAITLIST`)
+
+### Waitlist Feature
+
+The optional early‑access waitlist is disabled by default and gated by the environment variable `FEATURE_WAITLIST`.
+
+Enable locally (ephemeral) via shell:
+
+```bash
+FEATURE_WAITLIST=true npm run dev
+```
+
+Or set in Cloudflare Pages project settings (Environment Variables) for preview / production.
+
+Schema (migration `002_waitlist.sql`):
+
+```sql
+CREATE TABLE waitlist_signups (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	email TEXT NOT NULL UNIQUE,
+	source TEXT,
+	marketing_consent INTEGER DEFAULT 0,
+	ip_hash TEXT,
+	hash_algo TEXT
+);
+```
+
+Privacy: IP addresses are one‑way hashed with a secret (same mechanism as geo consent hashing) before storage; no raw IPs are retained. Duplicate joins return `{ ok: true, duplicate: true }` without error for smoother UX.
+
+Widget: Renders only when `FEATURE_WAITLIST` is `true` (see `src/components/WaitlistWidget.astro`).
 
 The previous `/demo` section has been retired. Requests to `/demo` return a 410 page. All functionality now under `/api/*`.
 
