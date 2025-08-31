@@ -10,6 +10,7 @@ SITE_URL = "https://jw-site-7q2.pages.dev"
 # Feature flags & admin keys (set securely in dashboard for production)
 # FEATURE_CONSENT_D1 = "true"  # Enable consent D1 persistence
 # FEATURE_GEO_CLASSIFICATION = "true" # Enable geo hashing output
+# FEATURE_WAITLIST = "true" # Enable waitlist API + widget (requires migration 002_waitlist.sql applied)
 # CONSENT_ADMIN_KEY = "set-in-dashboard" # Required for /api/admin/consent-stats
 # SUPER_ADMIN_KEY is consumed by /api/enhanced-security-scan for super-admin mode.
 # Set this in Cloudflare Pages project dashboard (do NOT commit secrets).

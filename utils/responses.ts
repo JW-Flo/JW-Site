@@ -45,3 +45,12 @@ export function serverError(message = 'Internal server error'): Response {
     },
   });
 }
+
+export function forbidden(message = 'Forbidden'): Response {
+  return new Response(message, {
+    status: 403,
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
+}
