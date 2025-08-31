@@ -1,6 +1,7 @@
 ---
 import SEO from '../components/SEO.astro';
-import IPTracker from '../components/IPTracker.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+// import IPTracker from '../components/IPTracker.astro';
 import '../styles/global.css';
 export interface Props { title?: string; description?: string; url?: string; noIndex?: boolean; }
 const { title, description, url, noIndex } = Astro.props as Props;
@@ -22,18 +23,30 @@ const { title, description, url, noIndex } = Astro.props as Props;
     <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
     
     <!-- IP Tracker Component -->
-    <IPTracker />
+    <!-- <IPTracker /> -->
     
     <!-- Interactive Demo Trigger -->
-    <div id="game-trigger" class="fixed bottom-6 right-6 bg-slate-800/90 backdrop-blur-sm border border-retro-cyan/40 hover:border-retro-cyan text-slate-200 px-4 py-3 rounded-xl font-medium text-sm cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-retro-cyan/30 z-40 group">
-      <div class="flex items-center space-x-2">
-        <span class="text-lg">🎮</span>
-        <div>
-          <div class="font-semibold">Interactive Demo <span id="trigger-word" class="text-retro-cyan">Available</span></div>
-          <div class="text-xs text-slate-400 opacity-80">Click to try</div>
-        </div>
+          <div class="game-trigger-container">
+        <button 
+          id="game-trigger" 
+          class="game-trigger-button" 
+          aria-label="Launch Retro Arcade"
+          title="Click to play retro games!"
+        >
+          🎮
+        </button>
       </div>
-    </div>
+      
+      <!-- Security Scanner Link -->
+      <div class="fixed top-20 right-4 z-50">
+        <a 
+          href="/security-scanner"
+          class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 flex items-center gap-2 text-sm font-medium"
+          title="Security Scanner Tool"
+        >
+          🛡️ Scan
+        </a>
+      </div>
     
     <!-- Enhanced Professional Leaderboard -->
     <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-6 opacity-0 transition-all duration-500 z-40 max-w-sm shadow-2xl shadow-slate-900/50">
@@ -281,5 +294,8 @@ const { title, description, url, noIndex } = Astro.props as Props;
     
     <!-- Dev easter eggs script -->
     <script type="module" src="/src/scripts/dev-easter-eggs.client.js"></script>
+    
+    <!-- Cookie Consent -->
+    <CookieConsent />
   </body>
 </html>

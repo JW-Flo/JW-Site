@@ -397,6 +397,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </style>
 
 <script>
+  // Import security analytics
+  import { securityAnalytics } from '../utils/securityAnalytics.ts';
+  
   class EnhancedSecurityScanner {
     constructor() {
       this.scanForm = document.getElementById('enhanced-scan-form');
@@ -418,6 +421,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       this.completedTasks = 0;
       this.engineerMode = false;
       this.superAdminMode = false;
+      
+      // Import security analytics
+      this.analytics = window.securityAnalytics;
+      
       this.businessMetrics = {
         trustScore: 100,
         professionalismScore: 100,
@@ -570,6 +577,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         seoSecurity: this.superAdminMode && document.getElementById('scan-seo-security').checked,
         accessibilitySecurity: this.superAdminMode && document.getElementById('scan-accessibility').checked
       };
+      
+      // Track scan start with analytics
+      const scanMode = this.superAdminMode ? 'super-admin' : (this.engineerMode ? 'engineer' : 'standard');
+      if (this.analytics) {
+        this.analytics.startScan('enhanced-security-scan', targetUrl, scanMode);
+      }
       
       this.totalTasks = Object.values(scanConfig).filter(Boolean).length;
       this.completedTasks = 0;
@@ -774,6 +787,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     
     displayEnhancedResults() {
+      // Track scan completion with analytics
+      if (this.analytics) {
+        this.analytics.endScan({
+          scanType: 'enhanced-security-scan',
+          domain: this.scanResults.url,
+          mode: this.superAdminMode ? 'super-admin' : (this.engineerMode ? 'engineer' : 'standard'),
+          findings: this.scanResults.findings,
+          score: this.scanResults.score,
+          businessMetrics: this.scanResults.businessMetrics
+        });
+      }
+      
       this.progressSection.classList.add('hidden');
       this.resultsSection.classList.remove('hidden');
       

@@ -6,7 +6,7 @@ export class GameManager {
     this.overlay = overlay;
     this.currentGame = null;
     this.isActive = false;
-    
+
     // Game progression order - start with simple games
     this.games = ["Asteroids", "Pac-Man", "Tetris", "Space Invaders"];
     this.unlockedGames = [true, false, false, false]; // Only Asteroids unlocked initially
@@ -16,17 +16,17 @@ export class GameManager {
 
     // Unlock requirements and score multipliers for each game
     this.unlockRequirements = {
-      "Asteroids": 0, // Always unlocked (starter game)
+      Asteroids: 0, // Always unlocked (starter game)
       "Pac-Man": 150, // Unlock after 150 points in Asteroids
-      "Tetris": 300, // Unlock after combined 300 points
+      Tetris: 300, // Unlock after combined 300 points
       "Space Invaders": 500, // Final game - most challenging
     };
 
     // Score multipliers for playing multiple games
     this.scoreMultipliers = {
-      "Asteroids": 1.0, // Base multiplier
+      Asteroids: 1.0, // Base multiplier
       "Pac-Man": 1.2, // 20% bonus
-      "Tetris": 1.5, // 50% bonus  
+      Tetris: 1.5, // 50% bonus
       "Space Invaders": 2.0, // 100% bonus - hardest game
     };
 
@@ -71,8 +71,7 @@ export class GameManager {
 
     // Map game names to their modules
     const gameModules = {
-      "Space Invaders": () =>
-        import("./games/SpaceInvadersGame.js"),
+      "Space Invaders": () => import("./games/SpaceInvadersGame.js"),
       Asteroids: () => import("./games/AsteroidsGame.js"),
       "Pac-Man": () => import("./games/PacManGame.js"),
       Tetris: () => import("./games/TetrisGame.js"),
@@ -170,10 +169,14 @@ export class GameManager {
 
         // Show score breakdown if bonus applied
         if (bonusPoints > 0) {
-          console.log(`🎉 Score: ${score} + ${bonusPoints} bonus (${multiplier}x multiplier) = ${bonusScore} total!`);
+          console.log(
+            `🎉 Score: ${score} + ${bonusPoints} bonus (${multiplier}x multiplier) = ${bonusScore} total!`
+          );
           // Show in overlay instead of alert
           if (this.overlay && this.overlay.showMessage) {
-            this.overlay.showMessage(`🎉 Score: ${score} + ${bonusPoints} bonus = ${bonusScore} total!`);
+            this.overlay.showMessage(
+              `🎉 Score: ${score} + ${bonusPoints} bonus = ${bonusScore} total!`
+            );
           }
         }
 
@@ -185,7 +188,11 @@ export class GameManager {
 
         // Submit to Cloudflare workflow for processing with player stats
         try {
-          const workflowResult = await this.submitScoreToWorkflow(gameName, bonusScore, playerName);
+          const workflowResult = await this.submitScoreToWorkflow(
+            gameName,
+            bonusScore,
+            playerName
+          );
           if (workflowResult && workflowResult.success) {
             console.log("✅ Score successfully stored in Cloudflare KV");
           }
@@ -199,7 +206,7 @@ export class GameManager {
 
   checkForUnlocks(playerName, totalScore) {
     const newUnlocks = [];
-    
+
     // Check if total score unlocks any games
     Object.entries(this.unlockRequirements).forEach(([game, requiredScore]) => {
       const gameIndex = this.games.indexOf(game);
@@ -213,7 +220,7 @@ export class GameManager {
     if (newUnlocks.length > 0) {
       this.saveUnlockedGames();
       // Show unlock notification for each new game
-      newUnlocks.forEach(game => this.showUnlockNotification(game));
+      newUnlocks.forEach((game) => this.showUnlockNotification(game));
     }
   }
 
@@ -553,7 +560,10 @@ export class GameManager {
   }
 
   saveTotalScore() {
-    window.localStorage.setItem("retroArcadeTotalScore", this.totalPlayerScore.toString());
+    window.localStorage.setItem(
+      "retroArcadeTotalScore",
+      this.totalPlayerScore.toString()
+    );
   }
 
   // Enhanced player stats for guestbook verification
@@ -562,27 +572,29 @@ export class GameManager {
       // Update local storage for guestbook verification
       const playerKey = `player-${playerName}`;
       const existingStats = window.localStorage.getItem(playerKey);
-      
-      const stats = existingStats ? JSON.parse(existingStats) : {
-        playerName: playerName,
-        bestScore: 0,
-        totalScore: 0,
-        gamesPlayed: [],
-        lastPlayed: null
-      };
+
+      const stats = existingStats
+        ? JSON.parse(existingStats)
+        : {
+            playerName: playerName,
+            bestScore: 0,
+            totalScore: 0,
+            gamesPlayed: [],
+            lastPlayed: null,
+          };
 
       // Update stats
       stats.bestScore = Math.max(stats.bestScore, score);
       stats.totalScore += score;
       stats.lastPlayed = Date.now();
-      
+
       if (!stats.gamesPlayed.includes(gameName)) {
         stats.gamesPlayed.push(gameName);
       }
 
       // Save updated stats
       window.localStorage.setItem(playerKey, JSON.stringify(stats));
-      
+
       console.log(`Updated player stats for ${playerName}:`, stats);
     } catch (error) {
       console.error("Failed to update player stats:", error);

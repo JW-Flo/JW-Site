@@ -29,6 +29,19 @@
     </div>
     
     <div class="flex items-center space-x-2">
+      <span id="security-icon">🔒</span>
+      <span id="security-status" class="text-xs font-medium">Analyzing...</span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <span class="text-purple-400">⚡</span>
+      <span id="performance-info" class="text-xs text-slate-300">Performance...</span>
+    </div>
+    
+    <div class="text-xs text-slate-400 pt-1 border-t border-slate-600">
+      Click to expand details
+    </div>
+  </div>
       <span id="security-icon" class="text-yellow-400">🔒</span>
       <span id="security-status" class="text-xs text-slate-300">Checking security...</span>
     </div>
@@ -155,7 +168,7 @@
           })
         },
         {
-          name: 'IPApi.co',
+          name: 'IPApi.co Enhanced',
           url: 'https://ipapi.co/json/',
           parser: (data) => ({
             ip: data.ip,
@@ -166,8 +179,15 @@
             timezone: data.timezone,
             vpn: data.proxy || false,
             proxy: data.proxy || false,
-            secure: window.location.protocol === 'https:',
-            type: this.getConnectionType(data.ip)
+            secure: location.protocol === 'https:',
+            type: this.getConnectionType(data.ip),
+            source: 'IPApi.co',
+            lat: data.latitude,
+            lon: data.longitude,
+            postal: data.postal,
+            asn: data.asn,
+            currency: data.currency,
+            calling_code: data.calling_code
           })
         },
         {
@@ -181,7 +201,7 @@
               region: '',
               country: 'Unknown',
               isp: 'Unknown',
-              secure: window.location.protocol === 'https:',
+              secure: location.protocol === 'https:',
               type: this.getConnectionType(data.ip)
             };
           }
@@ -191,9 +211,17 @@
       for (const service of services) {
         try {
           console.log(`Trying IP service: ${service.name}`);
+          const startTime = performance.now();
           const response = await fetch(service.url);
+          const endTime = performance.now();
           const data = await response.json();
+          
           this.ipData = await service.parser(data);
+          this.ipData.responseTime = Math.round(endTime - startTime);
+          
+          // Add performance metrics
+          await this.addPerformanceMetrics();
+          
           console.log(`✅ ${service.name} successful:`, this.ipData);
           return;
         } catch (err) {
@@ -208,9 +236,64 @@
         city: 'Unknown',
         country: 'Unknown',
         isp: 'Unknown',
-        secure: window.location.protocol === 'https:',
+        secure: true, // Default to secure for fallback
         type: 'Unknown'
       };
+    }
+
+    async addPerformanceMetrics() {
+      // Add connection performance data
+      if (typeof navigator !== 'undefined' && (navigator as any).connection) {
+        this.ipData.connection = {
+          effectiveType: (navigator as any).connection.effectiveType,
+          downlink: (navigator as any).connection.downlink,
+          rtt: (navigator as any).connection.rtt,
+          saveData: (navigator as any).connection.saveData
+        };
+      }
+
+      // Test DNS resolution time
+      try {
+        const dnsStart = performance.now();
+        await fetch('https://1.1.1.1/dns-query?name=example.com&type=A', {
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+        const dnsEnd = performance.now();
+        this.ipData.dnsResponseTime = Math.round(dnsEnd - dnsStart);
+      } catch (err) {
+        this.ipData.dnsResponseTime = 'Unknown';
+      }
+
+      // Enhanced security analysis
+      this.ipData.securityScore = this.calculateSecurityScore();
+    }
+
+    calculateSecurityScore() {
+      let score = 0;
+      let maxScore = 100;
+
+      // HTTPS usage (30 points)
+      if (this.ipData.secure) score += 30;
+
+      // No VPN/Proxy detected (20 points)
+      if (!this.ipData.vpn && !this.ipData.proxy) score += 20;
+
+      // Fast DNS resolution (20 points)
+      if (this.ipData.dnsResponseTime < 50) score += 20;
+      else if (this.ipData.dnsResponseTime < 100) score += 15;
+      else if (this.ipData.dnsResponseTime < 200) score += 10;
+
+      // Good connection quality (15 points)
+      if (this.ipData.connection?.effectiveType === '4g') score += 15;
+      else if (this.ipData.connection?.effectiveType === '3g') score += 10;
+      else if (this.ipData.connection?.effectiveType) score += 5;
+
+      // Valid IP type (15 points)
+      if (this.ipData.type === 'IPv6') score += 15;
+      else if (this.ipData.type === 'IPv4') score += 10;
+
+      return Math.min(score, maxScore);
     }
 
     getConnectionType(ip) {
@@ -251,8 +334,12 @@
         elements.isp.textContent = this.ipData.isp || 'Unknown ISP';
       }
 
-      // Security assessment
-      this.assessSecurity(elements);
+      // Enhanced security assessment with score
+      this.assessSecurityWithScore(elements);
+      
+      // Update performance metrics
+      this.updatePerformanceDisplay();
+    }
 
       // Detailed info
       if (elements.protocol) elements.protocol.textContent = this.ipData.type || 'Unknown';
@@ -262,7 +349,7 @@
     }
 
     assessSecurity(elements) {
-      const isHTTPS = window.location.protocol === 'https:';
+      const isHTTPS = location.protocol === 'https:';
       const hasVPN = this.ipData.vpn;
       const hasProxy = this.ipData.proxy;
       const isLocalIP = this.isLocalIP(this.ipData.ip);
@@ -327,7 +414,9 @@
     }
 
     getDetailedConnectionType() {
-      const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (typeof navigator === 'undefined') return 'Unknown';
+      
+      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
       
       if (connection) {
         const type = connection.effectiveType || connection.type || 'Unknown';
@@ -344,6 +433,49 @@
         return 'DNS' in window || navigator.userAgent.includes('Firefox') || navigator.userAgent.includes('Chrome');
       } catch {
         return false;
+      }
+    }
+
+    assessSecurityWithScore(elements) {
+      const score = this.ipData.securityScore || 0;
+      let statusText, statusClass, iconText;
+      
+      if (score >= 80) {
+        statusText = 'Excellent';
+        statusClass = 'security-secure';
+        iconText = '🛡️';
+      } else if (score >= 60) {
+        statusText = 'Good';
+        statusClass = 'security-warning';
+        iconText = '⚡';
+      } else if (score >= 40) {
+        statusText = 'Fair';
+        statusClass = 'security-warning';
+        iconText = '⚠️';
+      } else {
+        statusText = 'Poor';
+        statusClass = 'security-danger';
+        iconText = '🚨';
+      }
+      
+      if (elements.security) {
+        elements.security.textContent = `${iconText} ${statusText} (${score}/100)`;
+        elements.security.className = `font-medium ${statusClass}`;
+      }
+      
+      if (elements.securityIcon) {
+        elements.securityIcon.textContent = iconText;
+      }
+    }
+
+    updatePerformanceDisplay() {
+      // Update any performance-related UI elements
+      const perfElement = document.getElementById('performance-info');
+      if (perfElement && this.ipData.responseTime) {
+        perfElement.textContent = `API: ${this.ipData.responseTime}ms`;
+        if (this.ipData.dnsResponseTime !== 'Unknown') {
+          perfElement.textContent += ` | DNS: ${this.ipData.dnsResponseTime}ms`;
+        }
       }
     }
 
