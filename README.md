@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Personal Site – Joe Whittle
 
 Static, low-maintenance cybersecurity engineering portfolio + human journey context.
@@ -221,7 +220,56 @@ All arcade games featured in this portfolio are original JavaScript implementati
 - Code copying: ❌ Not permitted for commercial purposes
 
 For any questions regarding usage, licensing, or collaboration opportunities, please contact via the contact form or LinkedIn.
-=======
-# JW-Site
-JW-Public Site
->>>>>>> e70f17c7dc3f05e5d50f62b7c53b28bc354d91fb
+
+---
+
+## Enhanced Security Scanner – Session & Consent
+
+The enhanced scanner issues a short-lived signed session cookie (`escan_s`) strictly for grouping a visitor's scans (HttpOnly, Secure, SameSite=Lax). It contains only a random ID + signature. Signing uses `SESSION_SIGNING_KEY` (configure as secret in Cloudflare Pages). No personal identifiers are embedded.
+
+### Minimal Metadata Packets (KV `SCANNER_META`)
+
+Each scan may generate a tiny JSON packet (<= ~250 bytes):
+
+```json
+{ "u": "...", "t": 1735690000000, "m": "business", "f": 12, "c": 2, "s": 87, "co": "US", "ua": "ab12cd" }
+```
+
+Field summary:
+
+- `u` – origin + truncated path (no query, no full URL leak)
+- `t` – timestamp (ms)
+- `m` – mode (business | engineer | super-admin-lite)
+- `f` – total findings
+- `c` – critical/high finding count
+- `s` – overall score (if computed)
+- `co` – country code (only with research consent)
+- `ua` – one-way hashed User-Agent (only with research consent)
+
+### Consent Gating
+
+Persistence occurs ONLY if a consent cookie `cc_prefs` indicates:
+
+- Analytics: `a:1` OR Research: `r:1`
+- Research implies analytics (adds `co` & `ua` fields)
+
+No consent => No metadata persisted (scan still runs; results returned directly).
+
+### Regional Compliance
+
+Client code (cookie banner / CMP) must refrain from setting analytics/research consent values until explicit opt-in for users in regulated jurisdictions (EU GDPR, California). The server trusts the presence/absence of flags – ensure geo + consent logic on the client is correct.
+
+### Environment & Bindings
+
+- KV binding `SCANNER_META` (placeholder IDs in `wrangler.toml`) – replace with real namespace IDs.
+- Secret: `SESSION_SIGNING_KEY` (HMAC signing).
+
+### Data Retention & Size
+
+- KV entries TTL: 24h (lightweight aggregate trend window)
+- No IP addresses persisted; no exact full URLs; no raw user agents.
+
+### Extensibility
+
+Future analytics dashboards can query aggregated counts without exposing personal data. Any schema expansion must go through updated consent documentation before deployment.
+

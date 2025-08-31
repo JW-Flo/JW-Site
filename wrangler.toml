@@ -7,6 +7,10 @@ pages_build_output_dir = "dist"
 [vars]
 # Production site URL - update this with your custom domain later
 SITE_URL = "https://jw-site-7q2.pages.dev"
+# SUPER_ADMIN_KEY is consumed by /api/enhanced-security-scan for super-admin mode.
+# Set this in Cloudflare Pages project dashboard (do NOT commit secrets).
+# Example: SUPER_ADMIN_KEY = "your-secret-value" (uncomment only for local wrangler dev if needed)
+# SUPER_ADMIN_KEY = "dev-super-admin-key"
 
 # If you later add KV / D1 / R2 bindings, document them here.
 
@@ -35,6 +39,18 @@ preview_id = "508f61d2b5d6442bae53fbe541698360"
 binding = "ANALYTICS"
 id = "3dd7938561f5402bb41760edda181030"
 preview_id = "64323cab0ce447d182e8a5038461e6d3"
+
+# Lightweight metadata persistence for scanner sessions (stores ONLY minimal, non-personal aggregates per consent)
+[[kv_namespaces]]
+binding = "SCANNER_META"
+# Set real namespace IDs in production (below are placeholders / examples)
+id = "11111111111111111111111111111111"
+preview_id = "22222222222222222222222222222222"
+
+# Optional: SESSION_SIGNING_KEY (set as secret in Pages dashboard) used to sign ephemeral session cookie
+# Do NOT store here; example for local dev only (uncomment if needed)
+# [vars]
+# SESSION_SIGNING_KEY = "dev-session-signing-key"
 
 # Workflows configuration (implemented as functions for now)
 # These will be converted to proper workflows when Cloudflare Workflows supports them
