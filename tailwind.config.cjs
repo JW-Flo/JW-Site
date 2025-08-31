@@ -96,19 +96,19 @@ module.exports = {
           900: "#0f172a",
         },
         // Refined Retro Arcade Colors - Premium Gaming Aesthetic
-        'retro-cyan': '#00d9ff',      // Softer cyan
-        'retro-pink': '#ff6b9d',      // Softer pink  
-        'retro-green': '#00ff88',     // Softer green
-        'retro-yellow': '#ffeb3b',    // Warmer yellow
-        'retro-purple': '#9c27b0',    // Rich purple
-        'retro-orange': '#ff9800',    // Warm orange
+        "retro-cyan": "#00d9ff", // Softer cyan
+        "retro-pink": "#ff6b9d", // Softer pink
+        "retro-green": "#00ff88", // Softer green
+        "retro-yellow": "#ffeb3b", // Warmer yellow
+        "retro-purple": "#9c27b0", // Rich purple
+        "retro-orange": "#ff9800", // Warm orange
         neon: {
-          cyan: "#00d9ff",    // Premium cyan
-          pink: "#ff6b9d",    // Premium pink
-          green: "#00ff88",   // Premium green
-          yellow: "#ffeb3b",  // Premium yellow
-          purple: "#9c27b0",  // Premium purple
-          orange: "#ff9800",  // Premium orange
+          cyan: "#00d9ff", // Premium cyan
+          pink: "#ff6b9d", // Premium pink
+          green: "#00ff88", // Premium green
+          yellow: "#ffeb3b", // Premium yellow
+          purple: "#9c27b0", // Premium purple
+          orange: "#ff9800", // Premium orange
         },
         brand: {
           DEFAULT: "#1e40af", // Professional blue as primary

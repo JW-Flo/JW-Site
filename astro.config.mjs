@@ -12,8 +12,8 @@ export default defineConfig({
   output: "server", // Enable server-side rendering for API routes
   adapter: cloudflare({
     platformProxy: {
-      enabled: true
-    }
+      enabled: true,
+    },
   }),
   integrations: [tailwind(), mdx(), sitemap()],
 });
