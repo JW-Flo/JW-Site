@@ -67,8 +67,10 @@ class RetroArcade {
       this.canvas.style.zIndex = "35"; // Above navigation but below modal elements
       if (this.triggerWord) this.triggerWord.style.opacity = "0";
 
-      // Apply enhanced retro styling for game mode
-      document.body.classList.add("game-mode");
+  // Apply enhanced retro styling for game mode + scroll lock
+  document.body.classList.add("game-mode");
+  document.body.classList.add("game-mode-scroll-lock");
+  this._addScrollKeySuppression();
 
       console.log("🎯 Importing GameOverlay...");
       // Initialize modular game overlay
@@ -115,8 +117,10 @@ class RetroArcade {
     this.canvas.style.zIndex = "30"; // Back to normal z-index
     if (this.triggerWord) this.triggerWord.style.opacity = "0.3";
 
-    // Remove enhanced game mode styling
-    document.body.classList.remove("game-mode");
+  // Remove enhanced game mode styling & scroll lock
+  document.body.classList.remove("game-mode");
+  document.body.classList.remove("game-mode-scroll-lock");
+  this._removeScrollKeySuppression();
 
     if (this.gameOverlay) {
       this.gameOverlay.deactivate();
@@ -136,6 +140,41 @@ class RetroArcade {
   hideLeaderboard() {
     if (this.gameOverlay) {
       this.gameOverlay.hideLeaderboard();
+    }
+  }
+
+  _addScrollKeySuppression() {
+    this._keyHandler = (e) => {
+      if (!this.isActive) return;
+      // Ignore if focusing an input/textarea/contentEditable
+      const target = e.target;
+      const tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || target.isContentEditable) {
+        return;
+      }
+      const keysToBlock = [
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        " ", // Space (Chrome/Firefox)
+        "Spacebar", // Legacy
+        "PageUp",
+        "PageDown",
+        "Home",
+        "End"
+      ];
+      if (keysToBlock.includes(e.key)) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", this._keyHandler, { passive: false });
+  }
+
+  _removeScrollKeySuppression() {
+    if (this._keyHandler) {
+      window.removeEventListener("keydown", this._keyHandler);
+      this._keyHandler = null;
     }
   }
 }
