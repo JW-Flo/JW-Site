@@ -487,7 +487,10 @@ export class PacManGame {
   gameLoop() {
     this.update();
     this.draw();
-    this.animationId = requestAnimationFrame(() => this.gameLoop());
+    const raf = (typeof requestAnimationFrame !== 'undefined')
+      ? requestAnimationFrame
+      : (cb) => setTimeout(cb, 16);
+    this.animationId = raf(() => this.gameLoop());
   }
 
   draw() {
