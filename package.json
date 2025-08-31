@@ -18,6 +18,8 @@
     "build:andrey": "SITE_URL=https://andreysergeevich.me astro build --out-dir dist-andrey --config astro-andrey.config.mjs",
     "deploy:andrey:preview": "wrangler pages deploy ./dist-andrey --branch preview --config wrangler-andrey.toml",
     "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml",
+  "db:migrate:local": "wrangler d1 migrations apply DB --local",
+  "db:migrate": "wrangler d1 migrations apply DB",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
