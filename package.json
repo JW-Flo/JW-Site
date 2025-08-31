@@ -20,6 +20,7 @@
     "deploy:andrey": "wrangler pages deploy ./dist-andrey --config wrangler-andrey.toml",
   "db:migrate:local": "wrangler d1 migrations apply DB --local",
   "db:migrate": "wrangler d1 migrations apply DB",
+  "rotate:consent-admin-key": "node scripts/rotate-consent-admin-key.mjs",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
