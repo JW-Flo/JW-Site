@@ -251,6 +251,11 @@
       window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { 
         detail: consent 
       }));
+
+      // Attempt persistence if feature flag enabled
+      this.persistConsent(consent).catch(err => {
+        console.warn('Consent persistence failed', err);
+      });
     }
     
     getStoredConsent() {
@@ -321,6 +326,58 @@
     
     hasConsent(type) {
       return this.consent && this.consent[type] === true;
+    }
+
+    getOrCreateSessionId() {
+      let sid = localStorage.getItem('session-id');
+      if (!sid) {
+        // simple UUID v4 generator
+        sid = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxxyxxx'.replace(/[xy]/g, c => {
+          const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8); return v.toString(16);
+        });
+        localStorage.setItem('session-id', sid);
+      }
+      return sid;
+    }
+
+    async fetchGeoPrivacy() {
+      try {
+        const resp = await fetch('/api/geo');
+        if (!resp.ok) return undefined;
+        const data = await resp.json();
+        if (data && data.featureGeo && data.ipHash) {
+          return { ipHash: data.ipHash, hashAlgo: data.hashAlgo, geo: data.geo };
+        }
+      } catch (e) {
+        // ignore
+      }
+      return undefined;
+    }
+
+    isConsentFeatureEnabled() {
+      return (window?.ENV && window.ENV.FEATURE_CONSENT_D1 === 'true') || (typeof FEATURE_CONSENT_D1 !== 'undefined' && FEATURE_CONSENT_D1 === 'true') || false;
+    }
+
+    async persistConsent(consent) {
+      if (!this.isConsentFeatureEnabled()) return;
+      const sessionId = this.getOrCreateSessionId();
+      const basePayload = {
+        sessionId,
+        ...consent,
+        version: 'v1'
+      };
+      // Try to augment with geo/hash if available (do not block on failure)
+      const geo = await this.fetchGeoPrivacy();
+      const payload = geo ? { ...basePayload, ...geo } : basePayload;
+      try {
+        await fetch('/api/consent', {
+          method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        // swallow
+      }
     }
   }
   
