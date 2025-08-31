@@ -257,6 +257,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <script>
   const PASS_HASH = 'ae731e334f6ca897553b94ab466d24c7c02aa855982850a4edb816540562135d'; // sha256('chalant')
+  // SUPER ADMIN ACTIVATION NOTES:
+  // 1. User enters local passphrase (not the admin key) to reveal Super Admin mode button.
+  // 2. When switching to Super Admin mode first time, we prompt for the server SUPER_ADMIN_KEY (never stored).
+  // 3. That key is sent per-request as adminKey ONLY when mode === 'super-admin'.
   async function sha256(str){
     const buf = new TextEncoder().encode(str);
     const hash = await crypto.subtle.digest('SHA-256', buf);
@@ -289,7 +293,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const downloadBtn = document.getElementById('download-json');
   const rateLimitBox = document.getElementById('rate-limit-warning');
   let rateLimitTimer = null;
-    let mode = 'business';
+  let mode = 'business';
+  let superAdminServerKey = null; // ephemeral per-tab
     modeDescription.textContent = modeDesc[mode];
     async function tryUnlock(){
       const val = passInput.value.trim();
@@ -308,6 +313,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     modeButtons.forEach(btn=>btn.addEventListener('click', async () => {
       if(btn.disabled) return;
       mode = btn.dataset.mode;
+      if(mode==='super-admin' && !superAdminServerKey){
+        superAdminServerKey = prompt('Enter SUPER_ADMIN_KEY (server secret) to enable Super Admin scans. This is not stored.');
+        if(!superAdminServerKey){
+          // Abort switching if no key provided
+          mode='business';
+        }
+      }
       modeButtons.forEach(b=>{
         if(b===btn){ b.classList.replace('bg-slate-800','bg-slate-700'); b.classList.add('text-slate-200'); }
         else { b.classList.add('bg-slate-800'); b.classList.remove('bg-slate-700'); b.classList.remove('text-slate-200'); }
@@ -381,8 +393,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             return; // Abort full local scan due to rate limit
           }
         } catch(preErr){ /* network issues ignored for preflight */ }
-        const { runScan } = await import('../utils/scanner/dispatcher.js');
-        const bundle = await runScan({ url, mode, selected, adminKey: undefined });
+  const { runScan } = await import('../utils/scanner/dispatcher.js');
+  const bundle = await runScan({ url, mode, selected, adminKey: mode==='super-admin' ? superAdminServerKey : undefined });
         prog.classList.add('hidden');
         results.classList.remove('hidden');
         resultsContainer.innerHTML='';
