@@ -295,6 +295,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let rateLimitTimer = null;
   let mode = 'business';
   let superAdminServerKey = null; // ephemeral per-tab
+  let superAdminElevated = false;
     modeDescription.textContent = modeDesc[mode];
     async function tryUnlock(){
       const val = passInput.value.trim();
@@ -313,11 +314,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     modeButtons.forEach(btn=>btn.addEventListener('click', async () => {
       if(btn.disabled) return;
       mode = btn.dataset.mode;
-      if(mode==='super-admin' && !superAdminServerKey){
-        superAdminServerKey = prompt('Enter SUPER_ADMIN_KEY (server secret) to enable Super Admin scans. This is not stored.');
-        if(!superAdminServerKey){
-          // Abort switching if no key provided
+      if(mode==='super-admin' && !superAdminElevated){
+        // Require local passphrase validation
+        if(passInput.value.trim() === '' || !(await sha256(passInput.value.trim()) === PASS_HASH)){
+          alert('Enter correct passphrase first to unlock Super Admin mode');
           mode='business';
+        } else if(!superAdminServerKey){
+          superAdminServerKey = prompt('Enter SUPER_ADMIN_KEY (server secret) to elevate (one-time this session). Not stored.');
+          if(!superAdminServerKey){ mode='business'; }
+          else {
+            try {
+              const resp = await fetch('/api/super-admin-elevate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ key: superAdminServerKey }) });
+              if(resp.ok){
+                const data = await resp.json();
+                if(data.elevated){ superAdminElevated = true; }
+                else { alert('Elevation rejected'); mode='business'; }
+              } else {
+                alert('Elevation failed'); mode='business';
+              }
+            } catch { alert('Network error elevating'); mode='business'; }
+          }
         }
       }
       modeButtons.forEach(b=>{

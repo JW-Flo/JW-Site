@@ -19,6 +19,7 @@ interface SessionRecord {
   created: number;
   scans: ScanSummaryMeta[];
   last: number;
+  role?: 'sa'; // super-admin role flag when elevated
 }
 
 const sessions = new Map<string, SessionRecord>();
@@ -94,6 +95,10 @@ export class ScanStore {
     sessions.set(id, rec);
     const cookieHeader = `${SESSION_COOKIE}=${encodeURIComponent(id+'.'+sig)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60*60}`;
     return { record: rec, cookieHeader, consent };
+  }
+  elevateToSuperAdmin(record: SessionRecord) {
+    record.role = 'sa';
+    record.last = Date.now();
   }
   async addScan(record: SessionRecord, meta: ScanSummaryMeta, consent: ConsentState) {
     record.last = Date.now();
