@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { json, methodNotAllowed } from '../../../utils/responses.js';
+import { buildIpPrivacyRecord } from '../../utils/ipPrivacy.ts';
 
 export const prerender = false;
 
@@ -9,11 +10,22 @@ export const GET: APIRoute = async ({ request }) => {
                    request.headers.get('X-Forwarded-For') ||
                    request.headers.get('X-Real-IP') ||
                    '127.0.0.1';
-
+  const featureEnabled = process.env.FEATURE_GEO_CLASSIFICATION === 'true';
+  let privacy: any = undefined;
+  if (featureEnabled) {
+    const secret = process.env.GEO_HASH_KEY || 'dev-secret';
+    try {
+      privacy = await buildIpPrivacyRecord(clientIP, request, secret);
+    } catch (e) {
+      console.warn('Failed to build IP privacy record', e);
+    }
+  }
   return json({
     ip: clientIP,
     timestamp: new Date().toISOString(),
-    userAgent: request.headers.get('User-Agent') || 'Unknown'
+    userAgent: request.headers.get('User-Agent') || 'Unknown',
+    featureGeo: featureEnabled,
+    ...(privacy ? { ipHash: privacy.ipHash, hashAlgo: privacy.hashAlgo, geo: privacy.geo } : {})
   });
 };
 

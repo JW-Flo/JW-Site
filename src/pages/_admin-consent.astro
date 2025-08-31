@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const title = 'System Status'; // intentionally generic
+---
+<BaseLayout title={title}>
+  <meta name="robots" content="noindex,nofollow" />
+  <div class="max-w-4xl mx-auto py-12">
+    <h1 class="text-2xl font-bold text-slate-200 mb-6">System Metrics</h1>
+    <div class="bg-slate-800/70 border border-slate-600 rounded-lg p-6 space-y-4" id="admin-panel">
+      <div class="space-y-2">
+        <label class="block text-sm text-slate-300">Access Token</label>
+        <input id="admin-key" type="password" class="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-600" placeholder="Enter token" />
+        <button id="load-btn" class="bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium px-4 py-2 rounded transition disabled:opacity-50">Load Metrics</button>
+        <div id="status" class="text-xs text-slate-400"></div>
+      </div>
+      <div id="metrics" class="hidden space-y-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div class="p-3 bg-slate-900/60 rounded">
+            <div class="text-xs uppercase text-slate-400 tracking-wide">Total</div>
+            <div id="total" class="text-lg font-semibold text-cyan-400">-</div>
+          </div>
+          <div class="p-3 bg-slate-900/60 rounded">
+            <div class="text-xs uppercase text-slate-400 tracking-wide">Analytics</div>
+            <div id="analytics_on" class="text-lg font-semibold text-green-400">-</div>
+          </div>
+          <div class="p-3 bg-slate-900/60 rounded">
+            <div class="text-xs uppercase text-slate-400 tracking-wide">Research</div>
+            <div id="research_on" class="text-lg font-semibold text-purple-400">-</div>
+          </div>
+          <div class="p-3 bg-slate-900/60 rounded">
+            <div class="text-xs uppercase text-slate-400 tracking-wide">Marketing</div>
+            <div id="marketing_on" class="text-lg font-semibold text-amber-400">-</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-300">Recent Events</h2>
+          <button id="export-btn" class="text-xs px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200">Export CSV</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs text-left">
+            <thead class="bg-slate-700/50 text-slate-300">
+              <tr>
+                <th class="px-2 py-1">Time</th>
+                <th class="px-2 py-1">Session</th>
+                <th class="px-2 py-1">Country</th>
+                <th class="px-2 py-1">A</th>
+                <th class="px-2 py-1">R</th>
+                <th class="px-2 py-1">M</th>
+              </tr>
+            </thead>
+            <tbody id="recent-body" class="divide-y divide-slate-700"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const keyInput = document.getElementById('admin-key');
+      const loadBtn = document.getElementById('load-btn');
+      const statusEl = document.getElementById('status');
+      const metricsEl = document.getElementById('metrics');
+      const recentBody = document.getElementById('recent-body');
+      const exportBtn = document.getElementById('export-btn');
+
+      function setStatus(msg, cls='text-slate-400'){ statusEl.textContent = msg; statusEl.className = 'text-xs '+cls; }
+
+      async function fetchStats(){
+        const k = keyInput.value.trim();
+        if(!k){ setStatus('Token required','text-red-400'); return; }
+        loadBtn.disabled = true; setStatus('Loading...');
+        try {
+          const res = await fetch('/api/admin/consent-stats', { headers: { 'X-Admin-Key': k }});
+          if(res.status === 404){ setStatus('Not found','text-red-400'); metricsEl.classList.add('hidden'); return; }
+          if(!res.ok){ setStatus('Error '+res.status,'text-red-400'); metricsEl.classList.add('hidden'); return; }
+          sessionStorage.setItem('admin-token', k); // ephemeral storage
+          const data = await res.json();
+          populate(data);
+          setStatus('Loaded','text-green-400');
+        } catch(e){ setStatus('Network error','text-red-400'); }
+        finally { loadBtn.disabled = false; }
+      }
+
+      function populate(data){
+        metricsEl.classList.remove('hidden');
+        const t = data.totals || {};
+        document.getElementById('total').textContent = t.total ?? '-';
+        document.getElementById('analytics_on').textContent = t.analytics_on ?? '-';
+        document.getElementById('research_on').textContent = t.research_on ?? '-';
+        document.getElementById('marketing_on').textContent = t.marketing_on ?? '-';
+        recentBody.innerHTML = '';
+        (data.recent || []).forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td class='px-2 py-1 whitespace-nowrap'>${r.created_at || ''}</td>`+
+            `<td class='px-2 py-1 font-mono text-[10px]'>${(r.session_id||'').slice(0,8)}</td>`+
+            `<td class='px-2 py-1'>${r.country||''}</td>`+
+            `<td class='px-2 py-1'>${r.analytics? '✔':'-'}</td>`+
+            `<td class='px-2 py-1'>${r.research? '✔':'-'}</td>`+
+            `<td class='px-2 py-1'>${r.marketing? '✔':'-'}</td>`;
+          recentBody.appendChild(tr);
+        });
+      }
+
+      function exportCSV(){
+        const rows = [['created_at','session','country','analytics','research','marketing']];
+        recentBody.querySelectorAll('tr').forEach(tr => {
+          const cells = Array.from(tr.children).map(td => td.textContent.replace(/,/g,' '));
+          rows.push([cells[0], cells[1], cells[2], cells[3] === '✔', cells[4] === '✔', cells[5] === '✔']);
+        });
+        const csv = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'consent_recent.csv'; a.click();
+      }
+
+      loadBtn.addEventListener('click', fetchStats);
+      exportBtn.addEventListener('click', exportCSV);
+
+      // Auto-load if token persisted for session
+      const saved = sessionStorage.getItem('admin-token');
+      if(saved){ keyInput.value = saved; fetchStats(); }
+    })();
+  </script>
+</BaseLayout>
