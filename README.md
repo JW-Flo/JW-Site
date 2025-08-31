@@ -264,6 +264,42 @@ Client code (cookie banner / CMP) must refrain from setting analytics/research c
 - KV binding `SCANNER_META` (placeholder IDs in `wrangler.toml`) – replace with real namespace IDs.
 - Secret: `SESSION_SIGNING_KEY` (HMAC signing).
 
+### Creating the `SCANNER_META` KV Namespace
+
+The binding is currently commented out to allow deployment without a real namespace. When ready to enable persistence:
+
+1. Create production + preview namespaces:
+
+```bash
+wrangler kv:namespace create SCANNER_META --env=production
+wrangler kv:namespace create SCANNER_META --env=preview
+```
+
+1. Copy the returned `id` and `preview_id` values into `wrangler.toml` under an uncommented block:
+
+```toml
+[[kv_namespaces]]
+binding = "SCANNER_META"
+id = "<prod-id>"
+preview_id = "<preview-id>"
+```
+
+1. Redeploy. The scanner will begin persisting consent-gated packets.
+
+1. (Optional) To inspect a few recent keys during development:
+
+```bash
+wrangler kv:key list --namespace-id <preview-id> | head
+```
+
+1. To purge old data manually (normally TTL handles this):
+
+```bash
+wrangler kv:key delete --namespace-id <prod-id> <key>
+```
+
+Keep namespace small; avoid adding user-identifiable data.
+
 ### Data Retention & Size
 
 - KV entries TTL: 24h (lightweight aggregate trend window)
