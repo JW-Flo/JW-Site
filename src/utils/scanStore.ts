@@ -69,15 +69,32 @@ function parseConsentCookie(cookieHeader: string | null): ConsentState {
 }
 
 export class ScanStore {
-  private signingKey: string;
-  private kv: KVNamespace | undefined;
+  private readonly signingKey: string;
+  private readonly roleSigningKey: string;
+  private readonly kv: KVNamespace | undefined;
   constructor(env: any) {
     this.signingKey = env.SESSION_SIGNING_KEY || 'dev-signing-key';
+    this.roleSigningKey = env.ROLE_SIGNING_KEY || this.signingKey;
     this.kv = env.SCANNER_META; // optional
+  }
+  private async parseRole(cookie: string): Promise<'sa' | undefined> {
+    const roleMatch = /escan_role=([^;]+)/.exec(cookie);
+    if (!roleMatch) return undefined;
+    try {
+      const raw = decodeURIComponent(roleMatch[1]);
+      const [roleVal, expStr, sig] = raw.split('.');
+      if (roleVal !== 'sa' || !expStr || !sig) return undefined;
+      const base = roleVal + '.' + expStr;
+      if (!await verifySignature(this.roleSigningKey, base, sig)) return undefined;
+      const exp = parseInt(expStr, 10);
+      if (isNaN(exp) || Date.now() >= exp) return undefined;
+      return 'sa';
+    } catch { return undefined; }
   }
   async getOrCreateSession(request: Request): Promise<{ record: SessionRecord; cookieHeader?: string; consent: ConsentState; }> {
     const cookie = request.headers.get('Cookie') || '';
     const consent = parseConsentCookie(cookie);
+    const role = await this.parseRole(cookie);
     const match = /escan_s=([^;]+)/.exec(cookie);
     if (match) {
       const raw = decodeURIComponent(match[1]);
@@ -85,6 +102,7 @@ export class ScanStore {
       if (id && sig && await verifySignature(this.signingKey, id, sig)) {
         const rec = sessions.get(id);
         if (rec && (Date.now() - rec.last) < SESSION_TTL_MS) {
+          if (role && !rec.role) rec.role = role; // hydrate from role cookie
           return { record: rec, consent };
         }
       }
@@ -92,8 +110,17 @@ export class ScanStore {
     const id = randomId();
     const sig = await hmacSign(this.signingKey, id);
     const rec: SessionRecord = { id, created: Date.now(), last: Date.now(), scans: [] };
+    if (role) rec.role = role;
     sessions.set(id, rec);
-    const cookieHeader = `${SESSION_COOKIE}=${encodeURIComponent(id+'.'+sig)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60*60}`;
+    const newCookies: string[] = [];
+    newCookies.push(`${SESSION_COOKIE}=${encodeURIComponent(id+'.'+sig)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60*60}`);
+    if (role) {
+      const exp = Date.now() + 1000*60*60; // 1h
+      const base = `sa.${exp}`;
+      const rsig = await hmacSign(this.roleSigningKey, base);
+      newCookies.push(`escan_role=${encodeURIComponent(base+'.'+rsig)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60*60}`);
+    }
+    const cookieHeader = newCookies.join(', ');
     return { record: rec, cookieHeader, consent };
   }
   elevateToSuperAdmin(record: SessionRecord) {
@@ -107,13 +134,25 @@ export class ScanStore {
     if (this.kv && (consent.analytics || consent.research)) {
       const key = `s:${record.id}:${meta.timestamp}`;
       const packet: any = { u: meta.url, t: meta.timestamp, m: meta.mode, f: meta.findings, c: meta.critical, s: meta.score };
-      if (consent.research) { if (meta.country) packet.co = meta.country; if (meta.uaHash) packet.ua = meta.uaHash; }
+      if (consent.research) {
+        if (meta.country) packet.co = meta.country;
+        if (meta.uaHash) packet.ua = meta.uaHash;
+      }
       try { await this.kv.put(key, JSON.stringify(packet), { expirationTtl: 60*60*24 }); } catch(e) { console.warn('KV put failed', e); }
     }
   }
 }
 
 export function hashUA(ua: string): string { let h = 0; for (let i=0;i<ua.length;i++) { h = (h*31 + ua.charCodeAt(i)) >>> 0; } return h.toString(16); }
-export function sanitizeUrl(raw: string): string { try { const u = new URL(raw); let path = u.pathname; if (path.length>60) path = path.slice(0,57)+'...'; return u.origin + path; } catch { return raw.slice(0,80); } }
+export function sanitizeUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    let path = u.pathname;
+    if (path.length > 60) path = path.slice(0,57) + '...';
+    return u.origin + path;
+  } catch {
+    return raw.slice(0,80);
+  }
+}
 
 setInterval(() => { const now = Date.now(); for (const [id, rec] of sessions.entries()) { if ((now - rec.last) > SESSION_TTL_MS) sessions.delete(id); } }, 60_000);

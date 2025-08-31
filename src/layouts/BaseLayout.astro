@@ -1,10 +1,14 @@
 ---
 import SEO from '../components/SEO.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import { loadFlags, projectClientFlags } from '../config/flags';
 // import IPTracker from '../components/IPTracker.astro';
 import '../styles/global.css';
 export interface Props { title?: string; description?: string; url?: string; noIndex?: boolean; }
 const { title, description, url, noIndex } = Astro.props as Props;
+// Load feature flags from runtime environment and prepare safe client projection
+const serverFlags = loadFlags((Astro as any).env || {});
+const clientFlags = projectClientFlags(serverFlags);
 ---
 <html lang="en" class="scroll-smooth dark">
   <head>
@@ -19,6 +23,10 @@ const { title, description, url, noIndex } = Astro.props as Props;
     <SEO {title} {description} {url} noIndex={noIndex} />
   </head>
   <body class="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
+    <script>
+      // Safely expose selected non-sensitive environment flags
+      window.ENV = Object.assign({}, (window.ENV||{}), JSON.parse('{"flags":' + JSON.stringify(clientFlags).replace(/</g,'\\u003c') + '}'));
+    </script>
     <!-- Game Canvas Overlay -->
     <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
     

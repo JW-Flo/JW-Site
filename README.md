@@ -400,6 +400,18 @@ Field summary:
 - `co` – country code (only with research consent)
 - `ua` – one-way hashed User-Agent (only with research consent)
 
+## Deployment Invalidation / Old Builds
+
+To reduce risk of attackers enumerating and replaying older vulnerable builds:
+
+1. Each deployment includes an implicit commit hash (Cloudflare Pages sets env vars). `/api/health` exposes `commit` and flags.
+2. A forthcoming enhancement can store the latest production `BUILD_ID` in KV. Middleware then compares local `BUILD_ID` (`src/config/build.ts`) and returns 410 for stale preview URLs if left active.
+3. Periodically prune unused preview deployments (Pages Dashboard > Deployments) to eliminate backtracking surface.
+4. Avoid embedding secrets in static assets; rotate keys (`SUPER_ADMIN_KEY`, `CONSENT_ADMIN_KEY`, etc.) after critical fixes.
+5. Consider WAF rules to block direct access to known legacy asset paths if a severe vulnerability patch was shipped.
+
+Operational Tip: Track security header regressions by scripting a curl-based check against `/` and `/api/health` in CI before allowing promotion to production.
+
 ### Consent Gating
 
 Persistence occurs ONLY if a consent cookie `cc_prefs` indicates:
