@@ -34,6 +34,13 @@ body {
   min-height: 100vh;
 }
 
+/* Lock scrolling when game active or modal open */
+body.game-mode-scroll-lock,
+body.modal-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
 /* Subtle background texture (optional) */
 body::before {
   content: "";

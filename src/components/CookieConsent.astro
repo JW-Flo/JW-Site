@@ -2,7 +2,7 @@
 // Cookie Consent Component for GDPR/CCPA compliance
 ---
 
-<div id="cookie-consent" class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-cyan-500/30 p-4 z-50 transform translate-y-full transition-transform duration-300 ease-in-out">
+<div id="cookie-consent" class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-cyan-500/30 p-4 z-[1200] shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out pointer-events-auto">
   <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
     <div class="flex-1">
       <h3 class="text-cyan-400 font-semibold mb-2">Cookie & Privacy Notice</h3>
@@ -42,7 +42,7 @@
 </div>
 
 <!-- Cookie Settings Modal -->
-<div id="cookie-settings-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-60 hidden items-center justify-center p-4">
+<div id="cookie-settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1300] hidden items-center justify-center p-4">
   <div class="bg-gray-900 border border-cyan-500/30 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex items-center justify-between mb-6">
@@ -131,11 +131,14 @@
       this.bindEvents();
     }
     
-    showBanner() {
+  showBanner() {
       const banner = document.getElementById('cookie-consent');
       if (banner) {
         setTimeout(() => {
           banner.classList.remove('translate-y-full');
+      // Ensure banner always on top of any game/overlay layers
+      banner.style.zIndex = '1200';
+      banner.style.pointerEvents = 'auto';
         }, 1000);
       }
     }
@@ -201,19 +204,24 @@
       });
     }
     
-    showSettings() {
+  showSettings() {
       const modal = document.getElementById('cookie-settings-modal');
       if (modal) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+    modal.style.zIndex = '1300';
+    modal.style.pointerEvents = 'auto';
+    // Prevent background scroll while modal open
+    document.body.classList.add('modal-open');
       }
     }
     
-    hideSettings() {
+  hideSettings() {
       const modal = document.getElementById('cookie-settings-modal');
       if (modal) {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    document.body.classList.remove('modal-open');
       }
     }
     
