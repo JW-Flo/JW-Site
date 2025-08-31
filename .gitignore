@@ -27,3 +27,6 @@ yarn-error.log*
 # Misc
 coverage/
 tmp/
+
+# Secrets (local-only stored rotated admin keys)
+.secrets/

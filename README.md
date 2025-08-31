@@ -186,6 +186,50 @@ chmod +x scripts/smoke.sh # first run
 - `GET /api/waitlist` – waitlist count (feature-flag: `FEATURE_WAITLIST`)
 - `POST /api/waitlist` – join waitlist (feature-flag: `FEATURE_WAITLIST`)
 
+### Retro Arcade (Games)
+
+An original retro arcade system (Space Invaders, Tetris, Pac‑Man, Asteroids) is embedded site‑wide but intentionally subtle.
+
+Access methods:
+
+1. Click the floating controller button (🎮) near the top/right of any page to open the fullscreen canvas overlay.
+2. Or visit `/arcade` for written instructions and details.
+
+Controls:
+
+- Arrow Keys for movement / menu navigation
+- Space / Enter to select or fire
+- Esc to exit current game and return to menu (or deactivate)
+
+Security & Performance:
+
+- Games load only after activation (dynamic ES module import)
+- No external network calls; pure client runtime
+- Canvas + keyboard listeners are fully torn down on exit
+
+Leaderboard: Currently ephemeral (in‑memory). Future enhancement may optionally persist anonymized scores to KV (`LEADERBOARD`).
+
+### Enhanced Security Scanner & Super Admin Mode
+
+Two routes exist:
+
+- `/security-scanner` (legacy / basic) – minimal version
+- `/enhanced-security-scanner` – tri‑mode Business / Engineer / Super Admin lite
+
+Super Admin Activation Steps:
+
+1. Enter passphrase `chalant` in the passphrase field to enable the Super Admin button (client-side hash check only).
+2. Click Super Admin – you will be prompted for the server `SUPER_ADMIN_KEY` (this is the actual secret configured as an environment variable in Cloudflare Pages). Paste it once; it is stored only in memory for that tab.
+3. Run scans. The key is sent per request as `adminKey` only in Super Admin mode.
+
+If the server `SUPER_ADMIN_KEY` is not set, super admin requests return an error. For production, set it in Cloudflare Pages > Settings > Environment Variables (do NOT commit to `wrangler.toml`).
+
+Threat Model:
+
+- Passphrase only reveals UI (low sensitivity)
+- Real authorization enforced server-side by secret key comparison
+- Key never persisted locally (no localStorage/sessionStorage); lives only in a JS variable for the session
+
 ### Admin Consent Metrics Portal
 
 An intentionally unlinked, low-noise admin view for aggregated consent preferences to validate privacy UX and regional gating. Accessible at:
@@ -240,9 +284,19 @@ Rotate + set new admin key locally:
 npm run rotate:consent-admin-key            # prints new key & sets secret (no deploy)
 npm run rotate:consent-admin-key -- --deploy # rotate + build + deploy
 npm run rotate:consent-admin-key -- --dry-run # show what would happen
+npm run rotate:consent-admin-key -- --no-store # skip local writing of .secrets files
+npm run rotate:consent-admin-key -- --output=.secrets/custom-key.txt # custom file path
 ```
 
 Store the printed key immediately; it cannot be retrieved later. A rotation only becomes active after deployment.
+
+When run normally the script now also:
+
+- Creates a `.secrets/` directory (if missing)
+- Writes the full key to `.secrets/CONSENT_ADMIN_KEY.latest` (mode 600)
+- Appends a JSON line with timestamp + truncated preview to `.secrets/CONSENT_ADMIN_KEY.history`
+
+Disable local persistence with `--no-store`.
 
 ### Waitlist Feature
 
@@ -270,13 +324,13 @@ Schema (migration `002_waitlist.sql`):
 
 ```sql
 CREATE TABLE waitlist_signups (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	email TEXT NOT NULL UNIQUE,
-	source TEXT,
-	marketing_consent INTEGER DEFAULT 0,
-	ip_hash TEXT,
-	hash_algo TEXT
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+email TEXT NOT NULL UNIQUE,
+source TEXT,
+marketing_consent INTEGER DEFAULT 0,
+ip_hash TEXT,
+hash_algo TEXT
 );
 ```
 

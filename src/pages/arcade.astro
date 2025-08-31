@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Retro Arcade" description="Play original retro-inspired JavaScript games (Space Invaders, Tetris, Pac-Man, Asteroids)">
+  <section class="prose prose-invert max-w-none">
+    <h1>🎮 Retro Arcade</h1>
+    <p>This site includes an embedded retro arcade system built from scratch (no external frameworks). Games run entirely client-side on a full-screen canvas overlay so they never block content rendering.</p>
+    <h2>How to Launch</h2>
+    <ol>
+      <li>Click the floating <strong>controller button (🎮)</strong> at the top-right of any page.</li>
+      <li>The dark translucent game canvas fades in and the menu loads.</li>
+      <li>Select a game using arrow keys + Enter, or click directly.</li>
+    </ol>
+    <p>If nothing happens, ensure JavaScript is enabled and check the browser console for any blocked scripts.</p>
+    <h2>Controls</h2>
+    <ul>
+      <li><strong>Arrow Keys</strong>: Movement / navigation</li>
+      <li><strong>Space / Enter</strong>: Action / fire / select</li>
+      <li><strong>Esc</strong>: Exit current game / return to menu</li>
+    </ul>
+    <h2>Games</h2>
+    <ul>
+      <li><strong>Space Invaders</strong> – Defensive shooting & wave timing</li>
+      <li><strong>Tetris</strong> – Classic falling block logic & rotation system</li>
+      <li><strong>Pac-Man</strong> – Grid navigation, pathfinding ghosts (simplified)</li>
+      <li><strong>Asteroids</strong> – Inertia physics + collision system</li>
+    </ul>
+    <h2>Leaderboard</h2>
+    <p>A transient in-memory / (optional KV) leaderboard overlay tracks recent high scores for the current session. No PII or persistent profiles are stored.</p>
+    <h2>Performance & Architecture</h2>
+    <p>Games are modular ES modules dynamically imported only after activation. Rendering: optimized 2D canvas loop with basic dirty-region avoidance and lightweight object pooling in more active scenes.</p>
+    <h2>Security Considerations</h2>
+    <ul>
+      <li>No external network calls once loaded (aside from optional score submission if enabled later).</li>
+      <li>Canvas isolated; no privileged APIs.</li>
+      <li>ESC cleanly tears down listeners to prevent memory leaks.</li>
+    </ul>
+    <h2>Troubleshooting</h2>
+    <ul>
+      <li>If the canvas never appears, verify the <code>#game-canvas</code> element exists in the base layout.</li>
+      <li>If controls scroll the page, the scroll lock class may not have been applied; reload and retry.</li>
+      <li>Open DevTools Console: look for any errors from <code>RetroArcade</code> initialization.</li>
+    </ul>
+  </section>
+</BaseLayout>
