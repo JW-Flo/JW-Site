@@ -1,0 +1,1202 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Enhanced Security Scanner | JW Portfolio" description="Professional-grade security scanner with special admin features">
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent mb-4">
+        🚀 Enhanced Security Scanner
+      </h1>
+      <p class="text-xl text-slate-300 max-w-3xl mx-auto mb-6">
+        Professional-grade web security assessment with business impact analysis and comprehensive reporting
+      </p>
+      
+      <!-- Mode Toggle -->
+      <div class="flex items-center justify-center gap-6 mb-6">
+        <div class="flex items-center gap-4">
+          <span class="text-slate-400">Standard Mode</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="tech-mode-toggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+          <span class="text-slate-400">Engineer Mode</span>
+        </div>
+        
+        <!-- Super Admin Mode Toggle -->
+        <div class="flex items-center gap-4 border-l border-slate-600 pl-6">
+          <span class="text-slate-400">🔐 Super Admin</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="super-admin-toggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Admin Key Input -->
+      <div id="admin-key-section" class="hidden mb-6">
+        <div class="max-w-md mx-auto">
+          <label for="admin-key" class="block text-sm font-medium text-purple-300 mb-2">
+            🔑 Super Admin Access Key
+          </label>
+          <input
+            type="password"
+            id="admin-key"
+            placeholder="Enter your special access key"
+            class="w-full px-4 py-3 bg-slate-700 border border-purple-500 rounded-lg text-white placeholder-slate-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-400"
+          />
+          <p class="text-xs text-purple-300 mt-2">
+            This unlock the most comprehensive security analysis features
+          </p>
+        </div>
+      </div>
+      
+      <div id="mode-description" class="text-sm text-slate-400 max-w-2xl mx-auto">
+        <span id="standard-desc">Comprehensive security assessment with business-friendly reporting</span>
+        <span id="engineer-desc" class="hidden">Advanced technical analysis with detailed vulnerability assessment</span>
+        <span id="super-admin-desc" class="hidden">🌟 ULTIMATE: Complete business-grade security audit with privacy compliance, performance security, and brand protection analysis</span>
+      </div>
+    </div>
+
+    <!-- Legal Disclaimer -->
+    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-bold text-red-400 mb-3 flex items-center">
+        ⚠️ Important Legal Notice & Usage Guidelines
+      </h2>
+      <div class="text-sm text-slate-300 space-y-2">
+        <p><strong>Authorized Use Only:</strong> Only scan websites you own or have explicit written permission to test.</p>
+        <p><strong>No Data Storage:</strong> All scan results are processed in real-time and not permanently stored.</p>
+        <p><strong>Educational Purpose:</strong> This tool is for security awareness, education, and legitimate security testing.</p>
+        <p><strong>Professional Assessment:</strong> Results provide insights but should be validated by security professionals.</p>
+        <p><strong>Compliance:</strong> Users are responsible for compliance with all applicable laws and regulations.</p>
+        <p><strong>Rate Limiting:</strong> Tool includes intelligent rate limiting to respect target servers.</p>
+      </div>
+    </div>
+
+    <!-- Demo Section for Sister -->
+    <div id="demo-chalant" class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-bold text-purple-400 mb-3 flex items-center">
+        ✨ Special Demo: Chalant.net Analysis
+      </h2>
+      <div class="text-sm text-slate-300 space-y-2">
+        <p><strong>For Chalant.net Visitors:</strong> This enhanced scanner was specifically designed to help analyze and improve the security posture of creative and professional websites.</p>
+        <p><strong>Demo Features:</strong> Try the Super Admin mode with the special access key to see comprehensive business-grade security analysis.</p>
+        <p><strong>Perfect for:</strong> Creative professionals, consultants, and businesses who want to ensure their online presence is secure and trustworthy.</p>
+        <div class="mt-4 p-3 bg-slate-800/50 rounded">
+          <p class="text-purple-300"><strong>Try it now:</strong> Enter "https://www.chalant.net/" below and enable Super Admin mode for the most comprehensive analysis!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner Interface -->
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Input Section -->
+      <div class="lg:col-span-1">
+        <div class="bg-slate-800/50 rounded-lg p-6 border border-slate-600">
+          <h3 class="text-xl font-bold text-blue-400 mb-4">🎯 Enhanced Target Configuration</h3>
+          
+          <form id="enhanced-scan-form" class="space-y-4">
+            <div>
+              <label for="target-url" class="block text-sm font-medium text-slate-300 mb-2">
+                Target URL
+              </label>
+              <input
+                type="url"
+                id="target-url"
+                placeholder="https://www.chalant.net/"
+                required
+                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              <p class="text-xs text-slate-400 mt-1">
+                Enter the full URL including https://
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-3">
+                Enhanced Scan Types
+              </label>
+              <div class="space-y-2">
+                <!-- Standard Security Scans -->
+                <div class="border-b border-slate-600 pb-3 mb-3">
+                  <h4 class="text-sm font-bold text-blue-300 mb-2">🛡️ Core Security</h4>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-headers" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">Enhanced Security Headers</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-ssl" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">SSL/TLS Deep Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-info" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">Information Disclosure</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-common" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">Common Vulnerabilities</span>
+                  </label>
+                </div>
+                
+                <!-- Engineer Mode Options -->
+                <div id="engineer-options" class="hidden border-b border-slate-600 pb-3 mb-3">
+                  <h4 class="text-sm font-bold text-green-300 mb-2">⚡ Advanced Technical</h4>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-advanced-headers" class="rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500">
+                    <span class="ml-2 text-sm text-green-300">Advanced Header Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-waf" class="rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500">
+                    <span class="ml-2 text-sm text-green-300">WAF Detection</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-tech-stack" class="rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500">
+                    <span class="ml-2 text-sm text-green-300">Technology Fingerprinting</span>
+                  </label>
+                </div>
+
+                <!-- Super Admin Mode Options -->
+                <div id="super-admin-options" class="hidden">
+                  <h4 class="text-sm font-bold text-purple-300 mb-2">🌟 Business-Grade Analysis</h4>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-content-analysis" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">Content Security Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-privacy-compliance" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">Privacy Compliance (GDPR/CCPA)</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-performance-security" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">Performance Security</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-social-media" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">Social Media Audit</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-third-party" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">Third-Party Script Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-seo-security" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">SEO Security</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-accessibility" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500">
+                    <span class="ml-2 text-sm text-purple-300">Accessibility Security</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center">
+              <input type="checkbox" id="legal-agreement" required class="rounded border-slate-600 bg-slate-700 text-red-500 focus:ring-red-500">
+              <span class="ml-2 text-sm text-slate-300">
+                I confirm I have authorization to scan this website
+              </span>
+            </div>
+
+            <button
+              type="submit"
+              id="start-enhanced-scan-btn"
+              class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
+            >
+              🚀 Start Enhanced Security Scan
+            </button>
+          </form>
+        </div>
+
+        <!-- Scan Progress -->
+        <div id="scan-progress" class="hidden bg-slate-800/50 rounded-lg p-6 border border-slate-600 mt-6">
+          <h3 class="text-xl font-bold text-green-400 mb-4">📊 Enhanced Scan Progress</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Overall Progress</span>
+              <span id="overall-progress" class="text-sm text-purple-400">0%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-3">
+              <div id="progress-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div id="current-task" class="text-sm text-slate-400">
+              Initializing enhanced scan...
+            </div>
+            <div id="business-metrics" class="hidden mt-4 p-3 bg-slate-700/30 rounded">
+              <h4 class="text-sm font-bold text-purple-300 mb-2">📈 Business Impact Metrics</h4>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>Trust Score: <span id="trust-score" class="text-blue-400">--</span></div>
+                <div>UX Score: <span id="ux-score" class="text-green-400">--</span></div>
+                <div>Professional Score: <span id="prof-score" class="text-yellow-400">--</span></div>
+                <div>Brand Protection: <span id="brand-score" class="text-purple-400">--</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="lg:col-span-2">
+        <div id="scan-results" class="hidden">
+          <div class="bg-slate-800/50 rounded-lg p-6 border border-slate-600">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold text-purple-400">🔍 Enhanced Security Assessment</h3>
+              <div id="security-score" class="text-right">
+                <div class="text-2xl font-bold text-purple-400">--/100</div>
+                <div class="text-sm text-slate-400">Security Score</div>
+                <div id="business-impact-score" class="hidden text-lg font-bold text-pink-400 mt-1">Impact: --</div>
+                <div id="business-impact-label" class="hidden text-xs text-slate-400">Business Risk</div>
+              </div>
+            </div>
+
+            <!-- Business Metrics Dashboard -->
+            <div id="business-dashboard" class="hidden mb-6 grid md:grid-cols-4 gap-4 p-4 bg-slate-700/30 rounded-lg border border-purple-500/30">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-400" id="dashboard-trust">--</div>
+                <div class="text-xs text-slate-400">Trust Score</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-400" id="dashboard-ux">--</div>
+                <div class="text-xs text-slate-400">User Experience</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-400" id="dashboard-prof">--</div>
+                <div class="text-xs text-slate-400">Professionalism</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-purple-400" id="dashboard-brand">--</div>
+                <div class="text-xs text-slate-400">Brand Protection</div>
+              </div>
+            </div>
+
+            <!-- Results will be populated here -->
+            <div id="results-container" class="space-y-6">
+            </div>
+
+            <!-- Enhanced Actions -->
+            <div class="flex flex-wrap gap-4 mt-8 pt-6 border-t border-slate-600">
+              <button
+                id="export-business-report-btn"
+                class="flex-1 bg-purple-700 hover:bg-purple-600 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                📊 Business Report (PDF)
+              </button>
+              <button
+                id="export-technical-report-btn"
+                class="hidden flex-1 bg-green-700 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                📋 Technical Report (JSON)
+              </button>
+              <button
+                id="export-executive-summary-btn"
+                class="hidden flex-1 bg-blue-700 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                📈 Executive Summary
+              </button>
+              <button
+                id="new-enhanced-scan-btn"
+                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                🔄 New Scan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Welcome Message -->
+        <div id="welcome-message" class="bg-slate-800/50 rounded-lg p-8 border border-slate-600">
+          <div class="text-center">
+            <div class="text-6xl mb-4">🚀</div>
+            <h3 class="text-2xl font-bold text-purple-400 mb-4">Enhanced Security Scanner Ready</h3>
+            <p class="text-slate-300 mb-6">
+              Advanced security assessment with business impact analysis and comprehensive reporting.
+            </p>
+            
+            <div class="grid md:grid-cols-2 gap-4 text-left">
+              <div class="bg-slate-700/30 p-4 rounded-lg">
+                <h4 class="font-bold text-purple-400 mb-2">✅ Enhanced Features</h4>
+                <ul id="standard-features" class="text-sm text-slate-300 space-y-1">
+                  <li>• Business Impact Analysis</li>
+                  <li>• Cost Estimation for Fixes</li>
+                  <li>• Priority-Based Recommendations</li>
+                  <li>• Professional Reporting</li>
+                  <li>• Security Score with Context</li>
+                </ul>
+                <ul id="engineer-features" class="hidden text-sm text-slate-300 space-y-1">
+                  <li>• Technical Vulnerability Details</li>
+                  <li>• Exploit Vector Analysis</li>
+                  <li>• Advanced WAF Detection</li>
+                  <li>• Technology Stack Analysis</li>
+                  <li>• Integration-Ready JSON Export</li>
+                </ul>
+                <ul id="super-admin-features" class="hidden text-sm text-slate-300 space-y-1">
+                  <li>🌟 Complete Business-Grade Analysis</li>
+                  <li>🌟 GDPR/CCPA Compliance Checks</li>
+                  <li>🌟 Brand Protection Assessment</li>
+                  <li>🌟 Social Media Security Audit</li>
+                  <li>🌟 Performance Security Analysis</li>
+                  <li>🌟 Third-Party Risk Assessment</li>
+                  <li>🌟 SEO Security Validation</li>
+                  <li>🌟 Accessibility Security Review</li>
+                </ul>
+              </div>
+              
+              <div class="bg-slate-700/30 p-4 rounded-lg">
+                <h4 class="font-bold text-pink-400 mb-2">⚡ Business Benefits</h4>
+                <ul id="standard-benefits" class="text-sm text-slate-300 space-y-1">
+                  <li>• Risk-Based Priority Setting</li>
+                  <li>• Clear Cost/Benefit Analysis</li>
+                  <li>• Executive-Ready Reports</li>
+                  <li>• Compliance Guidance</li>
+                  <li>• Customer Trust Insights</li>
+                </ul>
+                <ul id="engineer-benefits" class="hidden text-sm text-slate-300 space-y-1">
+                  <li>• Detailed Technical Roadmap</li>
+                  <li>• Integration with DevOps</li>
+                  <li>• Automation-Ready Output</li>
+                  <li>• False Positive Analysis</li>
+                  <li>• Exploit Development Insights</li>
+                </ul>
+                <ul id="super-admin-benefits" class="hidden text-sm text-slate-300 space-y-1">
+                  <li>🎯 Complete Business Security Posture</li>
+                  <li>🎯 Legal Compliance Assessment</li>
+                  <li>🎯 Brand Risk Quantification</li>
+                  <li>🎯 Customer Experience Security</li>
+                  <li>🎯 Competitive Advantage Analysis</li>
+                  <li>🎯 ROI-Focused Recommendations</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .scanning {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+</style>
+
+<script>
+  class EnhancedSecurityScanner {
+    constructor() {
+      this.scanForm = document.getElementById('enhanced-scan-form');
+      this.progressSection = document.getElementById('scan-progress');
+      this.resultsSection = document.getElementById('scan-results');
+      this.welcomeMessage = document.getElementById('welcome-message');
+      this.progressBar = document.getElementById('progress-bar');
+      this.currentTask = document.getElementById('current-task');
+      this.overallProgress = document.getElementById('overall-progress');
+      this.resultsContainer = document.getElementById('results-container');
+      this.securityScore = document.getElementById('security-score');
+      this.techModeToggle = document.getElementById('tech-mode-toggle');
+      this.superAdminToggle = document.getElementById('super-admin-toggle');
+      this.adminKeySection = document.getElementById('admin-key-section');
+      this.adminKeyInput = document.getElementById('admin-key');
+      
+      this.scanResults = {};
+      this.totalTasks = 0;
+      this.completedTasks = 0;
+      this.engineerMode = false;
+      this.superAdminMode = false;
+      this.businessMetrics = {
+        trustScore: 100,
+        professionalismScore: 100,
+        userExperienceScore: 100,
+        brandProtectionScore: 100
+      };
+      
+      this.init();
+    }
+    
+    init() {
+      this.scanForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.startEnhancedScan();
+      });
+      
+      document.getElementById('new-enhanced-scan-btn')?.addEventListener('click', () => {
+        this.resetScan();
+      });
+      
+      document.getElementById('export-business-report-btn')?.addEventListener('click', () => {
+        this.exportBusinessReport();
+      });
+      
+      document.getElementById('export-technical-report-btn')?.addEventListener('click', () => {
+        this.exportTechnicalReport();
+      });
+      
+      document.getElementById('export-executive-summary-btn')?.addEventListener('click', () => {
+        this.exportExecutiveSummary();
+      });
+      
+      // Mode toggles
+      this.techModeToggle.addEventListener('change', () => {
+        this.toggleTechMode();
+      });
+      
+      this.superAdminToggle.addEventListener('change', () => {
+        this.toggleSuperAdminMode();
+      });
+      
+      // Pre-populate Chalant.net for demo
+      document.getElementById('target-url').value = 'https://www.chalant.net/';
+    }
+    
+    toggleTechMode() {
+      this.engineerMode = this.techModeToggle.checked;
+      this.updateUIForMode();
+    }
+    
+    toggleSuperAdminMode() {
+      this.superAdminMode = this.superAdminToggle.checked;
+      
+      if (this.superAdminMode) {
+        this.adminKeySection.classList.remove('hidden');
+        this.techModeToggle.checked = true;
+        this.engineerMode = true;
+      } else {
+        this.adminKeySection.classList.add('hidden');
+      }
+      
+      this.updateUIForMode();
+    }
+    
+    updateUIForMode() {
+      // Toggle UI elements based on mode
+      const engineerOptions = document.getElementById('engineer-options');
+      const superAdminOptions = document.getElementById('super-admin-options');
+      const standardDesc = document.getElementById('standard-desc');
+      const engineerDesc = document.getElementById('engineer-desc');
+      const superAdminDesc = document.getElementById('super-admin-desc');
+      
+      const standardFeatures = document.getElementById('standard-features');
+      const engineerFeatures = document.getElementById('engineer-features');
+      const superAdminFeatures = document.getElementById('super-admin-features');
+      
+      const standardBenefits = document.getElementById('standard-benefits');
+      const engineerBenefits = document.getElementById('engineer-benefits');
+      const superAdminBenefits = document.getElementById('super-admin-benefits');
+      
+      const businessDashboard = document.getElementById('business-dashboard');
+      const businessMetricsProgress = document.getElementById('business-metrics');
+      const exportTechnicalBtn = document.getElementById('export-technical-report-btn');
+      const exportExecutiveBtn = document.getElementById('export-executive-summary-btn');
+      
+      // Hide all first
+      [engineerOptions, superAdminOptions].forEach(el => el?.classList.add('hidden'));
+      [standardDesc, engineerDesc, superAdminDesc].forEach(el => el?.classList.add('hidden'));
+      [standardFeatures, engineerFeatures, superAdminFeatures].forEach(el => el?.classList.add('hidden'));
+      [standardBenefits, engineerBenefits, superAdminBenefits].forEach(el => el?.classList.add('hidden'));
+      
+      if (this.superAdminMode) {
+        superAdminOptions?.classList.remove('hidden');
+        engineerOptions?.classList.remove('hidden');
+        superAdminDesc?.classList.remove('hidden');
+        superAdminFeatures?.classList.remove('hidden');
+        superAdminBenefits?.classList.remove('hidden');
+        businessDashboard?.classList.remove('hidden');
+        businessMetricsProgress?.classList.remove('hidden');
+        exportTechnicalBtn?.classList.remove('hidden');
+        exportExecutiveBtn?.classList.remove('hidden');
+      } else if (this.engineerMode) {
+        engineerOptions?.classList.remove('hidden');
+        engineerDesc?.classList.remove('hidden');
+        engineerFeatures?.classList.remove('hidden');
+        engineerBenefits?.classList.remove('hidden');
+        exportTechnicalBtn?.classList.remove('hidden');
+      } else {
+        standardDesc?.classList.remove('hidden');
+        standardFeatures?.classList.remove('hidden');
+        standardBenefits?.classList.remove('hidden');
+      }
+    }
+    
+    async startEnhancedScan() {
+      const targetUrl = document.getElementById('target-url').value;
+      const legalAgreement = document.getElementById('legal-agreement').checked;
+      const adminKey = this.adminKeyInput.value;
+      
+      if (!legalAgreement) {
+        alert('Please confirm you have authorization to scan this website.');
+        return;
+      }
+      
+      if (this.superAdminMode && !adminKey) {
+        alert('Please enter the super admin access key.');
+        return;
+      }
+      
+      // Show progress, hide welcome
+      this.welcomeMessage.classList.add('hidden');
+      this.progressSection.classList.remove('hidden');
+      
+      // Configure enhanced scan based on checkboxes
+      const scanConfig = {
+        headers: document.getElementById('scan-headers').checked,
+        ssl: document.getElementById('scan-ssl').checked,
+        info: document.getElementById('scan-info').checked,
+        common: document.getElementById('scan-common').checked,
+        // Engineer mode options
+        advancedHeaders: this.engineerMode && document.getElementById('scan-advanced-headers').checked,
+        waf: this.engineerMode && document.getElementById('scan-waf').checked,
+        techStack: this.engineerMode && document.getElementById('scan-tech-stack').checked,
+        // Super admin mode options
+        contentAnalysis: this.superAdminMode && document.getElementById('scan-content-analysis').checked,
+        privacyCompliance: this.superAdminMode && document.getElementById('scan-privacy-compliance').checked,
+        performanceSecurity: this.superAdminMode && document.getElementById('scan-performance-security').checked,
+        socialMediaAudit: this.superAdminMode && document.getElementById('scan-social-media').checked,
+        thirdPartyScripts: this.superAdminMode && document.getElementById('scan-third-party').checked,
+        seoSecurity: this.superAdminMode && document.getElementById('scan-seo-security').checked,
+        accessibilitySecurity: this.superAdminMode && document.getElementById('scan-accessibility').checked
+      };
+      
+      this.totalTasks = Object.values(scanConfig).filter(Boolean).length;
+      this.completedTasks = 0;
+      
+      try {
+        await this.performEnhancedScan(targetUrl, scanConfig, adminKey);
+        this.displayEnhancedResults();
+      } catch (error) {
+        console.error('Enhanced scan error:', error);
+        this.showError('Enhanced scan failed: ' + error.message);
+      }
+    }
+    
+    async performEnhancedScan(targetUrl, config, adminKey) {
+      this.scanResults = { 
+        url: targetUrl, 
+        findings: [], 
+        score: 0,
+        businessMetrics: {
+          trustScore: 100,
+          professionalismScore: 100,
+          userExperienceScore: 100,
+          brandProtectionScore: 100
+        }
+      };
+      
+      // Standard scans with enhanced API
+      if (config.headers) {
+        await this.runEnhancedScan('headers', targetUrl, adminKey);
+      }
+      
+      if (config.ssl) {
+        await this.runEnhancedScan('ssl', targetUrl, adminKey);
+      }
+      
+      if (config.info) {
+        await this.runEnhancedScan('info', targetUrl, adminKey);
+      }
+      
+      if (config.common) {
+        await this.runEnhancedScan('common', targetUrl, adminKey);
+      }
+      
+      // Engineer mode scans
+      if (config.advancedHeaders) {
+        await this.runEnhancedScan('advanced-headers', targetUrl, adminKey);
+      }
+      
+      if (config.waf) {
+        await this.runEnhancedScan('waf', targetUrl, adminKey);
+      }
+      
+      if (config.techStack) {
+        await this.runEnhancedScan('tech-stack', targetUrl, adminKey);
+      }
+      
+      // Super admin mode scans
+      if (config.contentAnalysis) {
+        await this.runEnhancedScan('content-analysis', targetUrl, adminKey);
+      }
+      
+      if (config.privacyCompliance) {
+        await this.runEnhancedScan('privacy-compliance', targetUrl, adminKey);
+      }
+      
+      if (config.performanceSecurity) {
+        await this.runEnhancedScan('performance-security', targetUrl, adminKey);
+      }
+      
+      if (config.socialMediaAudit) {
+        await this.runEnhancedScan('social-media-audit', targetUrl, adminKey);
+      }
+      
+      if (config.thirdPartyScripts) {
+        await this.runEnhancedScan('third-party-scripts', targetUrl, adminKey);
+      }
+      
+      if (config.seoSecurity) {
+        await this.runEnhancedScan('seo-security', targetUrl, adminKey);
+      }
+      
+      if (config.accessibilitySecurity) {
+        await this.runEnhancedScan('accessibility-security', targetUrl, adminKey);
+      }
+      
+      this.calculateEnhancedSecurityScore();
+    }
+    
+    async runEnhancedScan(type, url, adminKey) {
+      const scanTypeNames = {
+        'headers': 'Enhanced security headers analysis...',
+        'ssl': 'Deep SSL/TLS configuration analysis...',
+        'info': 'Information disclosure assessment...',
+        'common': 'Common vulnerability detection...',
+        'advanced-headers': 'Advanced header analysis...',
+        'waf': 'Web Application Firewall detection...',
+        'tech-stack': 'Technology stack fingerprinting...',
+        'content-analysis': 'Content security analysis...',
+        'privacy-compliance': 'Privacy compliance assessment...',
+        'performance-security': 'Performance security analysis...',
+        'social-media-audit': 'Social media security audit...',
+        'third-party-scripts': 'Third-party script analysis...',
+        'seo-security': 'SEO security validation...',
+        'accessibility-security': 'Accessibility security review...'
+      };
+      
+      this.updateProgress(scanTypeNames[type] || `Analyzing ${type}...`);
+      
+      try {
+        const response = await fetch('/api/enhanced-security-scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            url, 
+            type, 
+            superAdminMode: this.superAdminMode,
+            adminKey: this.superAdminMode ? adminKey : undefined
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Scan failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        this.scanResults.findings.push(...result.findings);
+        
+        // Update business metrics if available
+        if (result.businessMetrics) {
+          Object.assign(this.scanResults.businessMetrics, result.businessMetrics);
+          this.updateBusinessMetrics(result.businessMetrics);
+        }
+        
+        this.completedTasks++;
+        this.updateProgressBar();
+        
+      } catch (error) {
+        console.error(`Enhanced ${type} scan error:`, error);
+        this.addEnhancedFinding('error', 'Scan Error', `Failed to complete ${type} scan`, 'Please try again or contact support');
+        this.completedTasks++;
+        this.updateProgressBar();
+      }
+    }
+    
+    addEnhancedFinding(severity, category, title, description, recommendation = '', businessImpact = '') {
+      this.scanResults.findings.push({
+        severity,
+        category,
+        title,
+        description,
+        recommendation,
+        businessImpact,
+        priority: severity === 'critical' ? 'immediate' : severity === 'high' ? 'high' : 'medium',
+        effort: 'moderate',
+        costEstimate: 'Contact for estimate'
+      });
+    }
+    
+    updateProgress(task) {
+      this.currentTask.textContent = task;
+    }
+    
+    updateProgressBar() {
+      const progress = (this.completedTasks / this.totalTasks) * 100;
+      this.progressBar.style.width = progress + '%';
+      this.overallProgress.textContent = Math.round(progress) + '%';
+    }
+    
+    updateBusinessMetrics(metrics) {
+      if (!this.superAdminMode) return;
+      
+      const elements = {
+        'trust-score': metrics.trustScore,
+        'ux-score': metrics.userExperienceScore,
+        'prof-score': metrics.professionalismScore,
+        'brand-score': metrics.brandProtectionScore
+      };
+      
+      Object.entries(elements).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element && value !== undefined) {
+          element.textContent = Math.round(value);
+        }
+      });
+    }
+    
+    calculateEnhancedSecurityScore() {
+      let score = 100;
+      
+      this.scanResults.findings.forEach(finding => {
+        switch (finding.severity) {
+          case 'critical': score -= 25; break;
+          case 'high': score -= 15; break;
+          case 'medium': score -= 10; break;
+          case 'low': score -= 5; break;
+          case 'warning': score -= 3; break;
+          case 'excellent': score += 2; break;
+        }
+      });
+      
+      this.scanResults.score = Math.max(0, score);
+    }
+    
+    displayEnhancedResults() {
+      this.progressSection.classList.add('hidden');
+      this.resultsSection.classList.remove('hidden');
+      
+      // Update security score
+      const score = this.scanResults.score;
+      const scoreColor = score >= 80 ? 'text-green-400' : score >= 60 ? 'text-yellow-400' : 'text-red-400';
+      
+      this.securityScore.innerHTML = `
+        <div class="text-2xl font-bold ${scoreColor}">${score}/100</div>
+        <div class="text-sm text-slate-400">Enhanced Security Score</div>
+      `;
+      
+      // Update business dashboard if in super admin mode
+      if (this.superAdminMode && this.scanResults.businessMetrics) {
+        const metrics = this.scanResults.businessMetrics;
+        document.getElementById('dashboard-trust').textContent = Math.round(metrics.trustScore);
+        document.getElementById('dashboard-ux').textContent = Math.round(metrics.userExperienceScore);
+        document.getElementById('dashboard-prof').textContent = Math.round(metrics.professionalismScore);
+        document.getElementById('dashboard-brand').textContent = Math.round(metrics.brandProtectionScore);
+      }
+      
+      // Group findings by category
+      const categories = {};
+      this.scanResults.findings.forEach(finding => {
+        if (!categories[finding.category]) {
+          categories[finding.category] = [];
+        }
+        categories[finding.category].push(finding);
+      });
+      
+      // Display findings by category with enhanced styling
+      this.resultsContainer.innerHTML = '';
+      Object.entries(categories).forEach(([category, findings]) => {
+        this.renderEnhancedCategory(category, findings);
+      });
+      
+      // If no findings, show enhanced success message
+      if (this.scanResults.findings.length === 0) {
+        this.resultsContainer.innerHTML = `
+          <div class="text-center py-8">
+            <div class="text-6xl mb-4">🌟</div>
+            <h3 class="text-xl font-bold text-purple-400 mb-2">Exceptional Security Posture!</h3>
+            <p class="text-slate-300">The enhanced security scan completed successfully with no major issues detected.</p>
+            <p class="text-slate-400 mt-2">Your website demonstrates excellent security practices.</p>
+          </div>
+        `;
+      }
+    }
+    
+    renderEnhancedCategory(category, findings) {
+      const categoryDiv = document.createElement('div');
+      categoryDiv.className = 'bg-slate-700/30 rounded-lg p-4 border border-slate-600';
+      
+      const severityColors = {
+        critical: 'border-red-500',
+        high: 'border-orange-500',
+        medium: 'border-yellow-500',
+        low: 'border-blue-500',
+        warning: 'border-purple-500',
+        info: 'border-slate-500',
+        excellent: 'border-green-500'
+      };
+      
+      const severityBadges = {
+        critical: 'bg-red-900 text-red-300',
+        high: 'bg-orange-900 text-orange-300',
+        medium: 'bg-yellow-900 text-yellow-300',
+        low: 'bg-blue-900 text-blue-300',
+        warning: 'bg-purple-900 text-purple-300',
+        info: 'bg-slate-900 text-slate-300',
+        excellent: 'bg-green-900 text-green-300'
+      };
+      
+      categoryDiv.innerHTML = `
+        <h4 class="font-bold text-white mb-3 flex items-center">
+          <span class="mr-2">${this.getCategoryIcon(category)}</span>
+          ${category} (${findings.length} findings)
+        </h4>
+        <div class="space-y-4">
+          ${findings.map(finding => `
+            <div class="border-l-4 ${severityColors[finding.severity] || 'border-slate-500'} pl-4 bg-slate-800/30 p-3 rounded-r">
+              <div class="flex items-start justify-between mb-2">
+                <h5 class="font-medium text-white">${finding.title}</h5>
+                <span class="text-xs px-2 py-1 rounded ${severityBadges[finding.severity] || 'bg-slate-900 text-slate-300'}">${finding.severity?.toUpperCase()}</span>
+              </div>
+              <p class="text-sm text-slate-400 mb-2">${finding.description}</p>
+              
+              ${finding.businessImpact ? `
+                <div class="text-sm text-orange-300 mb-2">
+                  <strong>Business Impact:</strong> ${finding.businessImpact}
+                </div>
+              ` : ''}
+              
+              ${finding.recommendation ? `
+                <div class="text-sm text-green-300 mb-2">
+                  <strong>Recommendation:</strong> ${finding.recommendation}
+                </div>
+              ` : ''}
+              
+              ${this.superAdminMode ? `
+                <div class="mt-3 p-2 bg-slate-800 rounded text-xs space-y-1">
+                  ${finding.priority ? `<p><strong>Priority:</strong> <span class="text-${finding.priority === 'immediate' ? 'red' : finding.priority === 'high' ? 'orange' : 'yellow'}-400">${finding.priority.toUpperCase()}</span></p>` : ''}
+                  ${finding.effort ? `<p><strong>Implementation Effort:</strong> ${finding.effort}</p>` : ''}
+                  ${finding.costEstimate ? `<p><strong>Cost Estimate:</strong> ${finding.costEstimate}</p>` : ''}
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      this.resultsContainer.appendChild(categoryDiv);
+    }
+    
+    getCategoryIcon(category) {
+      const icons = {
+        'Security Headers': '🛡️',
+        'SSL/TLS Security': '🔒',
+        'Information Disclosure': '📄',
+        'Exposed Paths': '📁',
+        'Content Security': '📝',
+        'Privacy Compliance': '🔐',
+        'Performance Security': '⚡',
+        'Social Media Security': '📱',
+        'Third-Party Scripts': '🔗',
+        'SEO Security': '🔍',
+        'Accessibility Security': '♿',
+        'Advanced Headers': '⚙️',
+        'WAF Detection': '🔥',
+        'Technology Stack': '🛠️'
+      };
+      return icons[category] || '📊';
+    }
+    
+    resetScan() {
+      this.resultsSection.classList.add('hidden');
+      this.progressSection.classList.add('hidden');
+      this.welcomeMessage.classList.remove('hidden');
+      this.scanForm.reset();
+      
+      // Reset checkboxes to default
+      document.getElementById('scan-headers').checked = true;
+      document.getElementById('scan-ssl').checked = true;
+      document.getElementById('scan-info').checked = true;
+      document.getElementById('scan-common').checked = true;
+      
+      // Reset URL to chalant.net for demo
+      document.getElementById('target-url').value = 'https://www.chalant.net/';
+    }
+    
+    exportBusinessReport() {
+      this.generatePDFReport('business');
+    }
+    
+    exportTechnicalReport() {
+      const reportData = {
+        scan: {
+          timestamp: new Date().toISOString(),
+          target: this.scanResults.url,
+          mode: this.superAdminMode ? 'super-admin' : this.engineerMode ? 'engineer' : 'standard',
+          score: this.scanResults.score,
+          businessMetrics: this.scanResults.businessMetrics
+        },
+        findings: this.scanResults.findings,
+        recommendations: this.generateRecommendations()
+      };
+      
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `enhanced-security-scan-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    exportExecutiveSummary() {
+      this.generatePDFReport('executive');
+    }
+    
+    generateRecommendations() {
+      const priorities = {
+        immediate: [],
+        high: [],
+        medium: [],
+        low: []
+      };
+      
+      this.scanResults.findings.forEach(finding => {
+        if (finding.priority && finding.recommendation) {
+          priorities[finding.priority].push({
+            title: finding.title,
+            recommendation: finding.recommendation,
+            businessImpact: finding.businessImpact,
+            costEstimate: finding.costEstimate
+          });
+        }
+      });
+      
+      return priorities;
+    }
+    
+    generatePDFReport(type) {
+      const printWindow = window.open('', '_blank');
+      const reportContent = this.createReportHTML(type);
+      
+      printWindow.document.write(reportContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+    
+    createReportHTML(type) {
+      const isExecutive = type === 'executive';
+      const isBusiness = type === 'business';
+      
+      return `
+        <html>
+          <head>
+            <title>${isExecutive ? 'Executive Security Summary' : 'Enhanced Security Report'} - ${this.scanResults.url}</title>
+            <style>
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+                margin: 40px; 
+                line-height: 1.6;
+                color: #333;
+              }
+              .header { 
+                border-bottom: 3px solid #7c3aed; 
+                padding-bottom: 20px; 
+                margin-bottom: 30px; 
+              }
+              .header h1 {
+                color: #7c3aed;
+                margin: 0;
+                font-size: 2.5em;
+              }
+              .metrics-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+                margin: 30px 0;
+                padding: 20px;
+                background: #f8fafc;
+                border-radius: 8px;
+              }
+              .metric {
+                text-align: center;
+                padding: 15px;
+                background: white;
+                border-radius: 6px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+              }
+              .metric-value {
+                font-size: 2em;
+                font-weight: bold;
+                margin-bottom: 5px;
+              }
+              .finding { 
+                margin-bottom: 20px; 
+                padding: 15px; 
+                border-left: 4px solid #333; 
+                background: #f9fafb;
+                border-radius: 0 6px 6px 0;
+              }
+              .critical { border-color: #dc2626; }
+              .high { border-color: #ea580c; }
+              .medium { border-color: #ca8a04; }
+              .low { border-color: #2563eb; }
+              .excellent { border-color: #16a34a; }
+              .priority {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 0.8em;
+                font-weight: bold;
+                margin-left: 10px;
+              }
+              .priority-immediate { background: #fee2e2; color: #dc2626; }
+              .priority-high { background: #fed7aa; color: #ea580c; }
+              .priority-medium { background: #fef3c7; color: #ca8a04; }
+              .summary-box {
+                background: #f0f9ff;
+                border: 1px solid #7dd3fc;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 20px 0;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>${isExecutive ? '📊 Executive Security Summary' : '🔍 Enhanced Security Report'}</h1>
+              <div style="margin-top: 10px;">
+                <strong>Target:</strong> ${this.scanResults.url}<br>
+                <strong>Security Score:</strong> ${this.scanResults.score}/100<br>
+                <strong>Report Generated:</strong> ${new Date().toLocaleDateString()}<br>
+                <strong>Analysis Mode:</strong> ${this.superAdminMode ? 'Super Admin (Business-Grade)' : this.engineerMode ? 'Engineer' : 'Standard'}
+              </div>
+            </div>
+            
+            ${this.superAdminMode ? `
+              <div class="metrics-grid">
+                <div class="metric">
+                  <div class="metric-value" style="color: #3b82f6;">${Math.round(this.scanResults.businessMetrics?.trustScore || 0)}</div>
+                  <div>Trust Score</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-value" style="color: #10b981;">${Math.round(this.scanResults.businessMetrics?.userExperienceScore || 0)}</div>
+                  <div>User Experience</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-value" style="color: #f59e0b;">${Math.round(this.scanResults.businessMetrics?.professionalismScore || 0)}</div>
+                  <div>Professionalism</div>
+                </div>
+                <div class="metric">
+                  <div class="metric-value" style="color: #8b5cf6;">${Math.round(this.scanResults.businessMetrics?.brandProtectionScore || 0)}</div>
+                  <div>Brand Protection</div>
+                </div>
+              </div>
+            ` : ''}
+            
+            ${isExecutive ? this.generateExecutiveSummaryContent() : this.generateDetailedReportContent()}
+          </body>
+        </html>
+      `;
+    }
+    
+    generateExecutiveSummaryContent() {
+      const criticalFindings = this.scanResults.findings.filter(f => f.severity === 'critical').length;
+      const highFindings = this.scanResults.findings.filter(f => f.severity === 'high').length;
+      const totalFindings = this.scanResults.findings.length;
+      
+      return `
+        <div class="summary-box">
+          <h2>🎯 Executive Summary</h2>
+          <p><strong>Overall Assessment:</strong> ${this.getOverallAssessment()}</p>
+          <p><strong>Key Statistics:</strong></p>
+          <ul>
+            <li>Security Score: ${this.scanResults.score}/100</li>
+            <li>Critical Issues: ${criticalFindings}</li>
+            <li>High Priority Issues: ${highFindings}</li>
+            <li>Total Findings: ${totalFindings}</li>
+          </ul>
+        </div>
+        
+        <h2>🚨 Immediate Action Required</h2>
+        ${this.scanResults.findings.filter(f => f.priority === 'immediate').map(finding => `
+          <div class="finding critical">
+            <h3>${finding.title} <span class="priority priority-immediate">IMMEDIATE</span></h3>
+            <p><strong>Business Impact:</strong> ${finding.businessImpact || 'Not specified'}</p>
+            <p><strong>Recommendation:</strong> ${finding.recommendation || 'Contact security team'}</p>
+            <p><strong>Cost Estimate:</strong> ${finding.costEstimate || 'Contact for estimate'}</p>
+          </div>
+        `).join('')}
+        
+        <h2>📈 Investment Recommendations</h2>
+        <p>Based on the security assessment, we recommend prioritizing investments in the following areas:</p>
+        ${this.generateInvestmentRecommendations()}
+      `;
+    }
+    
+    generateDetailedReportContent() {
+      const categories = {};
+      this.scanResults.findings.forEach(finding => {
+        if (!categories[finding.category]) {
+          categories[finding.category] = [];
+        }
+        categories[finding.category].push(finding);
+      });
+      
+      return Object.entries(categories).map(([category, findings]) => `
+        <h2>${this.getCategoryIcon(category)} ${category}</h2>
+        ${findings.map(finding => `
+          <div class="finding ${finding.severity}">
+            <h3>${finding.title} ${finding.priority ? `<span class="priority priority-${finding.priority}">${finding.priority.toUpperCase()}</span>` : ''}</h3>
+            <p><strong>Description:</strong> ${finding.description}</p>
+            ${finding.businessImpact ? `<p><strong>Business Impact:</strong> ${finding.businessImpact}</p>` : ''}
+            ${finding.recommendation ? `<p><strong>Recommendation:</strong> ${finding.recommendation}</p>` : ''}
+            ${finding.costEstimate ? `<p><strong>Cost Estimate:</strong> ${finding.costEstimate}</p>` : ''}
+          </div>
+        `).join('')}
+      `).join('');
+    }
+    
+    getOverallAssessment() {
+      const score = this.scanResults.score;
+      if (score >= 90) return 'Excellent - Your website demonstrates exceptional security practices';
+      if (score >= 80) return 'Good - Strong security posture with minor improvements needed';
+      if (score >= 60) return 'Fair - Some security concerns that should be addressed';
+      if (score >= 40) return 'Poor - Significant security issues requiring immediate attention';
+      return 'Critical - Severe security vulnerabilities requiring urgent remediation';
+    }
+    
+    generateInvestmentRecommendations() {
+      const recommendations = [];
+      
+      const criticalCount = this.scanResults.findings.filter(f => f.severity === 'critical').length;
+      const highCount = this.scanResults.findings.filter(f => f.severity === 'high').length;
+      
+      if (criticalCount > 0) {
+        recommendations.push('<li><strong>Immediate Security Remediation:</strong> Address critical vulnerabilities to prevent data breaches</li>');
+      }
+      
+      if (highCount > 0) {
+        recommendations.push('<li><strong>Security Infrastructure:</strong> Implement comprehensive security controls</li>');
+      }
+      
+      if (this.superAdminMode) {
+        recommendations.push('<li><strong>Compliance Investment:</strong> Ensure GDPR/CCPA compliance for legal protection</li>');
+        recommendations.push('<li><strong>Brand Protection:</strong> Enhance security measures to protect brand reputation</li>');
+      }
+      
+      return recommendations.length ? `<ul>${recommendations.join('')}</ul>` : '<p>Continue current security practices and regular monitoring.</p>';
+    }
+    
+    showError(message) {
+      this.currentTask.textContent = 'Error: ' + message;
+      this.currentTask.className = 'text-sm text-red-400';
+    }
+  }
+  
+  // Initialize the enhanced scanner when the page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    new EnhancedSecurityScanner();
+  });
+</script>
