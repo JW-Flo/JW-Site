@@ -186,6 +186,64 @@ chmod +x scripts/smoke.sh # first run
 - `GET /api/waitlist` – waitlist count (feature-flag: `FEATURE_WAITLIST`)
 - `POST /api/waitlist` – join waitlist (feature-flag: `FEATURE_WAITLIST`)
 
+### Admin Consent Metrics Portal
+
+An intentionally unlinked, low-noise admin view for aggregated consent preferences to validate privacy UX and regional gating. Accessible at:
+
+- Page: `/admin-consent`
+- Backend API: `GET /api/admin/consent-stats`
+
+Authentication:
+
+Provide a single header `X-Admin-Key: <secret>` (value must match environment variable `CONSENT_ADMIN_KEY`). If the header is missing or incorrect, the API returns `404` (not `401/403`) to avoid advertising its presence.
+
+What you see:
+
+- Totals of consent_events rows (overall + analytics, research, marketing opt-ins)
+- 25 most recent consent events (session fragment, country, individual flags)
+- CSV export of the currently displayed recent events (client‑side only)
+
+Enabling:
+
+1. In Cloudflare Pages project > Settings > Environment Variables add a variable `CONSENT_ADMIN_KEY` with a sufficiently strong random value (>= 24 chars). Do NOT commit the value to `wrangler.toml`.
+2. Redeploy. The page will then respond once the correct header is supplied.
+
+Operational Tips:
+
+- Rotate the key periodically; simply update the Pages variable and redeploy.
+- Because the page is discoverable if someone enumerates routes, its source sets `<meta name="robots" content="noindex,nofollow"/>` and a generic title. Treat security as relying on possession of the header secret, not obscurity.
+- Consider adding IP-based rate limiting in front of `/api/admin/consent-stats` later (currently small attack surface; returns 404 quickly on mismatch).
+- If you temporarily want to disable access, unset `CONSENT_ADMIN_KEY` and redeploy (API will always 404; UI shows Not found).
+
+Data Source:
+
+Rows originate from the `consent_events` D1 table created in migration `001_consent_events.sql`. Ensure feature flag `FEATURE_CONSENT_D1` (if used) and migrations are applied so events are being inserted.
+
+Client Behavior:
+
+- The page stores the provided key only for the current tab session via `sessionStorage` (cleared on tab close).
+- No key is logged or persisted server-side.
+
+Threat Model Notes:
+
+- Wrong key: indistinguishable from missing endpoint (404).
+- Brute force: improbable success before rotation if key sufficiently random; add WAF/rate limits if risk appetite demands.
+- Leakage: avoid pasting key into shared screenshots; use the password field provided.
+
+To remove the portal entirely, delete `src/pages/admin-consent.astro` and redeploy.
+
+Key Rotation Helper:
+
+Rotate + set new admin key locally:
+
+```bash
+npm run rotate:consent-admin-key            # prints new key & sets secret (no deploy)
+npm run rotate:consent-admin-key -- --deploy # rotate + build + deploy
+npm run rotate:consent-admin-key -- --dry-run # show what would happen
+```
+
+Store the printed key immediately; it cannot be retrieved later. A rotation only becomes active after deployment.
+
 ### Waitlist Feature
 
 The optional early‑access waitlist is disabled by default and gated by the environment variable `FEATURE_WAITLIST`.
