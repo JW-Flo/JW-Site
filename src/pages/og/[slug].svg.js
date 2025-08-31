@@ -1,4 +1,7 @@
 import { siteMeta } from "../../data/siteMeta";
+
+export const prerender = true;
+
 const postModules = import.meta.glob("../blog/*.{md,mdx}", { eager: true });
 
 export async function getStaticPaths() {

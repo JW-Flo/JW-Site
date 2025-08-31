@@ -166,6 +166,16 @@ export class TetrisGame {
       return;
     }
 
+    if (e.key === "s" || e.key === "S") {
+      e.preventDefault();
+      e.stopPropagation();
+      // Manual score save
+      if (!this.gameOver && this.score > 0) {
+        this.gameManager.saveScore("Tetris", this.score);
+      }
+      return;
+    }
+
     if (this.paused || this.gameOver) return;
 
     switch (e.key) {
@@ -311,6 +321,10 @@ export class TetrisGame {
     ) {
       this.gameOver = true;
       this.gameManager.playSound("gameOver");
+      // Save the score when game ends
+      if (this.score > 0) {
+        this.gameManager.saveScore("Tetris", this.score);
+      }
     }
   }
 

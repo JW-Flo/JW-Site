@@ -1,63 +1,57 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 🎮 CLEAN PROFESSIONAL THEME VARIABLES */
 :root {
-  --color-primary: #0ea5e9; /* cyan-500 */
-  --color-accent: #7c3aed; /* violet-600 */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-background: #071023; /* darker navy */
-  --color-surface: #0b1220;
-  --color-text: #e6eef8;
-  --color-text-secondary: #9fb3c8;
-  --color-border: #123243;
+  --color-primary: #3b82f6; /* professional blue */
+  --color-accent: #6366f1; /* indigo accent */
+  --color-success: #10b981; /* clean green */
+  --color-warning: #f59e0b; /* amber warning */
+  --color-danger: #ef4444; /* red danger */
+  --color-background: #0f172a; /* dark slate */
+  --color-surface: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-border: #475569;
+  
+  /* Subtle accent colors */
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
 }
 
-/* Reduced and unified neon palette to avoid excessive color clashes */
-:root {
-  --neon-cyan: #00d3ff;
-  --neon-pink: #ff5ed7;
-  --neon-green: #3ef59a;
-  --neon-yellow: #fff176;
-  --neon-blue: #6fd2ff;
-}
-
+/* 🎮 CLEAN PROFESSIONAL BODY STYLING */
 body {
-  @apply bg-slate-900 text-slate-100 font-sans antialiased;
-  background: linear-gradient(
-    135deg,
-    var(--color-background) 0%,
-    var(--color-surface) 100%
-  );
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  @apply text-slate-100 font-sans antialiased;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  font-family: "Inter", system-ui, sans-serif;
   position: relative;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
+/* Subtle background texture (optional) */
 body::before {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: radial-gradient(
-      circle at 20% 30%,
-      rgba(59, 130, 246, 0.05) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 70%,
-      rgba(16, 185, 129, 0.05) 0%,
-      transparent 50%
-    );
+  background-image: 
+    linear-gradient(rgba(59, 130, 246, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
   pointer-events: none;
-  z-index: -1;
+  z-index: 1;
+  opacity: 0.3;
 }
+
+/* 🎮 RETRO ARCADE COMPONENTS */
 
 /* Professional hover effects */
 .hover-lift {
@@ -522,10 +516,6 @@ button:focus-visible {
   transform: scale(1.1);
 }
 
-.game-mode .text-glow {
-  text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
-}
-
 .game-mode .pulse-neon {
   animation: pulse-neon-game 1.5s ease-in-out infinite;
 }
@@ -632,3 +622,158 @@ nav a {
   
   (This function doesn't exist yet... or does it? 😉)
 */
+
+/* 🎮 ENHANCED RETRO ARCADE ANIMATIONS */
+@keyframes neonPulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor; 
+  }
+  50% { 
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; 
+  }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-1px); }
+  100% { transform: translateY(100px); }
+}
+
+/* 🎮 RETRO ARCADE BUTTON STYLES */
+.retro-button {
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.retro-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.retro-button:hover::before {
+  left: 100%;
+}
+
+/* 🎮 RETRO PANEL EFFECTS */
+.retro-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.retro-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  animation: scanline 2s linear infinite;
+}
+
+/* 🎮 GLITCH EFFECT */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  animation: glitch 0.3s infinite;
+  color: #ff00ff;
+  z-index: -1;
+}
+
+.glitch::after {
+  animation: glitch 0.3s infinite reverse;
+  color: #00ffff;
+  z-index: -2;
+}
+
+/* 🎮 UTILITY CLASSES */
+.blink {
+  animation: blink 1s infinite;
+}
+
+.animate-gridPulse {
+  animation: gridPulse 3s ease-in-out infinite;
+}
+
+/* 🎮 REFINED RETRO GRID BACKGROUND */
+.retro-grid-bg {
+  background-image: 
+    linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  position: relative;
+}
+
+.retro-grid-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(15, 23, 42, 0.8) 70%);
+  pointer-events: none;
+}
+
+/* 🎮 REFINED RETRO TEXT EFFECTS */
+.retro-text-glow {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.retro-text-glow-soft {
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+/* 🎮 TERMINAL CURSOR ANIMATION */
+.terminal-cursor {
+  animation: terminal-blink 1.2s infinite;
+}
+
+@keyframes terminal-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes gridPulse {
+  0%, 100% { 
+    background-size: 50px 50px;
+    opacity: 0.6;
+  }
+  50% { 
+    background-size: 52px 52px;
+    opacity: 0.8;
+  }
+}

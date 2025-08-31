@@ -172,6 +172,16 @@ export class SpaceInvadersGame {
       return;
     }
 
+    if (e.key === "s" || e.key === "S") {
+      e.preventDefault();
+      e.stopPropagation();
+      // Manual score save
+      if (!this.gameOver && this.score > 0) {
+        this.gameManager.saveScore("Space Invaders", this.score);
+      }
+      return;
+    }
+
     // Update key states for smooth movement
     if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
       e.preventDefault();
@@ -378,6 +388,10 @@ export class SpaceInvadersGame {
     ) {
       this.gameOver = true;
       this.gameManager.playSound("gameOver");
+      // Save the score when game ends
+      if (this.score > 0) {
+        this.gameManager.saveScore("Space Invaders", this.score);
+      }
     }
   }
 
@@ -411,6 +425,10 @@ export class SpaceInvadersGame {
           if (this.lives <= 0) {
             this.gameOver = true;
             this.gameManager.playSound("gameOver");
+            // Save the score when game ends
+            if (this.score > 0) {
+              this.gameManager.saveScore("Space Invaders", this.score);
+            }
           }
         }
       }
@@ -421,6 +439,10 @@ export class SpaceInvadersGame {
       if (invader.alive && this.collides(invader, this.player)) {
         this.gameOver = true;
         this.gameManager.playSound("gameOver");
+        // Save the score when game ends
+        if (this.score > 0) {
+          this.gameManager.saveScore("Space Invaders", this.score);
+        }
       }
     });
 

@@ -22,7 +22,6 @@ test('Game modules can be imported', async () => {
 // Test if all game files exist
 test('All game files exist in public folder', async () => {
   const fs = await import('fs');
-  const path = await import('path');
   
   const gameFiles = [
     'public/GameManager.js',

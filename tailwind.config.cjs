@@ -6,7 +6,9 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"], // Professional sans-serif
-        mono: ["JetBrains Mono", "Fira Code", "monospace"], // Professional monospaced
+        mono: ["JetBrains Mono", "Courier New", "monospace"], // Code font
+        retro: ["Orbitron", "Inter", "sans-serif"], // Retro gaming font
+        display: ["Orbitron", "Inter", "system-ui", "sans-serif"], // For gaming headings
       },
       colors: {
         primary: {
@@ -93,14 +95,20 @@ module.exports = {
           800: "#1e293b",
           900: "#0f172a",
         },
-        // Vibrant Neon Colors for Retro Theme
+        // Refined Retro Arcade Colors - Premium Gaming Aesthetic
+        'retro-cyan': '#00d9ff',      // Softer cyan
+        'retro-pink': '#ff6b9d',      // Softer pink  
+        'retro-green': '#00ff88',     // Softer green
+        'retro-yellow': '#ffeb3b',    // Warmer yellow
+        'retro-purple': '#9c27b0',    // Rich purple
+        'retro-orange': '#ff9800',    // Warm orange
         neon: {
-          blue: "#00ffff", // Cyan
-          pink: "#ff00ff", // Magenta
-          green: "#00ff00", // Lime green
-          yellow: "#ffff00", // Bright yellow
-          orange: "#ff8000", // Orange
-          purple: "#8000ff", // Purple
+          cyan: "#00d9ff",    // Premium cyan
+          pink: "#ff6b9d",    // Premium pink
+          green: "#00ff88",   // Premium green
+          yellow: "#ffeb3b",  // Premium yellow
+          purple: "#9c27b0",  // Premium purple
+          orange: "#ff9800",  // Premium orange
         },
         brand: {
           DEFAULT: "#1e40af", // Professional blue as primary

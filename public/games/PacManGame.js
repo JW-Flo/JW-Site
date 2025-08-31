@@ -244,6 +244,16 @@ export class PacManGame {
       return;
     }
 
+    if (e.key === "s" || e.key === "S") {
+      e.preventDefault();
+      e.stopPropagation();
+      // Manual score save
+      if (!this.gameOver && this.score > 0) {
+        this.gameManager.saveScore("Pac-Man", this.score);
+      }
+      return;
+    }
+
     if (this.paused || this.gameOver) return;
 
     // Set next direction (will be applied when possible)
@@ -464,6 +474,10 @@ export class PacManGame {
     if (this.lives <= 0) {
       this.gameOver = true;
       this.gameManager.playSound("gameOver");
+      // Save the score when game ends
+      if (this.score > 0) {
+        this.gameManager.saveScore("Pac-Man", this.score);
+      }
     } else {
       this.resetPacman();
       this.gameManager.playSound("explosion");

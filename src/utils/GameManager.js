@@ -90,8 +90,8 @@ export class GameManager {
                 GameClass = exp;
                 break;
               }
-            } catch (e) {
-              // ignore problematic getters
+            } catch (gameError) {
+              console.warn(`Error accessing export ${k}:`, gameError);
             }
           }
         }
