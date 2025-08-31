@@ -41,11 +41,14 @@ id = "3dd7938561f5402bb41760edda181030"
 preview_id = "64323cab0ce447d182e8a5038461e6d3"
 
 # Lightweight metadata persistence for scanner sessions (stores ONLY minimal, non-personal aggregates per consent)
-[[kv_namespaces]]
-binding = "SCANNER_META"
-# Set real namespace IDs in production (below are placeholders / examples)
-id = "11111111111111111111111111111111"
-preview_id = "22222222222222222222222222222222"
+# NOTE: Disabled placeholder binding to prevent deploy failure. Uncomment and set real IDs after creating namespace:
+#   wrangler kv:namespace create SCANNER_META --env=production
+#   wrangler kv:namespace create SCANNER_META --env=preview
+# Then place the resulting ids below.
+# [[kv_namespaces]]
+# binding = "SCANNER_META"
+# id = "<prod-id>"
+# preview_id = "<preview-id>"
 
 # Optional: SESSION_SIGNING_KEY (set as secret in Pages dashboard) used to sign ephemeral session cookie
 # Do NOT store here; example for local dev only (uncomment if needed)
