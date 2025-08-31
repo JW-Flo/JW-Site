@@ -198,6 +198,16 @@ FEATURE_WAITLIST=true npm run dev
 
 Or set in Cloudflare Pages project settings (Environment Variables) for preview / production.
 
+Apply database migration (creates `waitlist_signups` table):
+
+```bash
+# Local (uses local D1 instance)
+npm run db:migrate:local
+
+# Remote (production binding)
+npm run db:migrate
+```
+
 Schema (migration `002_waitlist.sql`):
 
 ```sql
