@@ -6,6 +6,7 @@ interface ImportMetaEnv {
 	readonly SCANNER_META?: KVNamespace; // Optional KV namespace for minimal consent-gated scan metadata
 	readonly AGENT_SESSIONS?: KVNamespace; // KV namespace for agent session persistence (optional)
 	readonly AGENT_RL?: KVNamespace; // KV namespace for agent rate limiting (optional)
+	readonly FEATURE_AGENT_SCHEMA?: string; // Optional feature flag to enable schema validation ("true" to enforce)
 }
 
 interface ImportMeta {
@@ -23,6 +24,7 @@ declare global {
 					SCANNER_META?: KVNamespace; // Optional KV namespace for minimal consent-gated scan metadata
 					AGENT_SESSIONS?: KVNamespace; // KV namespace for agent session persistence (optional)
 					AGENT_RL?: KVNamespace; // KV namespace for agent rate limiting (optional)
+						FEATURE_AGENT_SCHEMA?: string; // Optional feature flag to enable schema validation
 				}
 			}
 		}

@@ -1,10 +1,10 @@
 // Runtime dispatcher (AGENT-01/AGENT-05)
-import { getTool, validateInput } from './registry.js';
+import { getTool, validateInput, validateOutput } from './registry.js';
 import { AgentRequestBody, AgentResponseBody } from './types.js';
 import { newSession, loadSession, saveSession } from './sessionStore.js';
 import { projectClientFlags, loadFlags } from '../config/flags.js';
 import { logAgent } from './log.js';
-import { incrToolCall, incrToolError, incrRateLimited } from './metrics.js';
+import { incrToolCall, incrToolError, incrRateLimited, incrValidationError } from './metrics.js';
 import { checkRateLimit } from './rateLimit.js';
 
 // Simple UUID-ish generator (not RFC4122 strict but sufficient for correlation)
@@ -53,8 +53,15 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset, correlationId: cid });
     return new Response(JSON.stringify({ ok: false, error: 'rate-limited', sessionId, tool: toolName, retryAfter: ra, correlationId: cid }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': ra.toString() } });
   }
-  const validationErr = validateInput(tool, input);
-  if (validationErr) return jsonError(`invalid-input:${validationErr}`, 400, start, sessionId, cid);
+  const schemaFlag = env.FEATURE_AGENT_SCHEMA;
+  if (schemaFlag === 'true') {
+    const vIn = validateInput(tool, input);
+    if (!vIn.ok) {
+      incrValidationError(toolName);
+      logAgent({ level: 'error', msg: 'validation-error', tool: toolName, sessionId, correlationId: cid, issues: vIn.issues });
+      return new Response(JSON.stringify({ ok: false, error: 'validation_error', issues: vIn.issues, sessionId, tool: toolName, correlationId: cid }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
   const ctx = {
     env,
     ip: ip || undefined,
@@ -73,6 +80,14 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   }
   session.messages.push({ role: 'user', content: JSON.stringify({ tool: toolName, input }), ts: Date.now() });
   await saveSession(env, session);
+  if (schemaFlag === 'true' && tool.outputSchema) {
+    const vOut = validateOutput(tool, result.ok ? result.data : undefined);
+    if (!vOut.ok) {
+      incrValidationError(toolName);
+      logAgent({ level: 'error', msg: 'output-validation-error', tool: toolName, sessionId, correlationId: cid, issues: vOut.issues });
+      return new Response(JSON.stringify({ ok: false, error: 'output_validation_error', issues: vOut.issues, sessionId, tool: toolName, correlationId: cid }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
   const response: AgentResponseBody = {
     sessionId: session.id,
     ok: result.ok,
