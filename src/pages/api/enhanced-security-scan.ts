@@ -25,7 +25,9 @@ type EnhancedScanType =
   | 'api-security'
   | 'business-logic'
   | 'cloud-security'
-  | 'compliance-frameworks';
+  | 'compliance-frameworks'
+  | 'threat-intel'
+  | 'full';
 
 interface EnhancedScanRequest {
   url: string;
@@ -64,10 +66,11 @@ interface EnhancedScanResult {
 // Constants & configuration
 const MAX_URL_LENGTH = 2048; // Prevent abuse via extremely long URLs
 
-// Super admin access key now sourced from environment variable SUPER_ADMIN_KEY
-// Configure in Cloudflare Pages project settings (Environment Variables)
-// Never commit real secrets. Optional fallback only for local dev if env not set.
-const SUPER_ADMIN_KEY = import.meta.env.SUPER_ADMIN_KEY || '';
+// Super admin access key primarily sourced from runtime environment (locals.runtime.env)
+// We still read any build-time injected value (import.meta.env) but prefer runtime so tests
+// can supply a key without rebuilding. If neither present, superAdminMode will return a
+// configuration error instead of silently allowing elevation.
+const BUILD_SUPER_ADMIN_KEY = (import.meta as any).env?.SUPER_ADMIN_KEY || '';
 
 export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
   try {
@@ -89,7 +92,7 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
         }
       });
     }
-    const { url, type, superAdminMode, adminKey }: EnhancedScanRequest = await request.json();
+  const { url, type, superAdminMode, adminKey }: EnhancedScanRequest = await request.json();
 
     // Basic URL length guard
     if (url && url.length > MAX_URL_LENGTH) {
@@ -106,19 +109,21 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
       });
     }
 
-    // Validate super admin access
+    // Validate super admin access (prefer runtime env key over build-time key)
     if (superAdminMode) {
-      if (!SUPER_ADMIN_KEY) {
+      const runtimeKey = env?.SUPER_ADMIN_KEY || env?.SUPER_ADMIN_KEY_DEV || '';
+      const effectiveKey = runtimeKey || BUILD_SUPER_ADMIN_KEY;
+      if (!effectiveKey) {
         return new Response(JSON.stringify({ error: 'Super admin key not configured on server', code: 'ADMIN_KEY_NOT_CONFIGURED' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      if (adminKey !== SUPER_ADMIN_KEY) {
-      return new Response(JSON.stringify({ error: 'Invalid admin key for super admin mode', code: 'INVALID_ADMIN_KEY' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      if (adminKey !== effectiveKey) {
+        return new Response(JSON.stringify({ error: 'Invalid admin key for super admin mode', code: 'INVALID_ADMIN_KEY' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
     }
 
@@ -169,7 +174,7 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
         result = await scanTechStack(targetUrl.toString(), superAdminMode);
         break;
       case 'cve':
-        result = await scanCVE(targetUrl.toString(), superAdminMode);
+  result = await scanCVE(targetUrl.toString(), superAdminMode, env);
         break;
       case 'content-analysis':
         result = await scanContentAnalysis(targetUrl.toString(), superAdminMode);
@@ -206,6 +211,12 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
         break;
       case 'compliance-frameworks':
         result = await scanComplianceFrameworks(targetUrl.toString(), superAdminMode || false);
+        break;
+      case 'threat-intel':
+        result = await scanThreatIntel(targetUrl.toString(), env, superAdminMode || false);
+        break;
+      case 'full':
+  result = await runFullAggregateScan(targetUrl.toString(), superAdminMode || false, env);
         break;
       default:
   return new Response(JSON.stringify({ error: 'Invalid scan type', code: 'INVALID_SCAN_TYPE' }), {
@@ -256,12 +267,21 @@ async function scanEnhancedSecurityHeaders(url: string, superAdminMode?: boolean
   const findings: EnhancedFinding[] = [];
   
   try {
-    const response = await fetch(url, {
+    const start = Date.now();
+    let response = await fetch(url, {
       method: 'HEAD',
       headers: {
         'User-Agent': 'Enhanced-Security-Scanner/2.0 (Business-Grade)'
       }
     });
+    // Some origins block HEAD or strip headers; fallback to GET if status suggests unsupported
+    if ([405, 403, 400].includes(response.status) || !response.ok) {
+      try {
+        const fallback = await fetch(url, { method: 'GET', redirect: 'manual', headers: { 'User-Agent': 'Enhanced-Security-Scanner/2.0 (Business-Grade)' } });
+        if (fallback.ok) response = fallback;
+      } catch (_) { /* ignore fallback errors */ }
+    }
+    const elapsed = Date.now() - start;
 
     const headers = response.headers;
     console.log(`Enhanced header scan for ${url}`, Object.fromEntries(Array.from(headers.entries())));
@@ -363,6 +383,14 @@ async function scanEnhancedSecurityHeaders(url: string, superAdminMode?: boolean
       });
     }
 
+    findings.push({
+      severity: elapsed > 3000 ? 'medium' : 'info',
+      category: 'Performance Security',
+      title: 'Header Fetch Time',
+      description: `Initial header retrieval took ${elapsed}ms`,
+      recommendation: 'Optimize server responsiveness and leverage CDN caching where applicable.'
+    });
+
     // Enhanced analysis for existing headers
     const hstsHeader = headers.get('strict-transport-security');
     if (hstsHeader) {
@@ -405,62 +433,142 @@ async function scanEnhancedSecurityHeaders(url: string, superAdminMode?: boolean
 
 async function scanEnhancedSSL(targetUrl: URL, superAdminMode?: boolean): Promise<EnhancedScanResult> {
   const findings: EnhancedFinding[] = [];
-  
+
+  // Case 1: Plain HTTP supplied. Probe if HTTPS is available.
   if (targetUrl.protocol === 'http:') {
-    findings.push({
-      severity: 'critical',
-      category: 'SSL/TLS Security',
-      title: 'No HTTPS Encryption',
-      description: 'Website uses unencrypted HTTP connection',
-      businessImpact: 'CRITICAL: Customer data transmitted in plain text, search engine penalties, browser warnings',
-      recommendation: 'Immediately implement SSL certificate and force HTTPS redirects',
-      priority: 'immediate',
-      effort: 'moderate',
-      costEstimate: '$100-500/year - SSL certificate + implementation',
-      technicalDetails: superAdminMode ? 'HTTP traffic is unencrypted and visible to network sniffers' : undefined,
-      references: superAdminMode ? [
-        'https://letsencrypt.org/',
-        'https://developers.google.com/web/fundamentals/security/encrypt-in-transit'
-      ] : undefined
-    });
-  } else {
+    let httpsAvailable = false;
     try {
-      const response = await fetch(targetUrl.toString(), {
-        method: 'HEAD',
-        headers: { 'User-Agent': 'Enhanced-Security-Scanner/2.0' }
+      const httpsUrl = new URL(targetUrl.toString().replace(/^http:/, 'https:'));
+      const probe = await fetch(httpsUrl.toString(), { method: 'HEAD', redirect: 'manual', headers: { 'User-Agent': 'Enhanced-Security-Scanner/2.0' } });
+      httpsAvailable = probe.status > 0; // If fetch succeeded at all
+      if (httpsAvailable) {
+        findings.push({
+          severity: 'high',
+          category: 'SSL/TLS Security',
+          title: 'HTTPS Available But Not Enforced',
+          description: 'Site loads over HTTP even though HTTPS endpoint responds. Missing redirect enforcement.',
+          businessImpact: 'Users may access site insecurely enabling MITM attacks; SEO and browser trust reduced.',
+          recommendation: 'Configure 301/308 redirect from HTTP to HTTPS and set HSTS header.',
+          priority: 'immediate',
+          effort: 'minimal',
+          costEstimate: '$0-200 - Configuration change',
+          technicalDetails: superAdminMode ? `HTTP URL: ${targetUrl.toString()} | Probed HTTPS status: ${probe.status}` : undefined,
+          references: superAdminMode ? ['https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security'] : undefined
+        });
+      }
+    } catch {
+      // Ignore probe failures; treat as no HTTPS.
+    }
+
+    if (!httpsAvailable) {
+      findings.push({
+        severity: 'critical',
+        category: 'SSL/TLS Security',
+        title: 'No HTTPS Encryption',
+        description: 'Website served only over unencrypted HTTP.',
+        businessImpact: 'CRITICAL: Data in transit exposed; modern browsers mark as Not Secure; potential compliance failures.',
+        recommendation: 'Obtain TLS certificate (e.g., Let’s Encrypt) and force HTTPS site-wide.',
+        priority: 'immediate',
+        effort: 'moderate',
+        costEstimate: '$0-500 - Certificate provisioning & configuration',
+        technicalDetails: superAdminMode ? 'HTTPS probe failed or unreachable.' : undefined,
+        references: superAdminMode ? ['https://letsencrypt.org/', 'https://owasp.org/www-project-top-ten/'] : undefined
       });
-      
+    }
+    return { findings, businessMetrics: calculateBusinessMetrics(findings) };
+  }
+
+  // Case 2: HTTPS supplied. Perform detailed checks.
+  try {
+    const response = await fetch(targetUrl.toString(), {
+      method: 'HEAD',
+      redirect: 'manual',
+      headers: { 'User-Agent': 'Enhanced-Security-Scanner/2.0' }
+    });
+
+    const location = response.headers.get('location');
+    if (location && location.startsWith('http:')) {
+      findings.push({
+        severity: 'high',
+        category: 'SSL/TLS Security',
+        title: 'HTTPS Downgrade Redirect',
+        description: 'HTTPS endpoint redirects clients back to HTTP (downgrade).',
+        businessImpact: 'Forces insecure transport allowing interception and tampering.',
+        recommendation: 'Serve same content over HTTPS and remove downgrade redirect.',
+        priority: 'immediate',
+        effort: 'moderate',
+        costEstimate: '$0-300 - Configuration fix',
+        technicalDetails: superAdminMode ? `Location header: ${location}` : undefined
+      });
+    }
+
+    if (response.status >= 200 && response.status < 400 && !(location && location.startsWith('http:'))) {
       findings.push({
         severity: 'excellent',
         category: 'SSL/TLS Security',
         title: 'HTTPS Connection Secure',
-        description: 'Website properly uses HTTPS encryption',
-        businessImpact: 'Excellent: Customer data protected, SEO benefits, browser trust indicators',
-        recommendation: 'Monitor certificate expiration and consider implementing Certificate Transparency monitoring',
+        description: 'Endpoint responds over HTTPS without downgrade.',
+        businessImpact: 'Strong user trust, SEO benefit, encrypted transport.',
+        recommendation: 'Maintain certificate hygiene, monitor expiry, enable HSTS preload if suitable.',
         priority: 'low',
         effort: 'minimal',
         costEstimate: '$0-200/year - Monitoring tools'
       });
-      
-    } catch (error) {
+    } else if (response.status >= 400) {
       findings.push({
-        severity: 'high',
+        severity: 'warning',
         category: 'SSL/TLS Security',
-        title: 'SSL Certificate Problem',
-        description: 'Failed to establish secure connection - certificate may be invalid or expired',
-        businessImpact: 'High: Customers see browser warnings, loss of trust, potential data exposure',
-        recommendation: 'Immediately check and renew SSL certificate',
-        priority: 'immediate',
+        title: 'HTTPS Error Response',
+        description: `HTTPS endpoint returned status ${response.status}.`,
+        businessImpact: 'Potential service availability or misconfiguration issue affecting secure access.',
+        recommendation: 'Verify server health and certificate chain; ensure app serves content over HTTPS.',
+        priority: 'medium',
         effort: 'moderate',
-        costEstimate: '$100-500 - Certificate renewal and troubleshooting'
+        costEstimate: '$0-500 - Troubleshooting'
       });
     }
+  } catch (error: any) {
+    // Error classification heuristics
+    const raw = String(error?.message || error);
+    const low = raw.toLowerCase();
+    let title = 'SSL Certificate Problem';
+    let description = 'Failed to establish secure TLS connection.';
+    let recommendation = 'Validate certificate chain, hostname, and expiry; enable modern TLS versions (1.2/1.3).';
+
+    if (low.includes('handshake') || low.includes('tls')) {
+      title = 'TLS Handshake Failure';
+      description = 'TLS handshake could not be completed (protocol/cipher mismatch or network interception).';
+      recommendation = 'Allow TLS 1.2/1.3, disable legacy protocols, and verify cipher suites.';
+    } else if (low.includes('expired')) {
+      title = 'Expired Certificate';
+      description = 'Presented certificate appears expired.';
+      recommendation = 'Renew the certificate immediately and deploy updated chain.';
+    } else if (low.includes('self-signed') || low.includes('self signed')) {
+      title = 'Self-Signed Certificate';
+      description = 'Certificate is self-signed and not trusted by browsers.';
+      recommendation = 'Replace with a publicly trusted CA certificate (e.g., Let’s Encrypt).';
+    } else if (low.includes('hostname') || low.includes('name mismatch')) {
+      title = 'Hostname Mismatch';
+      description = 'Certificate Common Name / SAN does not match requested host.';
+      recommendation = 'Issue new certificate including correct hostnames (SAN entries).';
+    }
+
+    findings.push({
+      severity: 'high',
+      category: 'SSL/TLS Security',
+      title,
+      description,
+      businessImpact: 'Browser warnings reduce trust; risk of interception if users proceed unsafely.',
+      recommendation,
+      priority: 'immediate',
+      effort: 'moderate',
+      costEstimate: '$0-500 - Renewal / reconfiguration',
+      technicalDetails: superAdminMode ? raw : undefined,
+      references: superAdminMode ? ['https://www.ssllabs.com/ssltest/', 'https://letsencrypt.org/docs/'] : undefined
+    });
   }
 
-  return { 
-    findings,
-    businessMetrics: calculateBusinessMetrics(findings)
-  };
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
 
 async function scanEnhancedInformationDisclosure(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
@@ -846,7 +954,7 @@ async function scanPerformanceSecurity(url: string, superAdminMode?: boolean): P
         title: 'Slow Page Load Time',
         description: `Page loaded in ${loadTime}ms (recommended: <3000ms)`,
         businessImpact: 'Poor user experience, potential security timeout issues',
-        recommendation: 'Optimize page performance and implement proper timeout handling',
+        recommendation: 'Optimize performance (caching, compression, code splitting)',
         priority: 'medium',
         effort: 'moderate',
         costEstimate: '$1000-5000 - Performance optimization'
@@ -856,72 +964,63 @@ async function scanPerformanceSecurity(url: string, superAdminMode?: boolean): P
         severity: 'excellent',
         category: 'Performance Security',
         title: 'Good Page Performance',
-        description: `Page loaded in ${loadTime}ms - excellent performance`,
-        businessImpact: 'Good user experience reduces security risks from timeouts',
-        recommendation: 'Maintain current performance levels',
+        description: `Page loaded in ${loadTime}ms (<3000ms)`,
+        businessImpact: 'Good UX lowers abandonment & security timeout risks',
+        recommendation: 'Maintain current performance budget',
         priority: 'low',
         effort: 'minimal',
         costEstimate: '$0 - Monitoring only'
       });
     }
     
-    // Check response size
     const contentLength = response.headers.get('content-length');
-    if (contentLength && parseInt(contentLength) > 1000000) { // > 1MB
+    if (contentLength && parseInt(contentLength) > 1000000) {
       findings.push({
         severity: 'low',
         category: 'Performance Security',
-        title: 'Large Page Size',
-        description: `Page size is ${Math.round(parseInt(contentLength) / 1024)}KB`,
-        businessImpact: 'Slower loading may impact security timeout configurations',
-        recommendation: 'Consider optimizing images and minifying resources',
+        title: 'Large Response Size',
+        description: `Initial response size ${contentLength} bytes (>1MB)`,
+        businessImpact: 'Higher bandwidth & slower loads increase attack surface (DoS amplification)',
+        recommendation: 'Enable compression, lazy loading, and asset optimization',
         priority: 'low',
         effort: 'moderate',
-        costEstimate: '$500-2000 - Asset optimization'
+        costEstimate: '$500-3000 - Optimization'
       });
     }
-
   } catch (error) {
     findings.push({
-      severity: 'warning',
+      severity: 'low',
       category: 'Performance Security',
-      title: 'Performance Analysis Failed',
-      description: 'Unable to measure page performance metrics',
-      businessImpact: 'Cannot assess performance-related security implications',
-      recommendation: 'Use performance monitoring tools for detailed analysis',
+      title: 'Performance Scan Incomplete',
+      description: 'Unable to gather performance metrics',
+      businessImpact: 'Unknown performance risk profile',
+      recommendation: 'Ensure site reachable and retry',
       priority: 'low',
-      effort: 'moderate',
-      costEstimate: '$500-1000 - Performance monitoring setup'
+      effort: 'minimal',
+      costEstimate: '$0 - Troubleshooting'
     });
   }
 
-  return { 
-    findings,
-    businessMetrics: calculateBusinessMetrics(findings)
-  };
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
 
+// Re-added after cleanup: analyzes social media metadata & links
 async function scanSocialMediaAudit(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
   const findings: EnhancedFinding[] = [];
-  
-  if (!superAdminMode) return { findings };
-  
   try {
     const response = await fetch(url);
     const html = await response.text();
-    
-    // Check for social media meta tags
+
     const ogTags = html.match(/<meta property="og:[^"]*" content="[^"]*"/g) || [];
     const twitterTags = html.match(/<meta name="twitter:[^"]*" content="[^"]*"/g) || [];
-    
     if (ogTags.length === 0 && twitterTags.length === 0) {
       findings.push({
         severity: 'medium',
         category: 'Social Media Security',
         title: 'Missing Social Media Meta Tags',
         description: 'No Open Graph or Twitter Card meta tags found',
-        businessImpact: 'Poor social media presentation, potential for misleading shared content',
-        recommendation: 'Implement Open Graph and Twitter Card meta tags',
+        businessImpact: 'Poor social share appearance; risk of misleading previews by third parties',
+        recommendation: 'Add Open Graph (og:title, og:description, og:image) and Twitter Card tags',
         priority: 'medium',
         effort: 'minimal',
         costEstimate: '$200-1000 - Social media optimization'
@@ -932,15 +1031,14 @@ async function scanSocialMediaAudit(url: string, superAdminMode?: boolean): Prom
         category: 'Social Media Security',
         title: 'Social Media Meta Tags Present',
         description: `Found ${ogTags.length} Open Graph and ${twitterTags.length} Twitter meta tags`,
-        businessImpact: 'Good control over social media presentation',
-        recommendation: 'Regularly verify social media previews are accurate',
+        businessImpact: 'Improved brand consistency & trustworthy link previews',
+        recommendation: 'Monitor previews after site updates',
         priority: 'low',
         effort: 'minimal',
-        costEstimate: '$0 - Regular monitoring'
+        costEstimate: '$0 - Monitoring only'
       });
     }
-    
-    // Check for social media links
+
     const socialLinks = html.match(/href="[^"]*(facebook|twitter|instagram|linkedin|youtube)[^"]*"/gi) || [];
     if (socialLinks.length > 0) {
       findings.push({
@@ -948,32 +1046,27 @@ async function scanSocialMediaAudit(url: string, superAdminMode?: boolean): Prom
         category: 'Social Media Security',
         title: 'Social Media Links Found',
         description: `Found ${socialLinks.length} social media links`,
-        businessImpact: 'Expanded brand presence and customer engagement',
-        recommendation: 'Ensure all social media accounts are secure and properly managed',
+        businessImpact: 'Active social presence; ensure account security & consistent branding',
+        recommendation: 'Enable MFA on social accounts & audit access',
         priority: 'low',
         effort: 'minimal',
-        costEstimate: '$0-500 - Social media security review'
+        costEstimate: '$0-500 - Account security review'
       });
     }
-
   } catch (error) {
     findings.push({
       severity: 'warning',
       category: 'Social Media Security',
       title: 'Social Media Audit Incomplete',
       description: 'Unable to analyze social media integration',
-      businessImpact: 'Unknown social media security posture',
-      recommendation: 'Manual social media presence review recommended',
+      businessImpact: 'Unknown social preview & account exposure posture',
+      recommendation: 'Verify site accessibility and retry; manual preview check',
       priority: 'low',
-      effort: 'moderate',
-      costEstimate: '$500-1500 - Social media audit'
+      effort: 'minimal',
+      costEstimate: '$0 - Retry'
     });
   }
-
-  return { 
-    findings,
-    businessMetrics: calculateBusinessMetrics(findings)
-  };
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
 
 async function scanThirdPartyScripts(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
@@ -985,58 +1078,41 @@ async function scanThirdPartyScripts(url: string, superAdminMode?: boolean): Pro
     const response = await fetch(url);
     const html = await response.text();
     
-    // Find all external scripts
     const scriptTags = html.match(/<script[^>]*src="[^"]*"[^>]*>/g) || [];
-    const externalScripts = scriptTags.filter(script => 
-      script.includes('http://') || script.includes('https://')
-    );
+    const externalScripts = scriptTags.filter(script => script.includes('http://') || script.includes('https://'));
     
     if (externalScripts.length > 0) {
-      const domains = new Set();
+      const domains = new Set<string>();
       externalScripts.forEach(script => {
-        const srcRegex = /src="(https?:\/\/[^"]+)"/;
+        const srcRegex = /src="(https?:\/\/[^\"]+)"/;
         const urlMatch = srcRegex.exec(script);
         if (urlMatch) {
-          try {
-            domains.add(new URL(urlMatch[1]).hostname);
-          } catch {
-            // Invalid URL, skip
-          }
+          try { domains.add(new URL(urlMatch[1]).hostname); } catch {}
         }
       });
-      
       findings.push({
         severity: 'medium',
         category: 'Third-Party Scripts',
         title: 'External Scripts Detected',
         description: `Found ${externalScripts.length} external scripts from ${domains.size} domains`,
-        businessImpact: 'Third-party dependencies may introduce security risks',
-        recommendation: 'Review all third-party scripts for necessity and security',
+        businessImpact: 'Third-party code can inject vulnerabilities or reduce performance',
+        recommendation: 'Perform security review & apply SRI hashes / CSP restrictions',
         priority: 'medium',
         effort: 'moderate',
         costEstimate: '$1000-3000 - Third-party security audit',
-        technicalDetails: `Domains: ${Array.from(domains).join(', ')}`
+        technicalDetails: superAdminMode ? `Domains: ${Array.from(domains).join(', ')}` : undefined
       });
-      
-      // Check for common analytics/tracking scripts
       const commonTrackers = ['google-analytics', 'googletagmanager', 'facebook', 'hotjar'];
       const foundTrackers: string[] = [];
-      externalScripts.forEach(script => {
-        commonTrackers.forEach(tracker => {
-          if (script.includes(tracker)) {
-            foundTrackers.push(tracker);
-          }
-        });
-      });
-      
+      externalScripts.forEach(script => commonTrackers.forEach(tracker => { if (script.includes(tracker)) foundTrackers.push(tracker); }));
       if (foundTrackers.length > 0) {
         findings.push({
           severity: 'info',
           category: 'Third-Party Scripts',
           title: 'Tracking Scripts Detected',
           description: `Found tracking scripts: ${foundTrackers.join(', ')}`,
-          businessImpact: 'Analytics data collection - ensure privacy compliance',
-          recommendation: 'Verify tracking scripts comply with privacy regulations',
+          businessImpact: 'Ensure analytics usage aligns with privacy regulations',
+          recommendation: 'Audit data collection & consent mechanisms',
           priority: 'medium',
           effort: 'minimal',
           costEstimate: '$500-1500 - Privacy compliance review'
@@ -1047,34 +1123,31 @@ async function scanThirdPartyScripts(url: string, superAdminMode?: boolean): Pro
         severity: 'excellent',
         category: 'Third-Party Scripts',
         title: 'No External Scripts Found',
-        description: 'Website does not load external JavaScript files',
-        businessImpact: 'Reduced third-party security risks and faster loading',
-        recommendation: 'Continue avoiding unnecessary third-party scripts',
+        description: 'No external JavaScript dependencies detected',
+        businessImpact: 'Reduced supply-chain risk & faster performance',
+        recommendation: 'Maintain minimal dependency strategy',
         priority: 'low',
         effort: 'minimal',
-        costEstimate: '$0 - Current approach is good'
+        costEstimate: '$0 - Monitoring only'
       });
     }
-
   } catch (error) {
     findings.push({
       severity: 'warning',
       category: 'Third-Party Scripts',
       title: 'Script Analysis Incomplete',
-      description: 'Unable to analyze third-party script dependencies',
-      businessImpact: 'Unknown third-party security risks',
-      recommendation: 'Manual script security review recommended',
+      description: 'Unable to analyze external script usage',
+      businessImpact: 'Unknown third-party risk surface',
+      recommendation: 'Retry scan or perform manual review',
       priority: 'medium',
       effort: 'moderate',
-      costEstimate: '$1000-2500 - Security code review'
+      costEstimate: '$1000-2500 - Security review'
     });
   }
 
-  return { 
-    findings,
-    businessMetrics: calculateBusinessMetrics(findings)
-  };
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
+
 
 async function scanSEOSecurity(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
   const findings: EnhancedFinding[] = [];
@@ -1264,18 +1337,275 @@ async function scanWAF(url: string, superAdminMode?: boolean): Promise<EnhancedS
 }
 
 async function scanSubdomains(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
-  // Enhanced version of existing function
-  return { findings: [], businessMetrics: { trustScore: 100, professionalismScore: 100, userExperienceScore: 100, brandProtectionScore: 100 } };
+  const findings: EnhancedFinding[] = [];
+  try {
+    const host = new URL(url).hostname;
+    const candidates = [
+      `www.${host}`,
+      `api.${host}`,
+      `cdn.${host}`,
+      `static.${host}`,
+      `assets.${host}`,
+      `img.${host}`
+    ];
+    const controller = new AbortController();
+    const TIMEOUT = 3000;
+    const timer = setTimeout(() => controller.abort(), TIMEOUT);
+    let discovered = 0;
+    await Promise.all(candidates.map(async sub => {
+      if (sub === host) return;
+      try {
+        const resp = await fetch(`https://${sub}`, { method: 'HEAD', redirect: 'manual', signal: controller.signal });
+        if (resp.ok || (resp.status >= 300 && resp.status < 400)) {
+          discovered++;
+          findings.push({
+            severity: 'info',
+            category: 'Subdomain Enumeration',
+            title: `Subdomain discovered: ${sub}`,
+            description: `Responded with status ${resp.status}`,
+            businessImpact: 'Additional attack surface identified',
+            recommendation: 'Ensure subdomain has proper security controls' 
+          });
+        }
+      } catch (_) { /* ignore timeouts/abort */ }
+    }));
+    clearTimeout(timer);
+    if (discovered === 0) {
+      findings.push({
+        severity: 'info',
+        category: 'Subdomain Enumeration',
+        title: 'No common subdomains discovered',
+        description: 'Basic passive subdomain enumeration found none of the probed common subdomains.'
+      });
+    }
+  } catch (e) {
+    findings.push({ severity: 'warning', category: 'Subdomain Enumeration', title: 'Subdomain scan error', description: 'Failed to enumerate basic subdomains.' });
+  }
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
 
 async function scanTechStack(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
-  // Enhanced version of existing function
-  return { findings: [], businessMetrics: { trustScore: 100, professionalismScore: 100, userExperienceScore: 100, brandProtectionScore: 100 } };
+  const findings: EnhancedFinding[] = [];
+  try {
+    const start = Date.now();
+    const resp = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const elapsed = Date.now() - start;
+    const text = await resp.text();
+    const headers = Object.fromEntries([...resp.headers.entries()].map(([k,v]) => [k.toLowerCase(), v]));
+    function push(title: string, description: string, severity: EnhancedFinding['severity']='info') {
+      findings.push({ severity, category: 'Tech Stack', title, description });
+    }
+    if (headers['server']) push('Server Header Detected', `Server reports: ${headers['server']}`);
+    if (headers['x-powered-by']) push('X-Powered-By Header Present', headers['x-powered-by'], 'medium');
+    const techMatchers: {regex: RegExp; name: string; severity?: EnhancedFinding['severity']; rec?: string;}[] = [
+      { regex: /wp-content|wordpress/i, name: 'WordPress CMS', severity: 'medium' },
+      { regex: /drupal/i, name: 'Drupal CMS', severity: 'medium' },
+      { regex: /<meta[^>]+generator\"?[^>]+wordpress/i, name: 'WordPress Generator Meta', severity: 'medium' },
+      { regex: /react|__REACT_DEVTOOLS_GLOBAL_HOOK__/i, name: 'React Framework' },
+      { regex: /vue(?:\.js)?/i, name: 'Vue.js Framework' },
+      { regex: /angular/i, name: 'Angular Framework' },
+      { regex: /next\.js/i, name: 'Next.js Framework' },
+      { regex: /nuxt/i, name: 'Nuxt.js Framework' },
+      { regex: /svelte/i, name: 'Svelte Framework' },
+      { regex: /laravel/i, name: 'Laravel (PHP)' },
+      { regex: /symfony/i, name: 'Symfony (PHP)' },
+      { regex: /django/i, name: 'Django (Python)' },
+      { regex: /flask/i, name: 'Flask (Python)' },
+      { regex: /express/i, name: 'Express (Node.js)' }
+    ];
+    for (const m of techMatchers) {
+      if (m.regex.test(text)) {
+        push(`Technology Detected: ${m.name}`, `Pattern match: ${m.regex}`, m.severity || 'info');
+      }
+    }
+    // Simple CDN detection via headers
+    const cdnIndicators = ['cf-ray','cf-cache-status','x-amz-cf-id','x-fastly-request-id','x-cache','akamai-grn'];
+    if (cdnIndicators.some(h => headers[h])) push('CDN Detected', 'Response headers indicate CDN edge presence.');
+    findings.push({ severity: 'info', category: 'Tech Stack', title: 'Tech Stack Scan Completed', description: `Analyzed headers & HTML in ${elapsed}ms.` });
+  } catch (e) {
+    findings.push({ severity: 'warning', category: 'Tech Stack', title: 'Tech Stack Scan Error', description: 'Failed to analyze technology stack.' });
+  }
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
 
-async function scanCVE(url: string, superAdminMode?: boolean): Promise<EnhancedScanResult> {
-  // Enhanced version of existing function
-  return { findings: [], businessMetrics: { trustScore: 100, professionalismScore: 100, userExperienceScore: 100, brandProtectionScore: 100 } };
+async function scanCVE(url: string, superAdminMode?: boolean, env?: any): Promise<EnhancedScanResult> {
+  const findings: EnhancedFinding[] = [];
+  let versionExposed = false;
+  try {
+    const resp = await fetch(url, { method: 'HEAD' });
+    const headers = Object.fromEntries([...resp.headers.entries()].map(([k,v]) => [k.toLowerCase(), v]));
+    const versionPatterns: { header: string; regex: RegExp; product: string }[] = [
+      { header: 'server', regex: /(apache|nginx)\/(\d+\.\d+(?:\.\d+)?)/i, product: 'Web Server' },
+      { header: 'x-powered-by', regex: /(express|php)\/(\d+\.\d+(?:\.\d+)?)/i, product: 'Platform' }
+    ];
+    const exposures: { product: string; version: string }[] = [];
+    for (const vp of versionPatterns) {
+      const val = headers[vp.header];
+      if (val) {
+        const match = val.match(vp.regex);
+        if (match) {
+          exposures.push({ product: match[1], version: match[2] });
+          versionExposed = true;
+        }
+      }
+    }
+    for (const ex of exposures) {
+      findings.push({
+        severity: 'medium',
+        category: 'CVE Exposure',
+        title: `${ex.product} version disclosed: ${ex.version}`,
+        description: 'Version disclosure may aid targeted exploitation.',
+        recommendation: 'Suppress version info or ensure prompt patching.',
+        businessImpact: 'Higher probability of successful exploit against known vulnerable versions.'
+      });
+    }
+  // Conditional NVD API query
+    const nvdKey = env?.NVD_API_KEY || (globalThis as any).process?.env?.NVD_API_KEY;
+    if (nvdKey && exposures.length) {
+      for (const ex of exposures) {
+        try {
+          const query = encodeURIComponent(`${ex.product} ${ex.version}`);
+          const nvdResp = await fetch(`https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${query}&resultsPerPage=5`, {
+            headers: { 'apiKey': nvdKey }
+          });
+          if (nvdResp.ok) {
+            const json: any = await nvdResp.json();
+            const total = json?.totalResults ?? json?.vulnerabilities?.length ?? 0;
+            if (total > 0) {
+              findings.push({
+                severity: total > 10 ? 'high' : 'medium',
+                category: 'CVE Exposure',
+                title: `Potential CVEs referenced for ${ex.product} ${ex.version}`,
+                description: `${total} CVE entries returned from NVD keyword search (top 5 fetched).`,
+                recommendation: 'Review CVEs and apply patches / mitigations.',
+                businessImpact: 'Unpatched vulnerabilities may lead to compromise.',
+                references: ['https://nvd.nist.gov']
+              });
+            } else {
+              findings.push({ severity: 'info', category: 'CVE Exposure', title: `No CVEs found for ${ex.product} ${ex.version}`, description: 'No matches returned by NVD keyword search.' });
+            }
+          } else {
+            findings.push({ severity: 'warning', category: 'CVE Exposure', title: 'NVD API request failed', description: `Status ${nvdResp.status} while querying NVD.` });
+          }
+        } catch (err) {
+          findings.push({ severity: 'warning', category: 'CVE Exposure', title: 'NVD API error', description: 'Failed querying NVD for CVE data.' });
+        }
+      }
+    } else if (exposures.length && !nvdKey) {
+      findings.push({ severity: 'info', category: 'CVE Exposure', title: 'NVD enrichment skipped', description: 'Set NVD_API_KEY to enrich version exposure with CVE counts.' });
+    }
+    // Optional OpenCVE enrichment (no key required for public queries) controlled via env flag OPENCVE_ENRICH
+    const doOpenCVE = (env?.OPENCVE_ENRICH || (globalThis as any).process?.env?.OPENCVE_ENRICH || '').toString().toLowerCase() === 'true';
+    if (doOpenCVE && exposures.length) {
+      const base = (env?.OPENCVE_API_BASE || (globalThis as any).process?.env?.OPENCVE_API_BASE || 'https://app.opencve.io/api').replace(/\/$/, '');
+      const ocveToken = env?.OPENCVE_API_TOKEN || (globalThis as any).process?.env?.OPENCVE_API_TOKEN;
+      const ocveUser = env?.OPENCVE_BASIC_USER || (globalThis as any).process?.env?.OPENCVE_BASIC_USER;
+      const ocvePass = env?.OPENCVE_BASIC_PASS || (globalThis as any).process?.env?.OPENCVE_BASIC_PASS;
+      for (const ex of exposures) {
+        try {
+          // Use product (lowercased) as search keyword; version can reduce recall; keep simple to avoid over-filtering
+          const searchTerm = encodeURIComponent(ex.product);
+          let authHeader: string | undefined;
+          if (ocveUser && ocvePass) {
+            // Basic auth takes precedence if both provided
+            const raw = `${ocveUser}:${ocvePass}`;
+            try {
+              authHeader = `Basic ${btoa(raw)}`;
+            } catch {
+              // btoa not available (non-browser); fallback manual
+              authHeader = 'Basic ' + Buffer.from(raw).toString('base64');
+            }
+          } else if (ocveToken) {
+            authHeader = `Token ${ocveToken}`;
+          }
+          const headerObj = authHeader ? { 'Authorization': authHeader } : undefined;
+          const ocveResp = await fetch(`${base}/cve?search=${searchTerm}&page=1`, { headers: headerObj });
+          if (ocveResp.ok) {
+            const data: any = await ocveResp.json();
+            const count = data?.count ?? 0;
+            if (count > 0) {
+              findings.push({
+                severity: count > 50 ? 'high' : count > 10 ? 'medium' : 'info',
+                category: 'CVE Exposure',
+                title: `OpenCVE references for ${ex.product}`,
+                description: `${count} CVE entries matched keyword '${ex.product}' (OpenCVE).`,
+                recommendation: 'Prioritize review of recent/high severity CVEs and patch accordingly.',
+                references: ['https://app.opencve.io/'],
+                businessImpact: 'Unaddressed CVEs elevate exploit and breach risk.'
+              });
+            } else {
+              findings.push({ severity: 'info', category: 'CVE Exposure', title: `No OpenCVE matches for ${ex.product}`, description: 'No CVE entries returned from OpenCVE keyword search.' });
+            }
+          } else {
+            findings.push({ severity: 'warning', category: 'CVE Exposure', title: 'OpenCVE request failed', description: `Status ${ocveResp.status} querying OpenCVE.` });
+          }
+        } catch (err) {
+          findings.push({ severity: 'warning', category: 'CVE Exposure', title: 'OpenCVE enrichment error', description: 'Unexpected error querying OpenCVE.' });
+        }
+      }
+    } else if (exposures.length && !doOpenCVE) {
+      findings.push({ severity: 'info', category: 'CVE Exposure', title: 'OpenCVE enrichment disabled', description: 'Set OPENCVE_ENRICH=true to include OpenCVE keyword statistics.' });
+    }
+    if (!versionExposed) {
+      findings.push({ severity: 'info', category: 'CVE Exposure', title: 'No obvious version disclosure', description: 'No easily parsed server/platform versions in headers.' });
+    }
+  } catch (e) {
+    findings.push({ severity: 'warning', category: 'CVE Exposure', title: 'CVE heuristic scan error', description: 'Failed to perform version disclosure heuristic.' });
+  }
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
+}
+
+async function scanThreatIntel(url: string, env: any, superAdminMode: boolean): Promise<EnhancedScanResult> {
+  const findings: EnhancedFinding[] = [];
+  try {
+    const vtKey = env?.VIRUSTOTAL_API_KEY || (globalThis as any).process?.env?.VIRUSTOTAL_API_KEY;
+    const host = new URL(url).hostname;
+    if (!vtKey) {
+      findings.push({ severity: 'info', category: 'Threat Intelligence', title: 'VirusTotal enrichment unavailable', description: 'Set VIRUSTOTAL_API_KEY to enable domain reputation lookups.' });
+      return { findings, businessMetrics: calculateBusinessMetrics(findings) };
+    }
+    const vtResp = await fetch(`https://www.virustotal.com/api/v3/domains/${host}`, { headers: { 'x-apikey': vtKey }});
+    if (vtResp.ok) {
+      const data: any = await vtResp.json();
+      const stats = data?.data?.attributes?.last_analysis_stats;
+      if (stats) {
+        const malicious = stats.malicious || 0;
+        findings.push({
+          severity: malicious > 0 ? 'high' : 'info',
+            category: 'Threat Intelligence',
+            title: 'VirusTotal Domain Reputation',
+            description: `Detections - malicious: ${malicious}, suspicious: ${stats.suspicious}, harmless: ${stats.harmless}`,
+            recommendation: malicious > 0 ? 'Investigate malicious classifications & remediate.' : 'Maintain good security hygiene.'
+        });
+      } else {
+        findings.push({ severity: 'info', category: 'Threat Intelligence', title: 'VirusTotal data unavailable', description: 'No analysis stats present in response.' });
+      }
+    } else {
+      findings.push({ severity: 'warning', category: 'Threat Intelligence', title: 'VirusTotal request failed', description: `Status ${vtResp.status} retrieving domain reputation.` });
+    }
+  } catch (e) {
+    findings.push({ severity: 'warning', category: 'Threat Intelligence', title: 'Threat intel scan error', description: 'Unexpected error during threat intelligence lookup.' });
+  }
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
+}
+
+async function runFullAggregateScan(url: string, superAdminMode: boolean, env?: any): Promise<EnhancedScanResult> {
+  // Run a subset concurrently for reasonable latency
+  const tasks = await Promise.allSettled([
+    scanEnhancedSecurityHeaders(url, superAdminMode),
+    scanEnhancedSSL(new URL(url), superAdminMode),
+    scanPerformanceSecurity(url, superAdminMode),
+    scanTechStack(url, superAdminMode),
+  scanSubdomains(url, superAdminMode),
+	scanCVE(url, superAdminMode, env),
+  scanThreatIntel(url, env || {}, superAdminMode),
+    scanThirdPartyScripts(url, superAdminMode)
+  ]);
+  const findings: EnhancedFinding[] = [];
+  for (const t of tasks) {
+    if (t.status === 'fulfilled') findings.push(...t.value.findings); else findings.push({ severity: 'warning', category: 'Aggregate Scan', title: 'Partial Scan Failure', description: 'One component scan failed.' });
+  }
+  return { findings, businessMetrics: calculateBusinessMetrics(findings) };
 }
 
 function calculateBusinessMetrics(findings: EnhancedFinding[]) {

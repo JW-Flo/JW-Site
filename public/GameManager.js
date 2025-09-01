@@ -6,6 +6,7 @@ export class GameManager {
     this.overlay = overlay;
     this.currentGame = null;
     this.isActive = false;
+  this.lastGameName = null; // Track last started game for restart functionality
 
     // Game progression order - start with simple games
     this.games = ["Asteroids", "Pac-Man", "Tetris", "Space Invaders"];
@@ -67,6 +68,11 @@ export class GameManager {
   async startGame(gameName) {
     if (this.currentGame) {
       this.currentGame.destroy();
+    }
+
+    // Remember last played (non-menu) game for restart support
+    if (gameName && gameName !== 'Menu') {
+      this.lastGameName = gameName;
     }
 
     // Map game names to their modules
@@ -149,6 +155,13 @@ export class GameManager {
         const multiplier = this.scoreMultipliers[gameName] || 1.0;
         const bonusScore = Math.floor(score * multiplier);
         const bonusPoints = bonusScore - score;
+
+        // Update local player stats (bestScore/totalScore) for guestbook verification UX
+        try {
+          await this.updatePlayerStats(playerName, gameName, bonusScore);
+        } catch (e) {
+          console.warn("updatePlayerStats failed (continuing):", e);
+        }
 
         // Save to local leaderboard with bonus
         this.leaderboardData.push({
@@ -348,6 +361,15 @@ export class GameManager {
       this.currentGame.destroy();
     }
     this.showMenu();
+  }
+
+  // Restart the last played game if available
+  async restartCurrentGame() {
+    if (!this.lastGameName) {
+      // If no last game, just show menu
+      return this.returnToMenu();
+    }
+    return this.startGame(this.lastGameName);
   }
 
   playSound(soundType) {

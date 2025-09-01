@@ -43,18 +43,22 @@ const mockCanvas = {
 };
 
 // @ts-ignore - Mocking browser APIs for testing
-global.requestAnimationFrame = (cb) => setTimeout(cb, 16);
+globalThis.requestAnimationFrame = (cb) => setTimeout(cb, 16);
 // @ts-ignore
-global.cancelAnimationFrame = () => {};
+globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 // @ts-ignore
-global.performance = { now: () => Date.now() };
+globalThis.performance = { now: () => Date.now() };
 // @ts-ignore
-global.Audio = function() { return {}; };
+globalThis.Audio = function() { return {}; };
 // @ts-ignore
-HTMLCanvasElement.prototype.getContext = () => mockCanvas.getContext();
+const CanvasCtor = (globalThis).HTMLCanvasElement || (globalThis.window && globalThis.window.HTMLCanvasElement);
+if (CanvasCtor && CanvasCtor.prototype) {
+  // @ts-ignore
+  CanvasCtor.prototype.getContext = () => mockCanvas.getContext();
+}
 
 // @ts-ignore - Mocking document for testing
-global.document = {
+globalThis.document = {
   ...mockElement,
   createElement: () => mockElement,
   getElementById: () => mockCanvas,
@@ -67,7 +71,7 @@ global.document = {
 };
 
 // @ts-ignore - Mocking window for testing
-global.window = {
+globalThis.window = {
   ...mockElement,
   localStorage: {
     getItem: () => null,
@@ -79,3 +83,7 @@ global.window = {
   AudioContext: function() { return {}; },
   webkitAudioContext: function() { return {}; }
 };
+
+// Signal to runtime that we are in a test environment (used to disable animations, etc.)
+// @ts-ignore
+globalThis.__TEST__ = true;

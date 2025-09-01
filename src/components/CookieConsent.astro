@@ -136,6 +136,10 @@
       // Ensure banner always on top of any game/overlay layers
       banner.style.zIndex = '1200';
       banner.style.pointerEvents = 'auto';
+  // Add body class + CSS variable so floating UI (arcade trigger) can offset above banner
+  const h = banner.offsetHeight || 0;
+  document.body.classList.add('cookie-banner-visible');
+  document.documentElement.style.setProperty('--cookie-banner-height', h + 'px');
         }, 1000);
       }
     }
@@ -144,6 +148,9 @@
       const banner = document.getElementById('cookie-consent');
       if (banner) {
         banner.classList.add('translate-y-full');
+  document.body.classList.remove('cookie-banner-visible');
+  // Leave variable but set to zero for smooth transition
+  document.documentElement.style.setProperty('--cookie-banner-height', '0px');
       }
     }
     

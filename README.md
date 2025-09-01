@@ -310,6 +310,65 @@ Security & Performance:
 
 Leaderboard: Currently ephemeral (in‑memory). Future enhancement may optionally persist anonymized scores to KV (`LEADERBOARD`).
 
+#### Arcade Hint & Easter Egg System
+
+The arcade now includes a lightweight, progressively‑layered hint system that surfaces subtle clues to encourage deeper engagement (play additional games, improve scores, explore security tooling).
+
+Core concepts:
+
+- Segmentation: Visitors are bucketed client‑side (no PII) by total accumulated score + achievements into tiers: `visitor`, `novice`, `competent`, `advanced`.
+- Hint Rotation: A single contextual hint line may appear in the menu (below the standard instructions). Hints are drawn from a per‑segment pool and are not repeated until the pool is exhausted (per local browser).
+- Persistence: `localStorage` keys track total score (already used by the arcade), seen hints (`retroArcadeSeenHints`), and an internal `secretProgress` counter (`retroArcadeSecretProgress`). No network calls or server storage are used.
+- Resilience: If the hint module fails to load or throws, the menu silently omits hints (defensive `try / catch`).
+
+File:
+
+- `public/arcadeHints.js` exports:
+	- `getArcadeHint()` – returns a `{ text, segment }` object or `null` if no new hint is available.
+	- `incrementSecretProgress(n = 1)` – increments an internal counter (future unlock triggers / meta puzzles).
+
+Menu Integration:
+
+- `MenuGame.drawInstructions()` calls `window.ArcadeHints?.getArcadeHint()` once per render cadence (with basic timestamp throttling) and appends the returned hint text if present.
+
+Adding / Editing Hints:
+
+1. Open `public/arcadeHints.js`.
+2. Modify the `HINTS` dictionary (arrays keyed by segment).
+3. Keep hints short (<= 80 chars) to avoid wrapping on narrow devices.
+
+Using Secret Progress (example inside a game module):
+
+```js
+// Award hidden progress when player performs a special action
+import './arcadeHints.js'; // ensure global is registered (or rely on existing load)
+window.ArcadeHints?.incrementSecretProgress(2);
+```
+
+Potential Extension Channels (backlog):
+
+- HTTP Response Header: Inject a low‑value, rotating `X-Arcade-Hint` header on arcade asset requests (disabled by default) for users inspecting network traffic.
+- Achievements Overlay: Display a transient toast when secret progress crosses thresholds (e.g., 5, 10, 20) to tease deeper layers.
+- Alternate Medium: Encode a higher‑tier clue in a CSS comment or `data-` attribute gated by score tier.
+- Server Metrics: (Optional) Aggregate anonymous segment counts server‑side for balancing (not implemented; would require KV or Durable Object).
+
+Design Principles:
+
+- Non‑intrusive: Hints never block gameplay or cover critical UI.
+- Privacy‑respecting: All state local; no fingerprinting, no remote beacon.
+- Progressive: Higher tiers reveal more meta / security themed clues (e.g., referencing headers, secret scanner modes) to reward sustained play.
+- Fail‑safe: Failure to load or parse hints should degrade silently with zero console noise (only `console.debug`).
+
+Removal / Disable:
+
+- Delete `public/arcadeHints.js` and remove the call in `MenuGame.drawInstructions()` (search for `ArcadeHints`). LocalStorage keys are orphaned but harmless; optionally clear them in a migration snippet.
+
+Roadmap (if expanded later):
+
+- Multi‑channel delivery (headers + DOM attributes + subtle audio Morse pattern) – gated behind a feature flag.
+- Challenge Chain: Sequence of hints leading to a hidden mode or scanner enhancement.
+- Rate limiting / cooldown for hint fetch to reduce DOM churn on very low‑end devices (currently minimal impact).
+
 ### Enhanced Security Scanner & Super Admin Mode
 
 Two routes exist:
@@ -330,6 +389,36 @@ Threat Model:
 - Passphrase only reveals UI (low sensitivity)
 - Real authorization enforced server-side by secret key comparison
 - Key never persisted locally (no localStorage/sessionStorage); lives only in a JS variable for the session
+
+#### External Security Intelligence Enrichment
+
+The enhanced scanner optionally enriches findings with external vulnerability & reputation data. All enrichments are graceful: absence of a key/flag yields an informational finding instead of an error.
+
+| Capability | Env Toggle / Key | Default Behavior When Missing | Notes |
+|------------|------------------|--------------------------------|-------|
+| NVD CVE keyword lookup | `NVD_API_KEY` | Adds info finding: enrichment skipped | Keyword search for disclosed product/version (top 5 CVEs fetched). |
+| VirusTotal domain reputation | `VIRUSTOTAL_API_KEY` | Adds info finding: enrichment unavailable | Reports malicious / suspicious / harmless counts; severity escalates if malicious > 0. |
+| OpenCVE keyword statistics | `OPENCVE_ENRICH=true` (no key) | Adds info finding: enrichment disabled | Public API query; override base with `OPENCVE_API_BASE` (default `https://app.opencve.io/api`). Severity scales with match count. |
+
+Example enablement in `.env.local` (do not commit real keys):
+
+```
+NVD_API_KEY=your_nvd_key
+VIRUSTOTAL_API_KEY=your_vt_key
+OPENCVE_ENRICH=true
+```
+
+Operational Guidance:
+
+- Keep requests conservative (current implementation limits CVE queries to small pages and simple keyword search) to stay within fair use.
+- If rate limiting or errors occur, findings are downgraded to `warning` or `info` without failing the overall scan.
+- Disable any enrichment quickly by unsetting the variable or setting `OPENCVE_ENRICH=false`.
+
+Security Considerations:
+
+- External lookups include only product/version keywords derived from already public response headers (no user PII).
+- Keys should be configured in the Cloudflare environment, never committed.
+- Future expansion (e.g., more precise CVE matching) should preserve minimal disclosure and add caching to reduce external traffic.
 
 ### Admin Consent Metrics Portal
 

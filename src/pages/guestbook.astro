@@ -83,8 +83,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         Recent Entries
       </h2>
       
-      <div id="guestbook-entries" class="space-y-6">
-        <div class="text-center text-slate-400 py-8">
+      <div id="guestbook-entries" class="space-y-6" data-state="loading">
+        <div id="guestbook-loading" class="text-center text-slate-400 py-8">
           Loading entries...
         </div>
       </div>
@@ -115,15 +115,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   let entries = [];
   
   async function loadEntries() {
+    const container = document.getElementById('guestbook-entries');
+    const loadingNode = document.getElementById('guestbook-loading');
+    if (container) container.dataset.state = 'loading';
     try {
-      const response = await fetch('/api/guestbook', {
-        headers: { 'Accept': 'application/json' }
-      });
+      const response = await fetch('/api/guestbook', { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) throw new Error('Non-OK response loading entries');
       entries = await response.json();
       displayEntries();
     } catch (error) {
       console.error('Failed to load entries:', error);
-      document.getElementById('guestbook-entries').innerHTML = '<div class="text-center text-red-400 py-8">Failed to load entries</div>';
+      if (container) {
+        container.dataset.state = 'error';
+        container.innerHTML = '<div class="text-center text-red-400 py-8">Failed to load entries. <button id="retry-load" class="underline hover:text-red-300">Retry</button></div>';
+        document.getElementById('retry-load')?.addEventListener('click', () => {
+          container.innerHTML = '<div id="guestbook-loading" class="text-center text-slate-400 py-8">Loading entries...</div>';
+          loadEntries();
+        });
+      }
+    } finally {
+      if (loadingNode) loadingNode.remove();
     }
   }
 
@@ -173,7 +184,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           window.turnstile.reset();
         }
       } else {
-        showFeedback(result.reason || result.error || 'Failed to add entry', 'error');
+        // Provide friendlier guidance for score requirement failures
+        let message = result.reason || result.error || 'Failed to add entry';
+        if (/score requirement/i.test(message)) {
+          // Attempt to read any local player-* stats for hint
+          const playerKey = `player-${name}`;
+          try {
+            const statsRaw = window.localStorage.getItem(playerKey);
+            if (statsRaw) {
+              const stats = JSON.parse(statsRaw);
+              const best = stats.bestScore || 0;
+              if (best < 100) {
+                message += ` — Your best recorded score is ${best}. Score 100+ points in any game, then try again.`;
+              }
+            } else {
+              message += ' — Play a game and score 100+ points first.';
+            }
+          } catch(_) { /* ignore */ }
+        }
+        showFeedback(message, 'error');
       }
       
     } catch (error) {
@@ -205,6 +234,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   function displayEntries() {
     const container = document.getElementById('guestbook-entries');
     if (!container) return;
+    container.dataset.state = 'loaded';
     
     if (!entries || entries.length === 0) {
       container.innerHTML = '<div class="text-center text-slate-400 py-8">No entries yet. Be the first to sign!</div>';
