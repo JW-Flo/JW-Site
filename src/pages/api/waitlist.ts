@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { json, methodNotAllowed, badRequest, forbidden } from '../../../utils/responses.ts';
+import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
 import { buildIpPrivacyRecord } from '../../utils/ipPrivacy.ts';
 
 export const prerender = false;
@@ -19,16 +20,22 @@ async function getCount(DB: any) {
   }
 }
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals, clientAddress }) => {
   if (process.env.FEATURE_WAITLIST !== 'true') return forbidden('Waitlist disabled');
+  const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
+  const rl = await applyRateLimit({ env, key: `waitlist:get:${clientAddress || 'unknown'}`, max: 30, windowMs: 60_000 });
+  if (!rl.allowed) return json({ error: 'rate-limited' }, { status: 429, headers: rateLimitHeaders(rl) });
   const DB = (globalThis as any).DB || (request as any).locals?.runtime?.env?.DB || (request as any).locals?.DB || (request as any).locals?.env?.DB;
   if (!DB) return json({ ok: true, count: 0 });
   const count = await getCount(DB);
   return json({ ok: true, count });
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
   if (process.env.FEATURE_WAITLIST !== 'true') return forbidden('Waitlist disabled');
+  const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
+  const rl = await applyRateLimit({ env, key: `waitlist:post:${clientAddress || 'unknown'}`, max: 5, windowMs: 60*60_000 });
+  if (!rl.allowed) return json({ error: 'rate-limited' }, { status: 429, headers: rateLimitHeaders(rl) });
   let body: any;
   try {
     body = await request.json();

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { json, methodNotAllowed } from '../../utils/responses.js';
+import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
 
 export const prerender = false;
 
@@ -17,7 +18,7 @@ interface ConsentPayload {
 }
 
 function validatePayload(body: any): { ok: true; data: ConsentPayload } | { ok: false; res: Response } {
-  if (!body || !body.sessionId) {
+  if (!body?.sessionId) {
     return { ok: false, res: json({ ok: false, error: 'missing-sessionId' }, { status: 400 }) };
   }
   const { sessionId, essential, analytics, research, marketing, timestamp } = body as ConsentPayload;
@@ -56,10 +57,15 @@ async function insertConsent(db: any, body: ConsentPayload) {
   ).run();
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
   const featureEnabled = process.env.FEATURE_CONSENT_D1 === 'true';
   if (!featureEnabled) {
     return json({ ok: false, reason: 'feature-disabled' }, { status: 403 });
+  }
+  const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
+  const rl = await applyRateLimit({ env, key: `consent:${clientAddress || 'unknown'}`, max: 10, windowMs: 5*60_000 });
+  if (!rl.allowed) {
+    return json({ ok: false, error: 'rate-limited' }, { status: 429, headers: rateLimitHeaders(rl) });
   }
   let body: ConsentPayload | undefined;
   try {
