@@ -866,6 +866,12 @@ nav a {
   box-shadow: 0 0 15px rgba(139,92,246,0.6), 0 0 30px rgba(59,130,246,0.35);
 }
 
+/* When cookie consent banner is visible, lift the trigger above it using measured height */
+body.cookie-banner-visible .game-trigger-container {
+  bottom: calc(var(--cookie-banner-height, 0px) + 1rem);
+  transition: bottom 0.3s ease;
+}
+
 body.game-mode .game-trigger-button {
   opacity: 0; /* hide trigger once active */
   pointer-events: none;

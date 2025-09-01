@@ -1,10 +1,10 @@
 ---
 ---
-<section class="py-20 bg-dark relative">
+<section class="py-20 bg-dark relative" id="bio-section">
   <div class="absolute inset-0 bg-gradient-to-t from-transparent via-neon-blue/5 to-transparent"></div>
-  <h2 class="text-4xl font-bold font-sans text-center text-neon-green mb-12 relative z-10">Bio</h2>
+  <h2 class="text-4xl font-bold font-sans text-center text-neon-green mb-12 relative z-10 select-none" id="bio-secret-trigger" aria-label="Bio Heading">Bio</h2>
   <div class="max-w-4xl mx-auto relative z-10 space-y-8">
-    <div class="text-lg text-slate-300 leading-relaxed">
+  <div class="text-lg text-slate-300 leading-relaxed" data-admin-hide-root>
       <p class="mb-4">
         I've always carried a strong sense of responsibility to protect the people and systems around me. Growing up in an orphanage in Kiev taught me resilience and self-reliance — traits that carried forward into my childhood in the U.S. After six years in South Carolina and ten in Nebraska, I earned the rank of Eagle Scout, an early milestone in discipline and leadership.
       </p>
@@ -16,7 +16,7 @@
       </p>
     </div>
     
-    <div>
+  <div data-admin-hide-root>
       <h3 class="text-xl font-bold text-neon-blue mb-4">Key Achievements</h3>
       <ul class="text-slate-300 space-y-2 list-disc list-inside">
         <li>Built and hardened identity platforms, deployed Okta as centralized IdP</li>
@@ -29,7 +29,7 @@
       </ul>
     </div>
     
-    <div>
+  <div data-admin-hide-root>
       <h3 class="text-xl font-bold text-neon-pink mb-4">Beyond Work</h3>
       <p class="text-slate-300 leading-relaxed">
         Outside of work, I stay curious. I've explored AI-driven security automation, early quantum computing concepts, and built AtlasIT, a lightweight automated IT management platform designed to push identity workflows and provisioning as far as possible without human overhead.
@@ -44,5 +44,87 @@
         Looking back, my path has been about progression: from Kiev to the Army, from logistics to IT, from IT to security, and now from security to automation. What drives me isn't titles or tools, but the responsibility to protect and improve — a thread that began in my earliest years and continues to guide my work today.
       </p>
     </div>
+    <!-- Hidden admin link container -->
+    <div id="admin-link-container" class="mt-8 text-center hidden" aria-hidden="true">
+      <a href="/admin" class="inline-block px-4 py-2 rounded bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue font-semibold text-sm transition" data-admin-link>Admin Console</a>
+      <button id="admin-reset" class="ml-3 text-xs text-slate-500 hover:text-slate-300 underline" type="button">hide</button>
+    </div>
   </div>
+
+  <script>
+    (() => {
+      const TRIGGER_ID = 'bio-secret-trigger';
+      const ADMIN_FLAG = 'superAdminMode';
+      const REQUIRED_CLICKS = 5;
+      const CLICK_WINDOW_MS = 3500; // timeframe to complete sequence
+      const triggerEl = document.getElementById(TRIGGER_ID);
+      const adminContainer = document.getElementById('admin-link-container');
+      const adminLink = adminContainer?.querySelector('[data-admin-link]');
+      const resetBtn = document.getElementById('admin-reset');
+      if (!triggerEl || !adminContainer) return;
+
+      function revealAdmin() {
+        localStorage.setItem(ADMIN_FLAG, 'true');
+        adminContainer.classList.remove('hidden');
+        adminContainer.setAttribute('aria-hidden', 'false');
+      }
+
+      function hideAdmin() {
+        adminContainer.classList.add('hidden');
+        adminContainer.setAttribute('aria-hidden', 'true');
+      }
+
+      // Persisted state
+      if (typeof localStorage !== 'undefined' && localStorage.getItem(ADMIN_FLAG) === 'true') {
+        revealAdmin();
+      }
+
+      let clickCount = 0;
+      let firstClickTime = 0;
+
+      triggerEl.addEventListener('click', () => {
+        const now = Date.now();
+        if (clickCount === 0) {
+          firstClickTime = now;
+          clickCount = 1;
+        } else {
+          if (now - firstClickTime <= CLICK_WINDOW_MS) {
+            clickCount++;
+          } else {
+            // window expired, reset sequence
+            firstClickTime = now;
+            clickCount = 1;
+          }
+        }
+        if (clickCount >= REQUIRED_CLICKS) {
+          revealAdmin();
+          // subtle feedback pulse
+          triggerEl.classList.add('animate-pulse');
+          setTimeout(() => triggerEl.classList.remove('animate-pulse'), 1200);
+          clickCount = 0;
+        }
+      });
+
+      // Optional: keyboard sequence (type 'admin') while focused anywhere in section
+      const section = document.getElementById('bio-section');
+      let keyBuffer = '';
+      const KEY_SEQUENCE = 'admin';
+      section?.addEventListener('keydown', (e) => {
+        if (!e.key || e.metaKey || e.ctrlKey) return;
+        keyBuffer += e.key.toLowerCase();
+        if (keyBuffer.length > KEY_SEQUENCE.length) {
+          keyBuffer = keyBuffer.slice(-KEY_SEQUENCE.length);
+        }
+        if (keyBuffer === KEY_SEQUENCE) {
+          revealAdmin();
+          keyBuffer = '';
+        }
+      });
+
+      resetBtn?.addEventListener('click', () => {
+        localStorage.removeItem(ADMIN_FLAG);
+        hideAdmin();
+      });
+    })();
+  </script>
 </section>

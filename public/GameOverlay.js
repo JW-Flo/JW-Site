@@ -31,20 +31,24 @@ export class GameOverlay {
       });
     }
 
-    // Global escape key - only deactivate if no game is active
+    // Global key handling for Escape (return to menu / close) and R (restart)
     document.addEventListener("keydown", (e) => {
+      if (!this.gameManager) return;
+      const gm = this.gameManager;
       if (e.key === "Escape") {
-        // If GameManager is active and has a current game, let the game handle escape
-        if (
-          this.gameManager &&
-          this.gameManager.isActive &&
-          this.gameManager.currentGame
-        ) {
-          // Game will handle its own escape logic
+        // If a game is active, return to menu; otherwise deactivate overlay
+        if (gm.currentGame) {
+          e.preventDefault();
+            gm.returnToMenu();
           return;
         }
-        // Otherwise, deactivate the entire overlay
         this.deactivate();
+      } else if (e.key.toLowerCase() === 'r') {
+        // Restart current/last game
+        if (gm.lastGameName) {
+          e.preventDefault();
+          gm.restartCurrentGame();
+        }
       }
     });
 
@@ -61,6 +65,7 @@ export class GameOverlay {
 
     this.showLeaderboard();
     await this.gameManager.activate();
+  this.injectGameControls();
   }
 
   async deactivate() {
@@ -122,6 +127,40 @@ export class GameOverlay {
   hideInstructions() {
     // Instructions are not implemented in BaseLayout
     // This method is kept for compatibility but doesn't do anything
+  }
+
+  // Inject lightweight control buttons (Restart / Menu) overlayed at bottom-right
+  injectGameControls() {
+    if (document.getElementById('arcade-controls')) return; // Avoid duplicates
+    const wrap = document.createElement('div');
+    wrap.id = 'arcade-controls';
+    wrap.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;gap:8px;font-family:monospace';
+    const btnStyle = 'background:#1e293b;color:#e2e8f0;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:background .15s';
+    const restartBtn = document.createElement('button');
+    restartBtn.textContent = 'Restart (R)';
+    restartBtn.style.cssText = btnStyle;
+    restartBtn.addEventListener('mouseenter', () => restartBtn.style.background = '#334155');
+    restartBtn.addEventListener('mouseleave', () => restartBtn.style.background = '#1e293b');
+    restartBtn.addEventListener('click', () => {
+      if (this.gameManager?.lastGameName) {
+        this.gameManager.restartCurrentGame();
+      }
+    });
+    const menuBtn = document.createElement('button');
+    menuBtn.textContent = 'Menu (Esc)';
+    menuBtn.style.cssText = btnStyle;
+    menuBtn.addEventListener('mouseenter', () => menuBtn.style.background = '#334155');
+    menuBtn.addEventListener('mouseleave', () => menuBtn.style.background = '#1e293b');
+    menuBtn.addEventListener('click', () => {
+      if (this.gameManager?.currentGame) {
+        this.gameManager.returnToMenu();
+      } else {
+        this.deactivate();
+      }
+    });
+    wrap.appendChild(restartBtn);
+    wrap.appendChild(menuBtn);
+    document.body.appendChild(wrap);
   }
 
   resize() {

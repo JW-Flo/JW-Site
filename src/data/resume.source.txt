@@ -12,12 +12,15 @@ March 2021 - May 2025
 - Developed Python/SQL scripts for IOC enrichment, saving ~20 hours/week.
 - Improved monitoring and reduced false positives by ~30%.
 - Led CVSS-based vulnerability remediation; maintained 98% closure rate for high-priority findings.
+- Enforced IAM policy least-privilege (AWS/Okta), cutting over-permissioned roles by ~45%.
+- Automated DSAR & privacy workflows to streamline GDPR/CCPA handling.
 
 IT Systems Engineer, FloSports
 March 2020 - March 2021
 - Deployed corporate Cisco network, VLAN segmentation, redundancy.
 - Managed Windows/Linux imaging, patching, endpoint lifecycle.
 - Integrated AD and Okta IAM workflows; maintained RBAC integrity.
+- Provided Tier 2–3 infra/network support & audits; improved uptime and access review cadence.
 
 Information Technology Associate, FloSports
 August 2019 - March 2020
@@ -37,9 +40,12 @@ Austin Community College - BASc, Computer Systems Technology - 2024
 
 Certifications
 A+
-AWS Cloud Practitioner
+AWS Certified Cloud Practitioner
 Cisco CCNA
 CompTIA Security+
 Network+
 Okta Certified Administrator
-Certified Ethical Hacker
+Certified Ethical Hacker (CEH)
+
+Tools
+AWS (EC2, S3) | Terraform | Docker | Python | Bash | PowerShell | SQL | SIEM | Endpoint Security (Datto EDR) | Cisco Networking | Windows/Linux Administration | Identity & Access Management (Okta, AWS IAM) | Vulnerability Management | Monitoring & Alerting

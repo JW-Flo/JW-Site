@@ -62,6 +62,32 @@ preview_id = "64323cab0ce447d182e8a5038461e6d3"
 # [vars]
 # SESSION_SIGNING_KEY = "dev-session-signing-key"
 
+# --- Environment Overrides --------------------------------------------------
+# Use `wrangler pages dev` or `wrangler dev` locally; deploy with:
+#   wrangler pages deploy dist --branch=staging
+#   wrangler pages deploy dist --branch=main
+# OR specify environments below for workers deploy styles if migrating later.
+
+[env.staging]
+vars = { SITE_URL = "https://staging.jw-site.example" }
+# Example distinct namespace IDs (create via: wrangler kv:namespace create <NAME> --env=staging)
+kv_namespaces = [
+	{ binding = "RATE_LIMIT", id = "<staging-rate-limit-id>" },
+	{ binding = "LEADERBOARD", id = "<staging-leaderboard-id>" },
+	{ binding = "ANALYTICS", id = "<staging-analytics-id>" },
+	# Optional scanner metadata KV (create only if enabling persistence)
+	# { binding = "SCANNER_META", id = "<staging-scanner-meta-id>" }
+]
+
+[env.production]
+vars = { SITE_URL = "https://jw-site.example" }
+kv_namespaces = [
+	{ binding = "RATE_LIMIT", id = "33fcae0c755840f996bfbb3ca3f9394f" },
+	{ binding = "LEADERBOARD", id = "4792010013254ed7815b2d66adb9a50e" },
+	{ binding = "ANALYTICS", id = "3dd7938561f5402bb41760edda181030" },
+	# { binding = "SCANNER_META", id = "<prod-scanner-meta-id>" }
+]
+
 # Workflows configuration (implemented as functions for now)
 # These will be converted to proper workflows when Cloudflare Workflows supports them
 # [[workflows]]
