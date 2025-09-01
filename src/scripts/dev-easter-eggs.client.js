@@ -29,7 +29,7 @@ const easterEggs = {
   },
 
   setupKonamiCode() {
-    let konamiCode = [
+  const konamiCode = [
       "ArrowUp",
       "ArrowUp",
       "ArrowDown",

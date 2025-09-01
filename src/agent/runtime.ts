@@ -4,7 +4,7 @@ import { AgentRequestBody, AgentResponseBody } from './types.js';
 import { newSession, loadSession, saveSession } from './sessionStore.js';
 import { projectClientFlags, loadFlags } from '../config/flags.js';
 import { logAgent } from './log.js';
-import { incrToolCall, incrToolError, incrRateLimited, incrValidationError } from './metrics.js';
+import { incrToolCall, incrToolError, incrRateLimited, incrValidationError, persistMetricsIfNeeded } from './metrics.js';
 import { checkRateLimit } from './rateLimit.js';
 
 // Simple UUID-ish generator (not RFC4122 strict but sufficient for correlation)
@@ -50,6 +50,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   if (!rl.allowed) {
     const ra = Math.ceil((rl.reset - Date.now())/1000);
   incrRateLimited(toolName);
+  await persistMetricsIfNeeded(env);
   logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset, correlationId: cid });
     return new Response(JSON.stringify({ ok: false, error: 'rate-limited', sessionId, tool: toolName, retryAfter: ra, correlationId: cid }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': ra.toString() } });
   }
@@ -58,6 +59,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     const vIn = validateInput(tool, input);
     if (!vIn.ok) {
       incrValidationError(toolName);
+      await persistMetricsIfNeeded(env);
       logAgent({ level: 'error', msg: 'validation-error', tool: toolName, sessionId, correlationId: cid, issues: vIn.issues });
       return new Response(JSON.stringify({ ok: false, error: 'validation_error', issues: vIn.issues, sessionId, tool: toolName, correlationId: cid }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
@@ -75,6 +77,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     result = await tool.execute(input, ctx as any);
   } catch (e:any) {
   incrToolError(toolName);
+  await persistMetricsIfNeeded(env);
   logAgent({ level: 'error', msg: 'tool-error', tool: toolName, sessionId, ip, error: e?.message, correlationId: cid });
     return jsonError('tool-error', 500, start, sessionId, cid);
   }
@@ -84,6 +87,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     const vOut = validateOutput(tool, result.ok ? result.data : undefined);
     if (!vOut.ok) {
       incrValidationError(toolName);
+      await persistMetricsIfNeeded(env);
       logAgent({ level: 'error', msg: 'output-validation-error', tool: toolName, sessionId, correlationId: cid, issues: vOut.issues });
       return new Response(JSON.stringify({ ok: false, error: 'output_validation_error', issues: vOut.issues, sessionId, tool: toolName, correlationId: cid }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
@@ -97,6 +101,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     latencyMs: Date.now() - start
   };
   incrToolCall(toolName);
+  await persistMetricsIfNeeded(env);
   logAgent({ level: 'info', msg: 'tool-exec', tool: toolName, sessionId: session.id, ip, latencyMs: response.latencyMs, correlationId: cid });
   return new Response(JSON.stringify({ ...response, correlationId: cid }), { status: result.ok ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
 }

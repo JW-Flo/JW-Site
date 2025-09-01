@@ -5,8 +5,8 @@ import matter from "gray-matter";
 
 const root = path.resolve(new URL(".", import.meta.url).pathname, "..");
 const blogDir = path.join(root, "src", "pages", "blog");
-let errors = [];
-let slugs = new Set();
+const errors = [];
+const slugs = new Set();
 
 if (existsSync(blogDir)) {
   for (const file of readdirSync(blogDir)) {

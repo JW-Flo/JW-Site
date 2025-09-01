@@ -23,13 +23,13 @@ import resume from '../data/resume.json';
         return (
           <>
             {topSkills.map((skill, index) => (
-              <div class={`p-6 border border-neon-blue/50 rounded-lg hover:border-neon-blue hover:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all duration-300 transform hover:scale-105 text-center group bg-dark/50 backdrop-blur-sm ${
+              <div class={`p-6 border border-neon-blue/50 rounded-lg hover:border-neon-blue hover:shadow-[0_0_18px_rgba(0,255,255,0.25)] transition-colors duration-300 text-center group bg-dark/50 backdrop-blur-sm will-change-transform ${
                 index < 6 ? 'animate-fade-in-up' : ''
               }`} style={`animation-delay: ${index * 0.1}s`}>
                 <div class="w-12 h-12 mx-auto mb-3 bg-neon-blue/20 rounded-full flex items-center justify-center group-hover:bg-neon-blue/30 transition-colors">
                   <span class="text-neon-blue text-xl">⚡</span>
                 </div>
-                <p class="text-neon-blue font-bold group-hover:text-white transition-colors">{skill}</p>
+                <p class="text-neon-blue font-bold group-hover:text-white transition-colors transition-transform group-hover:-translate-y-0.5">{skill}</p>
               </div>
             ))}
 
@@ -59,7 +59,7 @@ import resume from '../data/resume.json';
       </h3>
       <div class="flex flex-wrap justify-center gap-3 max-w-5xl mx-auto">
         {resume.tools.map((tool, index) => (
-          <span class={`px-4 py-2 bg-gradient-to-r from-neon-green/10 to-neon-blue/10 border border-neon-green/30 rounded-full text-neon-green text-sm hover:border-neon-green hover:shadow-[0_0_15px_rgba(0,255,255,0.2)] transition-all duration-300 transform hover:scale-110 cursor-default ${
+          <span class={`px-4 py-2 bg-gradient-to-r from-neon-green/10 to-neon-blue/10 border border-neon-green/30 rounded-full text-neon-green text-sm hover:border-neon-green hover:shadow-[0_0_12px_rgba(0,255,255,0.18)] transition-colors duration-300 cursor-default ${
             index < 10 ? 'animate-fade-in-up' : ''
           }`} style={`animation-delay: ${index * 0.05}s`}>
             {tool}
@@ -75,7 +75,7 @@ import resume from '../data/resume.json';
       </h3>
       <div class="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
         {resume.certifications.map((cert, index) => (
-          <div class={`px-6 py-3 bg-gradient-to-r from-neon-pink/10 to-neon-yellow/10 border border-neon-pink/50 rounded-lg text-slate-200 font-medium hover:border-neon-pink hover:shadow-[0_0_20px_rgba(255,0,255,0.3)] transition-all duration-300 transform hover:scale-105 ${
+          <div class={`px-6 py-3 bg-gradient-to-r from-neon-pink/10 to-neon-yellow/10 border border-neon-pink/50 rounded-lg text-slate-200 font-medium hover:border-neon-pink hover:shadow-[0_0_18px_rgba(255,0,255,0.25)] transition-colors duration-300 ${
             index < 6 ? 'animate-fade-in-up' : ''
           }`} style={`animation-delay: ${index * 0.1}s`}>
             <div class="font-semibold text-slate-100">{cert.name}</div>

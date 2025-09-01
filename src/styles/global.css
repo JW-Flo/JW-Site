@@ -842,6 +842,11 @@ nav a {
   justify-content: center;
 }
 
+/* When cookie banner visible, lift trigger above it */
+body.cookie-banner-visible .game-trigger-container {
+  bottom: 5rem; /* ~banner height + spacing */
+}
+
 .game-trigger-button {
   width: 48px;
   height: 48px;

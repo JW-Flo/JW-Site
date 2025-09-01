@@ -24,7 +24,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+  "test:coverage": "vitest run --coverage",
+  "lint": "eslint .",
+  "smoke": "bash scripts/smoke.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

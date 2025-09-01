@@ -193,6 +193,37 @@ describe('Agent API (Phase 0)', () => {
   expect(blockedJson.correlationId).toMatch(/^cid_/);
   });
 
+  test('metrics persistence writes to KV when flag enabled and resets correctly', async () => {
+    const kvStore: Record<string,string> = {};
+    const mockKV: KVNamespace = {
+      get: async (k: string) => kvStore[k] || null,
+      put: async (k: string, v: string) => { kvStore[k] = v; },
+      delete: async (k: string) => { delete kvStore[k]; }
+    } as any;
+    const env = mockEnv({ AGENT_METRICS: mockKV, FEATURE_AGENT_METRICS_PERSIST: 'true' });
+    // Generate some metrics
+    await post({ tool: 'list_flags' }, env);
+    await post({ tool: 'list_tools' }, env);
+    // Force a validation error (enable schema flag & bad input)
+    env.FEATURE_AGENT_SCHEMA = 'true';
+    await post({ tool: 'start_scan', input: {} }, env); // validation error increments
+    // Snapshot persisted content
+    const storedKey = Object.keys(kvStore).find(k => k.includes('agent:metrics'));
+    expect(storedKey).toBeDefined();
+    const persisted = JSON.parse(kvStore[storedKey!]);
+    expect(persisted.totalCalls).toBeGreaterThanOrEqual(2);
+    // Reset via admin tool
+    const resetRes = await post({ tool: 'metrics_reset' }, env, 'admin-secret');
+    expect(resetRes.status).toBe(200);
+    const resetJson: any = await resetRes.json();
+    expect(resetJson.result.totalCalls).toBe(0);
+    // KV should now reflect reset (after another call to trigger persist)
+    await post({ tool: 'list_flags' }, env);
+    const afterReset = JSON.parse(kvStore[storedKey!]);
+  // metrics_reset itself increments totalCalls, plus the subsequent list_flags => 2
+  expect(afterReset.totalCalls).toBe(2);
+  });
+
   test('payload too large rejected', async () => {
     const env = mockEnv();
     const big = 'x'.repeat(10_001);

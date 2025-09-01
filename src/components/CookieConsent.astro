@@ -136,6 +136,9 @@
       // Ensure banner always on top of any game/overlay layers
       banner.style.zIndex = '1200';
       banner.style.pointerEvents = 'auto';
+      // Add a body class so other fixed UI (e.g., arcade trigger) can adjust position
+      document.body.classList.add('cookie-banner-visible');
+      window.dispatchEvent(new CustomEvent('cookieBannerShown'));
         }, 1000);
       }
     }
@@ -144,6 +147,8 @@
       const banner = document.getElementById('cookie-consent');
       if (banner) {
         banner.classList.add('translate-y-full');
+        document.body.classList.remove('cookie-banner-visible');
+        window.dispatchEvent(new CustomEvent('cookieBannerHidden'));
       }
     }
     

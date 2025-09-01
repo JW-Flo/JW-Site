@@ -1,6 +1,6 @@
 // Tool registry (AGENT-01/AGENT-05)
 import { AgentTool } from './types.js';
-import { snapshotMetrics } from './metrics.js';
+import { snapshotMetrics, resetAndPersist } from './metrics.js';
 import { z } from 'zod';
 
 // Simple schema validator
@@ -107,6 +107,15 @@ const tools: AgentTool[] = [
     }).strict(),
     async execute() {
       return { ok: true, data: snapshotMetrics() };
+    }
+  },
+  {
+    name: 'metrics_reset',
+    description: 'Reset in-memory (and persisted if enabled) metrics and return fresh snapshot (admin only).',
+    superAdminOnly: true,
+    async execute(_input, ctx) {
+      const snap = await resetAndPersist(ctx.env);
+      return { ok: true, data: snap };
     }
   }
 ];

@@ -12,6 +12,7 @@ SITE_URL = "https://jw-site-7q2.pages.dev"
 # FEATURE_GEO_CLASSIFICATION = "true" # Enable geo hashing output
 # FEATURE_WAITLIST = "true" # Enable waitlist API + widget (requires migration 002_waitlist.sql applied)
 # FEATURE_AGENT = "true" # Enable Copilot Agent Mode (agent query API under /api/agent/query)
+# FEATURE_AGENT_METRICS_PERSIST = "true" # Enable metrics persistence to KV (requires AGENT_METRICS binding below)
 # CONSENT_ADMIN_KEY = "set-in-dashboard" # Required for /api/admin/consent-stats
 # SUPER_ADMIN_KEY is consumed by /api/enhanced-security-scan for super-admin mode.
 # Set this in Cloudflare Pages project dashboard (do NOT commit secrets).
@@ -19,6 +20,16 @@ SITE_URL = "https://jw-site-7q2.pages.dev"
 # SUPER_ADMIN_KEY = "dev-super-admin-key"
 
 # If you later add KV / D1 / R2 bindings, document them here.
+
+# Metrics persistence KV (optional; only needed if enabling FEATURE_AGENT_METRICS_PERSIST)
+# Create namespaces:
+#   wrangler kv:namespace create AGENT_METRICS --env=production
+#   wrangler kv:namespace create AGENT_METRICS --env=preview
+# Then add ids:
+# [[kv_namespaces]]
+# binding = "AGENT_METRICS"
+# id = "<prod-id>"
+# preview_id = "<preview-id>"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"

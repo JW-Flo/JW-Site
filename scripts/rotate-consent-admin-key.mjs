@@ -14,7 +14,6 @@ import { spawnSync } from 'child_process';
 import { mkdirSync, writeFileSync, appendFileSync, existsSync, chmodSync } from 'fs';
 // (no path utilities needed)
 
-// eslint-disable-next-line no-undef
 const args = new Set(process.argv.slice(2));
 const deploy = args.has('--deploy');
 const dryRun = args.has('--dry-run');
@@ -76,8 +75,7 @@ function setSecretAndMaybeDeploy(key){
   const put = spawnSync('npx', ['wrangler','pages','secret','put','CONSENT_ADMIN_KEY','--project-name','jw-site'], { input: key + '\n', stdio: ['pipe','inherit','inherit'] });
   if(put.status !== 0) {
     console.error('Failed to set secret. Aborting.');
-    // eslint-disable-next-line no-undef
-    process.exit(put.status || 1);
+  process.exit(put.status || 1);
   }
   console.log('Secret updated.');
   if(deploy){
