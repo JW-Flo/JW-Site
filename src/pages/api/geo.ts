@@ -1,10 +1,16 @@
 import type { APIRoute } from 'astro';
 import { json, methodNotAllowed } from '../../../utils/responses.js';
+import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
 import { buildIpPrivacyRecord } from '../../utils/ipPrivacy.ts';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, locals, clientAddress }) => {
+  const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
+  const rl = await applyRateLimit({ env, key: `geo:${clientAddress || 'unknown'}`, max: 30, windowMs: 60_000 });
+  if (!rl.allowed) {
+    return json({ error: 'rate-limited' }, { status: 429, headers: rateLimitHeaders(rl) });
+  }
   // Get client IP from various headers
   const clientIP = request.headers.get('CF-Connecting-IP') ||
                    request.headers.get('X-Forwarded-For') ||

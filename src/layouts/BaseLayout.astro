@@ -26,7 +26,10 @@ const clientFlags = projectClientFlags(serverFlags);
     <script>
       // Safely expose selected non-sensitive environment flags
       window.ENV = Object.assign({}, (window.ENV||{}), JSON.parse('{"flags":' + JSON.stringify(clientFlags).replace(/</g,'\\u003c') + '}'));
-    </script>
+      <script nonce={Astro.locals.cspNonce}>
+        // Safely expose selected non-sensitive environment flags
+        window.ENV = Object.assign({}, (window.ENV||{}), JSON.parse('{"flags":' + JSON.stringify(clientFlags).replace(/</g,'\\u003c') + '}'));
+      </script>
     <!-- Game Canvas Overlay -->
     <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
     

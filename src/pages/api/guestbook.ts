@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
 
 export const prerender = false;
 
@@ -41,10 +42,14 @@ async function verifyGameScore(env: any, playerName: string, minimumScore: numbe
   }
 }
 
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals, clientAddress }) => {
   try {
     const env = (locals as any).runtime?.env;
-    if (!env || !env.DB) {
+    const rl = await applyRateLimit({ env, key: `guestbook:get:${clientAddress || 'unknown'}`, max: 60, windowMs: 60_000 });
+    if (!rl.allowed) {
+      return new Response(JSON.stringify({ error: 'rate-limited' }), { status: 429, headers: { 'Content-Type': 'application/json', ...rateLimitHeaders(rl) } });
+    }
+  if (!env?.DB) {
       throw new Error('Database not available');
     }
 
@@ -66,9 +71,13 @@ export const GET: APIRoute = async ({ locals }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
   try {
     const env = (locals as any).runtime?.env;
+    const rl = await applyRateLimit({ env, key: `guestbook:post:${clientAddress || 'unknown'}`, max: 5, windowMs: 10*60_000 });
+    if (!rl.allowed) {
+      return new Response(JSON.stringify({ error: 'rate-limited' }), { status: 429, headers: { 'Content-Type': 'application/json', ...rateLimitHeaders(rl) } });
+    }
     if (!env) {
       throw new Error('Cloudflare environment not available');
     }

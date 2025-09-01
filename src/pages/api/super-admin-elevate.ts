@@ -1,13 +1,19 @@
 import type { APIRoute } from 'astro';
 import { ScanStore } from '../../utils/scanStore.js';
+import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
 import { logger } from '../../utils/logger.js';
 
 // Elevate current session to super-admin if correct key supplied
 // Sets role flag in in-memory session only (ephemeral until session expires)
 // Request body: { key: string }
 // Response: { elevated: boolean }
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
   const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
+  // Rate limit elevation attempts (e.g., 5 per 10 minutes per IP)
+  const rl = await applyRateLimit({ env, key: `elevate:${clientAddress || 'unknown'}`, max: 5, windowMs: 10*60*1000 });
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ elevated: false, error: 'rate-limited' }), { status: 429, headers: { 'Content-Type': 'application/json', ...rateLimitHeaders(rl) } });
+  }
   const SUPER_ADMIN_KEY = env.SUPER_ADMIN_KEY || '';
   if (!SUPER_ADMIN_KEY) {
     logger.error('Elevation attempted without configured key');
