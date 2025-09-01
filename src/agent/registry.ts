@@ -1,5 +1,6 @@
 // Tool registry (AGENT-01/AGENT-05)
 import { AgentTool } from './types.js';
+import { snapshotMetrics } from './metrics.js';
 
 // Simple schema validator
 function validate(input: any, schema?: any): string | null {
@@ -78,6 +79,14 @@ const tools: AgentTool[] = [
       } catch (e:any) {
         return { ok: false, error: e.message || 'query failed' };
       }
+    }
+  },
+  {
+    name: 'metrics_snapshot',
+    description: 'Return current in-memory agent metrics (admin only).',
+    superAdminOnly: true,
+    async execute() {
+      return { ok: true, data: snapshotMetrics() };
     }
   }
 ];
