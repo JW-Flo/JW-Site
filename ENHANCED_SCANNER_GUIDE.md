@@ -8,7 +8,7 @@ Hey! Your brother Joe has created a special enhanced security scanner just for y
 
 1. **Visit**: Go to [jw-whittle.pages.dev/enhanced-security-scanner](https://jw-whittle.pages.dev/enhanced-security-scanner)
 2. **Look for**: The purple "🚀 Enhanced Security Scanner" button on his main page
-3. **Demo Ready**: The scanner comes pre-loaded with "https://www.chalant.net/" for easy testing
+3. **Demo Ready**: Enter your site URL ("https://www.chalant.net/") manually unless you enable Super Admin mode (Super Admin will auto-fill it if empty).
 
 ## Special Super Admin Features 🌟
 
@@ -34,7 +34,7 @@ chalant-special-2024-jw-sister-access
 3. You'll see "ULTIMATE" mode description appear
 
 ### Step 2: Configure Your Scan
-1. The URL should already be set to "https://www.chalant.net/"
+1. Enter your full site URL (e.g., "https://www.chalant.net/") – if you switch to Super Admin mode and the field is blank it will auto-fill for convenience.
 2. Choose which scans to run (all are recommended for full analysis)
 3. Check the legal agreement box
 4. Click "🚀 Start Enhanced Security Scan"
