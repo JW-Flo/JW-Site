@@ -89,6 +89,30 @@ describe('Agent API (Phase 0)', () => {
   expect(json.correlationId).toMatch(/^cid_/);
   });
 
+  test('metrics_snapshot requires admin and reflects counts', async () => {
+    const env = mockEnv();
+    // invoke a couple tools to generate metrics
+    await post({ tool: 'list_flags' }, env);
+    await post({ tool: 'list_tools' }, env);
+    // trigger a rate limit error quickly by using same IP beyond limit for start_scan
+    const headers = { 'cf-connecting-ip': '203.0.113.99' };
+    for (let i=0;i<5;i++) {
+      await post({ tool: 'start_scan', input: { target: `m${i}.com` } }, env, undefined, headers);
+    }
+    await post({ tool: 'start_scan', input: { target: 'over.com' } }, env, undefined, headers).catch(()=>{});
+    const unauth = await post({ tool: 'metrics_snapshot' }, env);
+    expect(unauth.status).toBe(403);
+    const auth = await post({ tool: 'metrics_snapshot' }, env, 'admin-secret');
+    expect(auth.status).toBe(200);
+    const json: any = await auth.json();
+    expect(json.result.totalCalls).toBeGreaterThanOrEqual(2); // list_flags + list_tools + start_scan successes
+    expect(json.result.totalRateLimited).toBeGreaterThanOrEqual(1);
+    expect(json.result.toolCalls.list_flags).toBeGreaterThanOrEqual(1);
+    expect(json.result.toolCalls.list_tools).toBeGreaterThanOrEqual(1);
+    expect(json.result.rateLimited.start_scan).toBeGreaterThanOrEqual(1);
+    expect(json.correlationId).toMatch(/^cid_/);
+  });
+
   test('rate limiting enforced for start_scan', async () => {
     const env = mockEnv();
     // limit is 5 per minute

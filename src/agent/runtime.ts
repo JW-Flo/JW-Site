@@ -4,6 +4,7 @@ import { AgentRequestBody, AgentResponseBody } from './types.js';
 import { newSession, loadSession, saveSession } from './sessionStore.js';
 import { projectClientFlags, loadFlags } from '../config/flags.js';
 import { logAgent } from './log.js';
+import { incrToolCall, incrToolError, incrRateLimited } from './metrics.js';
 
 // Simple UUID-ish generator (not RFC4122 strict but sufficient for correlation)
 function correlationId() {
@@ -62,7 +63,8 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   const rl = rateLimitCheck(rlKey, limit);
   if (!rl.allowed) {
     const ra = Math.ceil((rl.reset - Date.now())/1000);
-    logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset, correlationId: cid });
+  incrRateLimited(toolName);
+  logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset, correlationId: cid });
     return new Response(JSON.stringify({ ok: false, error: 'rate-limited', sessionId, tool: toolName, retryAfter: ra, correlationId: cid }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': ra.toString() } });
   }
   const validationErr = validateInput(tool, input);
@@ -79,7 +81,8 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   try {
     result = await tool.execute(input, ctx as any);
   } catch (e:any) {
-    logAgent({ level: 'error', msg: 'tool-error', tool: toolName, sessionId, ip, error: e?.message, correlationId: cid });
+  incrToolError(toolName);
+  logAgent({ level: 'error', msg: 'tool-error', tool: toolName, sessionId, ip, error: e?.message, correlationId: cid });
     return jsonError('tool-error', 500, start, sessionId, cid);
   }
   session.messages.push({ role: 'user', content: JSON.stringify({ tool: toolName, input }), ts: Date.now() });
@@ -92,6 +95,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     error: result.ok ? undefined : result.error || 'error',
     latencyMs: Date.now() - start
   };
+  incrToolCall(toolName);
   logAgent({ level: 'info', msg: 'tool-exec', tool: toolName, sessionId: session.id, ip, latencyMs: response.latencyMs, correlationId: cid });
   return new Response(JSON.stringify({ ...response, correlationId: cid }), { status: result.ok ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
 }
