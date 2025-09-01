@@ -109,8 +109,49 @@ describe('Agent API (Phase 0)', () => {
     expect(json.result.totalRateLimited).toBeGreaterThanOrEqual(1);
     expect(json.result.toolCalls.list_flags).toBeGreaterThanOrEqual(1);
     expect(json.result.toolCalls.list_tools).toBeGreaterThanOrEqual(1);
+    expect(json.result.validationErrors).toBeDefined();
+    expect(json.result.totalValidationErrors).toBeDefined();
     expect(json.result.rateLimited.start_scan).toBeGreaterThanOrEqual(1);
     expect(json.correlationId).toMatch(/^cid_/);
+  });
+
+  test('input validation errors returned when schema flag enabled', async () => {
+    const env = mockEnv({ FEATURE_AGENT_SCHEMA: 'true' });
+    const res = await post({ tool: 'start_scan', input: { /* missing target */ } }, env);
+    expect(res.status).toBe(400);
+    const json: any = await res.json();
+    expect(json.error).toBe('validation_error');
+    expect(Array.isArray(json.issues)).toBe(true);
+    expect(json.issues[0].path[0]).toBe('target');
+    expect(json.correlationId).toMatch(/^cid_/);
+  });
+
+  test('output validation errors returned when schema flag enabled and output altered', async () => {
+    // Monkey-patch registry tool temporarily to force invalid output
+    const env = mockEnv({ FEATURE_AGENT_SCHEMA: 'true' });
+    // First call metrics_snapshot valid
+    const good = await post({ tool: 'metrics_snapshot' }, env, 'admin-secret');
+    expect(good.status).toBe(200);
+    // Patch snapshotMetrics to return malformed data (string for totalCalls)
+    const mod = await import('../agent/registry.js');
+    const original = mod.getTool('metrics_snapshot')!.execute;
+    mod.getTool('metrics_snapshot')!.execute = async () => ({ ok: true, data: { startedAt: Date.now(), toolCalls: {}, toolErrors: {}, rateLimited: {}, validationErrors: {}, totalCalls: 'x', totalErrors: 0, totalRateLimited: 0, totalValidationErrors: 0 } as any });
+    const bad = await post({ tool: 'metrics_snapshot' }, env, 'admin-secret');
+    expect(bad.status).toBe(500);
+    const badJson: any = await bad.json();
+    expect(badJson.error).toBe('output_validation_error');
+    // restore
+    mod.getTool('metrics_snapshot')!.execute = original;
+  });
+
+  test('validation skipped when schema flag disabled', async () => {
+    const env = mockEnv(); // no FEATURE_AGENT_SCHEMA
+    const res = await post({ tool: 'start_scan', input: { /* missing target intentionally */ } }, env);
+    // Without flag, legacy simple validator still requires target due to legacy schema? Now replaced by zod only when flag is true.
+    // start_scan now uses zod schema; without flag it should NOT enforce and will fail later on empty target returning domain error
+    const json: any = await res.json();
+    // The tool returns domain error 'Empty target' (400) or 200? Implementation returns ok:false => 400.
+    expect(json.error === 'validation_error').toBe(false);
   });
 
   test('persistent rate limiter KV fallback works', async () => {

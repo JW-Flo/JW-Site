@@ -1,19 +1,28 @@
 // Tool registry (AGENT-01/AGENT-05)
 import { AgentTool } from './types.js';
 import { snapshotMetrics } from './metrics.js';
+import { z } from 'zod';
 
 // Simple schema validator
-function validate(input: any, schema?: any): string | null {
-  if (!schema) return null;
-  if (schema.type === 'object') {
-    if (typeof input !== 'object' || input === null) return 'Input must be object';
-    if (schema.required) {
-      for (const key of schema.required) {
-        if (!(key in input)) return `Missing required field: ${key}`;
-      }
+function validate(input: any, schema?: any): { ok: true } | { ok: false; issues: any[] } {
+  if (!schema) return { ok: true };
+  // Zod schema path
+  if (schema?.safeParse) {
+    const r = schema.safeParse(input);
+    if (r.success) return { ok: true };
+    return { ok: false, issues: r.error.issues.map((i: any) => ({ path: i.path, message: i.message, code: i.code })) };
+  }
+  // Legacy object schema path
+  if (schema.type !== 'object') return { ok: true };
+  if (typeof input !== 'object' || input === null) {
+    return { ok: false, issues: [{ path: [], message: 'Input must be object', code: 'invalid_type' }] };
+  }
+  if (schema.required) {
+    for (const key of schema.required) {
+      if (!(key in input)) return { ok: false, issues: [{ path: [key], message: `Missing required field: ${key}`, code: 'missing_key' }] };
     }
   }
-  return null;
+  return { ok: true };
 }
 
 const tools: AgentTool[] = [
@@ -37,7 +46,7 @@ const tools: AgentTool[] = [
   {
     name: 'start_scan',
     description: 'Initiate a security scan (stub). Returns a fake task id.',
-    inputSchema: { type: 'object', required: ['target'] },
+    inputSchema: z.object({ target: z.string().trim().min(1, 'target required') }).strict(),
     async execute(input, ctx) {
       const target = String(input.target || '').trim();
       if (!target) return { ok: false, error: 'Empty target' };
@@ -85,6 +94,17 @@ const tools: AgentTool[] = [
     name: 'metrics_snapshot',
     description: 'Return current in-memory agent metrics (admin only).',
     superAdminOnly: true,
+    outputSchema: z.object({
+      startedAt: z.number(),
+      toolCalls: z.record(z.number()),
+      toolErrors: z.record(z.number()),
+      rateLimited: z.record(z.number()),
+      validationErrors: z.record(z.number()),
+      totalCalls: z.number(),
+      totalErrors: z.number(),
+      totalRateLimited: z.number(),
+      totalValidationErrors: z.number()
+    }).strict(),
     async execute() {
       return { ok: true, data: snapshotMetrics() };
     }
@@ -99,6 +119,10 @@ export function listTools(): Pick<AgentTool, 'name' | 'description' | 'superAdmi
   return tools.map(t => ({ name: t.name, description: t.description, superAdminOnly: !!t.superAdminOnly }));
 }
 
-export function validateInput(tool: AgentTool, input: any): string | null {
+export function validateInput(tool: AgentTool, input: any) {
   return validate(input, tool.inputSchema);
+}
+
+export function validateOutput(tool: AgentTool, output: any) {
+  return validate(output, tool.outputSchema);
 }

@@ -6,9 +6,11 @@ export interface AgentMetricsSnapshot {
   toolCalls: Record<string, number>;
   toolErrors: Record<string, number>;
   rateLimited: Record<string, number>; // per tool
+  validationErrors: Record<string, number>; // per tool (input or output schema validation failures)
   totalCalls: number;
   totalErrors: number;
   totalRateLimited: number;
+  totalValidationErrors: number;
 }
 
 const state: AgentMetricsSnapshot = {
@@ -16,9 +18,11 @@ const state: AgentMetricsSnapshot = {
   toolCalls: {},
   toolErrors: {},
   rateLimited: {},
+  validationErrors: {},
   totalCalls: 0,
   totalErrors: 0,
-  totalRateLimited: 0
+  totalRateLimited: 0,
+  totalValidationErrors: 0
 };
 
 export function incrToolCall(tool: string) {
@@ -33,6 +37,10 @@ export function incrRateLimited(tool: string) {
   state.totalRateLimited++;
   state.rateLimited[tool] = (state.rateLimited[tool] || 0) + 1;
 }
+export function incrValidationError(tool: string) {
+  state.totalValidationErrors++;
+  state.validationErrors[tool] = (state.validationErrors[tool] || 0) + 1;
+}
 export function snapshotMetrics(): AgentMetricsSnapshot {
   // Return shallow clone to avoid mutation from outside
   return JSON.parse(JSON.stringify(state));
@@ -42,7 +50,9 @@ export function resetMetrics() {
   state.toolCalls = {};
   state.toolErrors = {};
   state.rateLimited = {};
+  state.validationErrors = {};
   state.totalCalls = 0;
   state.totalErrors = 0;
   state.totalRateLimited = 0;
+  state.totalValidationErrors = 0;
 }

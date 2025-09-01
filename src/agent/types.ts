@@ -30,12 +30,21 @@ export interface AgentToolResult<T=any> {
   meta?: Record<string, any>;
 }
 
-export type AgentTool = {
+// Zod schemas (lazy import in runtime to avoid hard dependency here for types only)
+export interface AgentToolSchemas<I = any, O = any> {
+  // Allow either a Zod schema or legacy minimal object schema with { type:'object', required: string[] }
+  inputSchema?: import('zod').ZodType<I> | { type: 'object'; required?: string[] };
+  outputSchema?: import('zod').ZodType<O>;
+}
+
+export type AgentTool<I = any, O = any> = {
   name: string;
   description: string;
-  inputSchema?: any; // minimal validation schema (object with required keys)
   superAdminOnly?: boolean;
-  execute: (input: any, ctx: AgentToolContext) => Promise<AgentToolResult>;
+  // Schemas optional; if provided runtime will validate
+  inputSchema?: AgentToolSchemas<I, O>["inputSchema"];
+  outputSchema?: AgentToolSchemas<I, O>["outputSchema"];
+  execute: (input: I, ctx: AgentToolContext) => Promise<AgentToolResult<O>>;
 };
 
 export interface AgentRequestBody {
