@@ -113,6 +113,30 @@ describe('Agent API (Phase 0)', () => {
     expect(json.correlationId).toMatch(/^cid_/);
   });
 
+  test('persistent rate limiter KV fallback works', async () => {
+    // Provide a mock KV implementation to observe stored state
+    const kvStore: Record<string,string> = {};
+    const mockKV: KVNamespace = {
+      get: async (k: string) => kvStore[k] || null,
+      put: async (k: string, v: string) => { kvStore[k] = v; },
+      delete: async (k: string) => { delete kvStore[k]; }
+    } as any;
+    const env = mockEnv({ AGENT_RL: mockKV });
+    const headers = { 'cf-connecting-ip': '198.51.100.7' };
+    // Hit start_scan 5 times (limit) should succeed then 6th blocked
+    for (let i=0;i<5;i++) {
+      const r = await post({ tool: 'start_scan', input: { target: `kv${i}.com` } }, env, undefined, headers);
+      expect(r.status).toBe(200);
+    }
+    const blocked = await post({ tool: 'start_scan', input: { target: 'kvblocked.com' } }, env, undefined, headers);
+    expect(blocked.status).toBe(429);
+    // Check KV bucket exists
+    const keys = Object.keys(kvStore).filter(k => k.startsWith('rl:'));
+    expect(keys.length).toBe(1);
+    const bucket = JSON.parse(kvStore[keys[0]]);
+    expect(bucket.remaining).toBe(0);
+  });
+
   test('rate limiting enforced for start_scan', async () => {
     const env = mockEnv();
     // limit is 5 per minute

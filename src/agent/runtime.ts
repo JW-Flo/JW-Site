@@ -5,6 +5,7 @@ import { newSession, loadSession, saveSession } from './sessionStore.js';
 import { projectClientFlags, loadFlags } from '../config/flags.js';
 import { logAgent } from './log.js';
 import { incrToolCall, incrToolError, incrRateLimited } from './metrics.js';
+import { checkRateLimit } from './rateLimit.js';
 
 // Simple UUID-ish generator (not RFC4122 strict but sufficient for correlation)
 function correlationId() {
@@ -13,26 +14,10 @@ function correlationId() {
 
 function randomId() { return Math.random().toString(36).slice(2, 10); }
 
-// Simple in-memory rate limiter map (per process). For production horizontal scaling, replace with durable store.
-interface RLBucket { count: number; reset: number; }
-const RL_STORE: Record<string, RLBucket> = {};
-const RL_WINDOW_MS = 60_000; // 1 minute
-const RL_LIMIT_PER_TOOL = 30; // generic default
-const RL_LIMIT_START_SCAN = 5; // stricter for start_scan
-
-function rateLimitCheck(key: string, limit: number) {
-  const now = Date.now();
-  let bucket = RL_STORE[key];
-  if (!bucket || bucket.reset < now) {
-    bucket = { count: 0, reset: now + RL_WINDOW_MS };
-    RL_STORE[key] = bucket;
-  }
-  if (bucket.count >= limit) {
-    return { allowed: false, remaining: 0, reset: bucket.reset };
-  }
-  bucket.count++;
-  return { allowed: true, remaining: limit - bucket.count, reset: bucket.reset };
-}
+// Rate limiting constants
+const RL_WINDOW_MS = 60_000; // 1 minute window
+const RL_LIMIT_PER_TOOL = 30;
+const RL_LIMIT_START_SCAN = 5;
 
 export async function handleAgentRequest(req: Request, env: any, _locals: any): Promise<Response> {
   const start = Date.now();
@@ -60,7 +45,8 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   const ip = req.headers.get('cf-connecting-ip') || 'unknown';
   const rlKey = `agent:${toolName}:${ip}`;
   const limit = toolName === 'start_scan' ? RL_LIMIT_START_SCAN : RL_LIMIT_PER_TOOL;
-  const rl = rateLimitCheck(rlKey, limit);
+  const rlStore: KVNamespace | undefined = env.AGENT_RL;
+  const rl = await checkRateLimit(rlStore, rlKey, { limit, windowMs: RL_WINDOW_MS });
   if (!rl.allowed) {
     const ra = Math.ceil((rl.reset - Date.now())/1000);
   incrRateLimited(toolName);
