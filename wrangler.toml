@@ -68,16 +68,7 @@ preview_id = "64323cab0ce447d182e8a5038461e6d3"
 #   wrangler pages deploy dist --branch=main
 # OR specify environments below for workers deploy styles if migrating later.
 
-[env.staging]
-vars = { SITE_URL = "https://staging.jw-site.example" }
-# Example distinct namespace IDs (create via: wrangler kv:namespace create <NAME> --env=staging)
-kv_namespaces = [
-	{ binding = "RATE_LIMIT", id = "<staging-rate-limit-id>" },
-	{ binding = "LEADERBOARD", id = "<staging-leaderboard-id>" },
-	{ binding = "ANALYTICS", id = "<staging-analytics-id>" },
-	# Optional scanner metadata KV (create only if enabling persistence)
-	# { binding = "SCANNER_META", id = "<staging-scanner-meta-id>" }
-]
+# NOTE: Removed unsupported [env.staging] section for Cloudflare Pages. Pages supports only preview/production.
 
 [env.production]
 vars = { SITE_URL = "https://jw-site.example" }
