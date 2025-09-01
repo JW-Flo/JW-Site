@@ -36,7 +36,8 @@ describe('Agent API (Phase 0)', () => {
   const json: any = await res.json();
     expect(json.ok).toBe(true);
     expect(json.tool).toBe('list_flags');
-    expect(json.result.FEATURE_AGENT).toBe('true');
+  expect(json.result.FEATURE_AGENT).toBe('true');
+  expect(json.correlationId).toMatch(/^cid_/);
   });
 
   test('list_tools filters admin-only tools', async () => {
@@ -50,7 +51,8 @@ describe('Agent API (Phase 0)', () => {
     const resAdmin = await post({ tool: 'list_tools' }, env, 'admin-secret');
     const adminJson: any = await resAdmin.json();
     const namesAdmin = adminJson.result.map((t: any) => t.name);
-    expect(namesAdmin).toContain('waitlist_count');
+  expect(namesAdmin).toContain('waitlist_count');
+  expect(adminJson.correlationId).toMatch(/^cid_/);
   });
 
   test('unknown tool returns 404', async () => {
@@ -58,7 +60,8 @@ describe('Agent API (Phase 0)', () => {
     const res = await post({ tool: 'nope' }, env);
     expect(res.status).toBe(404);
   const json: any = await res.json();
-    expect(json.error).toBe('unknown-tool');
+  expect(json.error).toBe('unknown-tool');
+  expect(json.correlationId).toMatch(/^cid_/);
   });
 
   test('start_scan and scan_status lifecycle', async () => {
@@ -71,7 +74,8 @@ describe('Agent API (Phase 0)', () => {
     const status = await post({ tool: 'scan_status', input: { taskId } }, env);
   const statusJson: any = await status.json();
     expect(statusJson.result.taskId).toBe(taskId);
-    expect(['queued', 'running', 'complete']).toContain(statusJson.result.status);
+  expect(['queued', 'running', 'complete']).toContain(statusJson.result.status);
+  expect(statusJson.correlationId).toMatch(/^cid_/);
   });
 
   test('waitlist_count requires admin', async () => {
@@ -81,7 +85,8 @@ describe('Agent API (Phase 0)', () => {
     const auth = await post({ tool: 'waitlist_count' }, env, 'admin-secret');
     expect(auth.status).toBe(200);
   const json: any = await auth.json();
-    expect(json.result.count).toBe(3);
+  expect(json.result.count).toBe(3);
+  expect(json.correlationId).toMatch(/^cid_/);
   });
 
   test('rate limiting enforced for start_scan', async () => {
@@ -95,7 +100,8 @@ describe('Agent API (Phase 0)', () => {
     const blocked = await post({ tool: 'start_scan', input: { target: 'blocked.com' } }, env, undefined, headers);
     expect(blocked.status).toBe(429);
     const blockedJson: any = await blocked.json();
-    expect(blockedJson.error).toBe('rate-limited');
+  expect(blockedJson.error).toBe('rate-limited');
+  expect(blockedJson.correlationId).toMatch(/^cid_/);
   });
 
   test('payload too large rejected', async () => {

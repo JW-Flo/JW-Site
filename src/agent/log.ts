@@ -9,6 +9,7 @@ interface LogEntry {
   error?: string;
   remaining?: number;
   reset?: number;
+  correlationId?: string;
 }
 
 export function logAgent(entry: LogEntry) {
