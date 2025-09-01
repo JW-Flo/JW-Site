@@ -3,8 +3,30 @@ import { getTool, validateInput } from './registry.js';
 import { AgentRequestBody, AgentResponseBody } from './types.js';
 import { newSession, loadSession, saveSession } from './sessionStore.js';
 import { projectClientFlags, loadFlags } from '../config/flags.js';
+import { logAgent } from './log.js';
 
 function randomId() { return Math.random().toString(36).slice(2, 10); }
+
+// Simple in-memory rate limiter map (per process). For production horizontal scaling, replace with durable store.
+interface RLBucket { count: number; reset: number; }
+const RL_STORE: Record<string, RLBucket> = {};
+const RL_WINDOW_MS = 60_000; // 1 minute
+const RL_LIMIT_PER_TOOL = 30; // generic default
+const RL_LIMIT_START_SCAN = 5; // stricter for start_scan
+
+function rateLimitCheck(key: string, limit: number) {
+  const now = Date.now();
+  let bucket = RL_STORE[key];
+  if (!bucket || bucket.reset < now) {
+    bucket = { count: 0, reset: now + RL_WINDOW_MS };
+    RL_STORE[key] = bucket;
+  }
+  if (bucket.count >= limit) {
+    return { allowed: false, remaining: 0, reset: bucket.reset };
+  }
+  bucket.count++;
+  return { allowed: true, remaining: limit - bucket.count, reset: bucket.reset };
+}
 
 export async function handleAgentRequest(req: Request, env: any, _locals: any): Promise<Response> {
   const start = Date.now();
@@ -19,13 +41,29 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   if ('errorResponse' in body) return body.errorResponse;
   const { toolName, session, sessionId, input, isSuperAdmin } = body;
   const tool = getTool(toolName);
-  if (!tool) return jsonError('unknown-tool', 404, start, sessionId);
-  if (tool.superAdminOnly && !isSuperAdmin) return jsonError('forbidden', 403, start, sessionId);
+  if (!tool) {
+    logAgent({ level: 'error', msg: 'unknown-tool', sessionId, tool: toolName });
+    return jsonError('unknown-tool', 404, start, sessionId);
+  }
+  if (tool.superAdminOnly && !isSuperAdmin) {
+    logAgent({ level: 'error', msg: 'forbidden', sessionId, tool: toolName });
+    return jsonError('forbidden', 403, start, sessionId);
+  }
+  // Rate limiting per IP+tool
+  const ip = req.headers.get('cf-connecting-ip') || 'unknown';
+  const rlKey = `agent:${toolName}:${ip}`;
+  const limit = toolName === 'start_scan' ? RL_LIMIT_START_SCAN : RL_LIMIT_PER_TOOL;
+  const rl = rateLimitCheck(rlKey, limit);
+  if (!rl.allowed) {
+    const ra = Math.ceil((rl.reset - Date.now())/1000);
+    logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset });
+    return new Response(JSON.stringify({ ok: false, error: 'rate-limited', sessionId, tool: toolName, retryAfter: ra }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': ra.toString() } });
+  }
   const validationErr = validateInput(tool, input);
   if (validationErr) return jsonError(`invalid-input:${validationErr}`, 400, start, sessionId);
   const ctx = {
     env,
-    ip: req.headers.get('cf-connecting-ip') || undefined,
+    ip: ip || undefined,
     isSuperAdmin,
     flags,
     now: Date.now(),
@@ -34,7 +72,8 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   let result;
   try {
     result = await tool.execute(input, ctx as any);
-  } catch {
+  } catch (e:any) {
+    logAgent({ level: 'error', msg: 'tool-error', tool: toolName, sessionId, ip, error: e?.message });
     return jsonError('tool-error', 500, start, sessionId);
   }
   session.messages.push({ role: 'user', content: JSON.stringify({ tool: toolName, input }), ts: Date.now() });
@@ -47,6 +86,7 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     error: result.ok ? undefined : result.error || 'error',
     latencyMs: Date.now() - start
   };
+  logAgent({ level: 'info', msg: 'tool-exec', tool: toolName, sessionId: session.id, ip, latencyMs: response.latencyMs });
   return new Response(JSON.stringify(response), { status: result.ok ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
 }
 

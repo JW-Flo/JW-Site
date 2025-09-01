@@ -1,4 +1,4 @@
-/// <reference types="vitest" />
+import { describe, test, expect } from 'vitest';
 import { handleAgentRequest } from '../agent/runtime.js';
 
 // Minimal mock env
@@ -15,12 +15,13 @@ function mockEnv(overrides: any = {}) {
   };
 }
 
-async function post(body: any, env: any, adminKey?: string) {
+async function post(body: any, env: any, adminKey?: string, extraHeaders: Record<string,string> = {}) {
   const req = new Request('https://example.test/api/agent/query', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(adminKey ? { 'x-admin-key': adminKey } : {})
+  ...(adminKey ? { 'x-admin-key': adminKey } : {}),
+  ...extraHeaders
     },
     body: JSON.stringify(body)
   });
@@ -36,6 +37,20 @@ describe('Agent API (Phase 0)', () => {
     expect(json.ok).toBe(true);
     expect(json.tool).toBe('list_flags');
     expect(json.result.FEATURE_AGENT).toBe('true');
+  });
+
+  test('list_tools filters admin-only tools', async () => {
+    const env = mockEnv();
+    const resUser = await post({ tool: 'list_tools' }, env);
+    const userJson: any = await resUser.json();
+    expect(userJson.ok).toBe(true);
+    const namesUser = userJson.result.map((t: any) => t.name);
+    expect(namesUser).toContain('list_flags');
+    expect(namesUser).not.toContain('waitlist_count');
+    const resAdmin = await post({ tool: 'list_tools' }, env, 'admin-secret');
+    const adminJson: any = await resAdmin.json();
+    const namesAdmin = adminJson.result.map((t: any) => t.name);
+    expect(namesAdmin).toContain('waitlist_count');
   });
 
   test('unknown tool returns 404', async () => {
@@ -67,6 +82,20 @@ describe('Agent API (Phase 0)', () => {
     expect(auth.status).toBe(200);
   const json: any = await auth.json();
     expect(json.result.count).toBe(3);
+  });
+
+  test('rate limiting enforced for start_scan', async () => {
+    const env = mockEnv();
+    // limit is 5 per minute
+    const headers = { 'cf-connecting-ip': '203.0.113.55' }; // unique IP so prior tests don't consume quota
+    for (let i=0;i<5;i++) {
+      const r = await post({ tool: 'start_scan', input: { target: `example${i}.com` } }, env, undefined, headers);
+      expect(r.status).toBe(200);
+    }
+    const blocked = await post({ tool: 'start_scan', input: { target: 'blocked.com' } }, env, undefined, headers);
+    expect(blocked.status).toBe(429);
+    const blockedJson: any = await blocked.json();
+    expect(blockedJson.error).toBe('rate-limited');
   });
 
   test('payload too large rejected', async () => {

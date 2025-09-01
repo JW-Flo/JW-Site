@@ -17,6 +17,16 @@ function validate(input: any, schema?: any): string | null {
 
 const tools: AgentTool[] = [
   {
+    name: 'list_tools',
+    description: 'List available agent tools (filters admin-only unless super admin).',
+    async execute(_input, ctx) {
+      // We import lazily to avoid circular (already local) but reuse list from this module
+      const all = listTools();
+      const filtered = ctx.isSuperAdmin ? all : all.filter(t => !t.superAdminOnly);
+      return { ok: true, data: filtered };
+    }
+  },
+  {
     name: 'list_flags',
     description: 'List client-exposed feature flags.',
     async execute(_input, ctx) {
