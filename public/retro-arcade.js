@@ -132,13 +132,14 @@ class RetroArcade {
   }
 
   showLeaderboard() {
-    if (this.gameOverlay) {
+    // Leaderboard currently removed; guard for absence.
+    if (this.gameOverlay && typeof this.gameOverlay.showLeaderboard === 'function') {
       this.gameOverlay.showLeaderboard();
     }
   }
 
   hideLeaderboard() {
-    if (this.gameOverlay) {
+    if (this.gameOverlay && typeof this.gameOverlay.hideLeaderboard === 'function') {
       this.gameOverlay.hideLeaderboard();
     }
   }
