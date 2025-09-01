@@ -74,10 +74,18 @@ const BUILD_SUPER_ADMIN_KEY = (import.meta as any).env?.SUPER_ADMIN_KEY || '';
 
 export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
   try {
-  // Initialize session store (env accessible via locals.runtime?.env in Astro CF adapter)
-  const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
-  const store = new ScanStore(env);
-  const { record: sessionRec, cookieHeader, consent } = await store.getOrCreateSession(request);
+    // Initialize session store (env accessible via locals.runtime?.env in Astro CF adapter)
+    const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
+    const store = new ScanStore(env);
+    // Graceful session acquisition: if anything fails (unexpected runtime issue), continue without cookie
+    let sessionRec: any; let cookieHeader: string | undefined; let consent: any = { analytics: false, research: false };
+    try {
+      const sess = await store.getOrCreateSession(request);
+      sessionRec = sess.record; cookieHeader = sess.cookieHeader; consent = sess.consent;
+    } catch (e) {
+      console.warn('Session initialization failed, proceeding stateless', e);
+      sessionRec = { id: 'stateless', scans: [], created: Date.now(), last: Date.now() };
+    }
 
     // Basic rate limiting keyed by client IP (falls back to 'unknown')
     const rateKey = clientAddress || request.headers.get('x-forwarded-for') || 'unknown';
