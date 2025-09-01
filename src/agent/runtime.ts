@@ -5,6 +5,11 @@ import { newSession, loadSession, saveSession } from './sessionStore.js';
 import { projectClientFlags, loadFlags } from '../config/flags.js';
 import { logAgent } from './log.js';
 
+// Simple UUID-ish generator (not RFC4122 strict but sufficient for correlation)
+function correlationId() {
+  return 'cid_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
 function randomId() { return Math.random().toString(36).slice(2, 10); }
 
 // Simple in-memory rate limiter map (per process). For production horizontal scaling, replace with durable store.
@@ -30,6 +35,7 @@ function rateLimitCheck(key: string, limit: number) {
 
 export async function handleAgentRequest(req: Request, env: any, _locals: any): Promise<Response> {
   const start = Date.now();
+  const cid = correlationId();
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
   }
@@ -42,12 +48,12 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   const { toolName, session, sessionId, input, isSuperAdmin } = body;
   const tool = getTool(toolName);
   if (!tool) {
-    logAgent({ level: 'error', msg: 'unknown-tool', sessionId, tool: toolName });
-    return jsonError('unknown-tool', 404, start, sessionId);
+    logAgent({ level: 'error', msg: 'unknown-tool', sessionId, tool: toolName, correlationId: cid });
+    return jsonError('unknown-tool', 404, start, sessionId, cid);
   }
   if (tool.superAdminOnly && !isSuperAdmin) {
-    logAgent({ level: 'error', msg: 'forbidden', sessionId, tool: toolName });
-    return jsonError('forbidden', 403, start, sessionId);
+    logAgent({ level: 'error', msg: 'forbidden', sessionId, tool: toolName, correlationId: cid });
+    return jsonError('forbidden', 403, start, sessionId, cid);
   }
   // Rate limiting per IP+tool
   const ip = req.headers.get('cf-connecting-ip') || 'unknown';
@@ -56,11 +62,11 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   const rl = rateLimitCheck(rlKey, limit);
   if (!rl.allowed) {
     const ra = Math.ceil((rl.reset - Date.now())/1000);
-    logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset });
-    return new Response(JSON.stringify({ ok: false, error: 'rate-limited', sessionId, tool: toolName, retryAfter: ra }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': ra.toString() } });
+    logAgent({ level: 'error', msg: 'rate-limited', tool: toolName, sessionId, ip, remaining: rl.remaining, reset: rl.reset, correlationId: cid });
+    return new Response(JSON.stringify({ ok: false, error: 'rate-limited', sessionId, tool: toolName, retryAfter: ra, correlationId: cid }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': ra.toString() } });
   }
   const validationErr = validateInput(tool, input);
-  if (validationErr) return jsonError(`invalid-input:${validationErr}`, 400, start, sessionId);
+  if (validationErr) return jsonError(`invalid-input:${validationErr}`, 400, start, sessionId, cid);
   const ctx = {
     env,
     ip: ip || undefined,
@@ -73,8 +79,8 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
   try {
     result = await tool.execute(input, ctx as any);
   } catch (e:any) {
-    logAgent({ level: 'error', msg: 'tool-error', tool: toolName, sessionId, ip, error: e?.message });
-    return jsonError('tool-error', 500, start, sessionId);
+    logAgent({ level: 'error', msg: 'tool-error', tool: toolName, sessionId, ip, error: e?.message, correlationId: cid });
+    return jsonError('tool-error', 500, start, sessionId, cid);
   }
   session.messages.push({ role: 'user', content: JSON.stringify({ tool: toolName, input }), ts: Date.now() });
   await saveSession(env, session);
@@ -86,8 +92,8 @@ export async function handleAgentRequest(req: Request, env: any, _locals: any): 
     error: result.ok ? undefined : result.error || 'error',
     latencyMs: Date.now() - start
   };
-  logAgent({ level: 'info', msg: 'tool-exec', tool: toolName, sessionId: session.id, ip, latencyMs: response.latencyMs });
-  return new Response(JSON.stringify(response), { status: result.ok ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
+  logAgent({ level: 'info', msg: 'tool-exec', tool: toolName, sessionId: session.id, ip, latencyMs: response.latencyMs, correlationId: cid });
+  return new Response(JSON.stringify({ ...response, correlationId: cid }), { status: result.ok ? 200 : 400, headers: { 'Content-Type': 'application/json' } });
 }
 
 async function parseBody(req: Request, start: number, env: any): Promise<any> {
@@ -108,7 +114,7 @@ async function parseBody(req: Request, start: number, env: any): Promise<any> {
   return { toolName, session, sessionId, input, isSuperAdmin };
 }
 
-function jsonError(code: string, status: number, start: number, sessionId: string) {
-  const body = { sessionId, ok: false, tool: 'unknown', error: code, latencyMs: Date.now() - start };
+function jsonError(code: string, status: number, start: number, sessionId: string, correlationId?: string) {
+  const body = { sessionId, ok: false, tool: 'unknown', error: code, latencyMs: Date.now() - start, correlationId };
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }
