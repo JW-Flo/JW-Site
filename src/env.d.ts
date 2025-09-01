@@ -5,6 +5,7 @@ interface ImportMetaEnv {
 	readonly SESSION_SIGNING_KEY?: string; // Used to sign ephemeral session cookies (HMAC)
 	readonly SCANNER_META?: KVNamespace; // Optional KV namespace for minimal consent-gated scan metadata
 	readonly AGENT_SESSIONS?: KVNamespace; // KV namespace for agent session persistence (optional)
+	readonly AGENT_RL?: KVNamespace; // KV namespace for agent rate limiting (optional)
 }
 
 interface ImportMeta {
@@ -21,6 +22,7 @@ declare global {
 					SESSION_SIGNING_KEY?: string;
 					SCANNER_META?: KVNamespace; // Optional KV namespace for minimal consent-gated scan metadata
 					AGENT_SESSIONS?: KVNamespace; // KV namespace for agent session persistence (optional)
+					AGENT_RL?: KVNamespace; // KV namespace for agent rate limiting (optional)
 				}
 			}
 		}
