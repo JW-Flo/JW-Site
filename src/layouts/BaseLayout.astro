@@ -23,13 +23,10 @@ const clientFlags = projectClientFlags(serverFlags);
     <SEO {title} {description} {url} noIndex={noIndex} />
   </head>
   <body class="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
-    <script>
+    <script nonce={Astro.locals.cspNonce}>
       // Safely expose selected non-sensitive environment flags
       window.ENV = Object.assign({}, (window.ENV||{}), JSON.parse('{"flags":' + JSON.stringify(clientFlags).replace(/</g,'\\u003c') + '}'));
-      <script nonce={Astro.locals.cspNonce}>
-        // Safely expose selected non-sensitive environment flags
-        window.ENV = Object.assign({}, (window.ENV||{}), JSON.parse('{"flags":' + JSON.stringify(clientFlags).replace(/</g,'\\u003c') + '}'));
-      </script>
+    </script>
     <!-- Game Canvas Overlay -->
     <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
     
@@ -124,8 +121,8 @@ const clientFlags = projectClientFlags(serverFlags);
       </div>
     </footer>
     
-  <!-- External RetroArcade script -->
-  <script type="module" src="/src/scripts/retro-arcade.client.js"></script>
+  <!-- External RetroArcade script (served from public/). Using public path /retro-arcade.js -->
+  <script type="module" src="/retro-arcade.js" nonce={Astro.locals.cspNonce}></script>
     
     <!-- Dev easter eggs script -->
     <script type="module" src="/src/scripts/dev-easter-eggs.client.js"></script>
