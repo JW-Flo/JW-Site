@@ -833,7 +833,8 @@ nav a {
 /* 🎮 Retro Arcade Trigger (restored styles) */
 .game-trigger-container {
   position: fixed;
-  top: 1rem;
+  /* Moved from top to bottom to avoid covering navigation */
+  bottom: 1rem;
   right: 1rem;
   z-index: 60; /* above canvas (30-35) and below leaderboard (40) */
   display: flex;
