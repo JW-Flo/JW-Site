@@ -1,12 +1,16 @@
 # Personal Site – Joe Whittle
 
-Static, low-maintenance cybersecurity engineering portfolio + human journey context.
+Cybersecurity engineering portfolio + human journey context, now served via Cloudflare Pages Worker (Astro SSR) with selective edge APIs (guestbook, consent, waitlist, geo, security scanner) and hardened security headers.
 
 ## Stack
 
-- Astro + MDX
+- Astro (SSR on Cloudflare Workers) + MDX
 - TailwindCSS
-- Cloudflare Pages (primary hosting)
+- Cloudflare Pages / Workers Runtime
+- Cloudflare KV (RATE_LIMIT, LEADERBOARD, ANALYTICS, optional SCANNER_META)
+- Cloudflare D1 (guestbook entries, consent events, waitlist signups)
+- Turnstile (bot mitigation for guestbook submits)
+- Feature Flags (server evaluated, safe projection to client)
 
 ## Local Development
 
@@ -120,10 +124,107 @@ If you previously exported a token in your shell profile, remove that line and r
 
 ## Principles
 
-- Minimal attack surface (static output only)
+- Minimal attack surface (small set of narrowly-scoped edge functions)
 - Single JSON resume source of truth
-- No backend, no database
+- Principle of least privilege for data (only store what is required; IPs hashed, no raw PII in scanner metadata)
+- Strong default security headers (CSP nonce, HSTS, COOP/COEP/CORP, Permissions Policy, Frame Deny)
+- Rate limit externally reachable mutation/read endpoints
+- Defense-in-depth; fall back fast & quietly on auth failures (404 for hidden admin endpoints)
 - Simple, readable code
+
+Historical note: Earlier iteration was fully static (“no backend”). The project now purposefully includes a controlled backend surface (D1 + KV) to enable interactive features while maintaining a constrained threat profile.
+
+---
+
+## Security & Hardening Overview
+
+Implemented layers:
+
+1. Content Security Policy: Per-request nonce for the single inline bootstrap script; `script-src 'self' 'nonce-<random>';` removed `unsafe-inline` for scripts. (Style tightening pending; currently still allows Tailwind-generated inline style usage.)
+2. HTTP Response Headers: HSTS (2y, preload), X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy minimized, COOP/COEP/CORP isolation, SameSite=Lax cookies.
+3. Signed Cookies: `escan_s` (session correlation) & `escan_role` (super-admin elevation) HMAC-signed with `SESSION_SIGNING_KEY` / role issuance secret; HttpOnly, Secure.
+4. Rate Limiting (KV-backed token bucket): Applied to elevation, geo, consent, guestbook (GET & POST), waitlist (GET & POST). Returns HTTP 429 with JSON `{ ok: false, error: 'rate_limited' }` and standard headers when exceeded.
+5. Request Observability: `X-Request-ID` header + structured JSON log line + `Server-Timing` metrics for latency insight.
+6. Privacy Controls: IP hashing before persistence (waitlist, consent events); scanner metadata gated by explicit consent flags (analytics / research) and not yet persisted unless SCANNER_META enabled.
+7. Feature Flags: Evaluated server-side; only a minimal set of non-sensitive booleans exposed through the nonce-protected inline script.
+8. Build Integrity (future): Plan to enforce active build ID via KV to invalidate stale preview deployments.
+
+Deferred / Backlog:
+
+- Remove `unsafe-inline` from style-src by extracting critical styles or adopting hashed styles.
+- Migrate enhanced security scanner limiter to KV (currently in-memory) for consistent horizontal behavior.
+- Stale deployment guard (ACTIVE_BUILD_ID in KV) enforcement.
+- Key rotation automation (dual-key grace window).
+- External log sink / metrics aggregation.
+
+---
+
+## Rate Limiting Details
+
+Current quotas (subject to tuning):
+
+- `/api/super-admin-elevate`: 5 per 10 minutes per IP
+- `/api/geo`: 30 per minute per IP
+- `/api/consent`: 10 per 5 minutes per IP
+- `/api/guestbook` (GET recent): 60 per minute per IP
+- `/api/guestbook` (POST submit): 5 per 10 minutes per IP
+- `/api/waitlist` (GET): 30 per minute per IP
+- `/api/waitlist` (POST join): 5 per hour per IP
+
+Response headers (example):
+
+```text
+RateLimit-Limit: 60;w=60
+RateLimit-Remaining: 42
+RateLimit-Reset: 23
+```
+On exhaustion: HTTP 429 with the same headers and JSON body.
+
+---
+
+## Environment Variables & Secrets
+
+| Name | Type | Purpose | Notes |
+|------|------|---------|-------|
+| SITE_URL | Config | Canonical site origin | Used in feeds & canonical links |
+| SUPER_ADMIN_KEY | Secret | Enables super-admin mode in enhanced scanner | Set only in dashboard; not committed |
+| CONSENT_ADMIN_KEY | Secret | Auth for `/api/admin/consent-stats` | 404 on mismatch; rotate periodically |
+| SESSION_SIGNING_KEY | Secret | HMAC signing for `escan_s` cookie | Required for session integrity |
+| FEATURE_WAITLIST | Flag | Enable waitlist endpoints & widget | Requires migration 002_waitlist.sql |
+| FEATURE_CONSENT_D1 | Flag | Enable consent D1 persistence | If false, consent writes disabled |
+| FEATURE_GEO_CLASSIFICATION | Flag | Enable geo hashing output | Controls additional geo-derived data |
+| PUBLIC_TURNSTILE_SITE_KEY | Public Config | Client Turnstile rendering | Public value safe to expose |
+| TURNSTILE_SECRET_KEY | Secret | Server verify Turnstile tokens | Keep secret |
+| ACTIVE_BUILD_ID (planned) | Future Config | Stale deploy invalidation gate | Not yet implemented |
+
+Secrets should be configured in the Cloudflare Pages dashboard (Production + Preview). Only non-sensitive defaults may appear in `wrangler.toml` for local dev.
+
+---
+
+## Architecture Reference
+
+See `ARCHITECTURE.md` for diagrams (ASCII + Mermaid), data flow, and future enhancement backlog. That document is the authoritative source for component relationships.
+
+---
+
+## Deployment QA Checklist
+
+Run after staging & before promoting to production:
+
+1. Headers: `curl -I https://staging.example` → confirm CSP present with per-request nonce, HSTS, Frame deny, Permissions-Policy, COOP/COEP.
+2. CSP Nonce Validity: Load page; ensure inline bootstrap script has a nonce attribute matching CSP header value.
+3. Rate Limits: Hit `/api/geo` >30 times quickly → receive 429 with RateLimit headers.
+4. Health Endpoint: `curl /api/health` → verify commit hash matches latest main branch commit.
+5. Guestbook Submit: Valid Turnstile token path returns 200 and appears in GET list; exceeding quota yields 429.
+6. Super Admin Elevation: POST to `/api/super-admin-elevate` with wrong key → fast failure; correct key issues role cookie.
+7. Admin Consent Stats: GET with missing/incorrect `X-Admin-Key` returns 404; with correct key returns stats JSON.
+8. Waitlist (if enabled): Duplicate email returns `{ ok: true, duplicate: true }` without error.
+9. Security Scanner: Super-admin mode only accessible when SUPER_ADMIN_KEY set; role cookie not present otherwise.
+10. Logs (Preview via Wrangler): Confirm structured JSON lines with request IDs & server timing.
+
+Optional Automated Script Idea: A future `scripts/qa.sh` can encapsulate these checks.
+
+---
 
 ## Minimal Maintenance Cheatsheet
 
@@ -339,6 +440,8 @@ Privacy: IP addresses are one‑way hashed with a secret (same mechanism as geo 
 Widget: Renders only when `FEATURE_WAITLIST` is `true` (see `src/components/WaitlistWidget.astro`).
 
 The previous `/demo` section has been retired. Requests to `/demo` return a 410 page. All functionality now under `/api/*`.
+
+---
 
 ## License
 
