@@ -4,7 +4,7 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import cloudflare from "@astrojs/cloudflare";
 
-const SITE_URL = process.env.SITE_URL || "https://jw-site-7q2.pages.dev";
+const SITE_URL = process.env.SITE_URL || "https://thewanderingwhittle.com";
 
 export default defineConfig({
   // Canonical site URL used by Astro for absolute links & sitemap

@@ -6,7 +6,7 @@ pages_build_output_dir = "dist"
 
 [vars]
 # Production site URL - update this with your custom domain later
-SITE_URL = "https://jw-site-7q2.pages.dev"
+SITE_URL = "https://thewanderingwhittle.com"
 # Feature flags & admin keys (set securely in dashboard for production)
 # FEATURE_CONSENT_D1 = "true"  # Enable consent D1 persistence
 # FEATURE_GEO_CLASSIFICATION = "true" # Enable geo hashing output
@@ -81,7 +81,7 @@ preview_id = "64323cab0ce447d182e8a5038461e6d3"
 # NOTE: Removed unsupported [env.staging] section for Cloudflare Pages. Pages supports only preview/production.
 
 [env.production]
-vars = { SITE_URL = "https://jw-site.example" }
+vars = { SITE_URL = "https://thewanderingwhittle.com" }
 kv_namespaces = [
 	{ binding = "RATE_LIMIT", id = "33fcae0c755840f996bfbb3ca3f9394f" },
 	{ binding = "LEADERBOARD", id = "4792010013254ed7815b2d66adb9a50e" },
