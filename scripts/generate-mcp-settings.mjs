@@ -88,7 +88,7 @@ function main() {
   if (!existsSync(wellKnownDir)) mkdirSync(wellKnownDir, { recursive: true });
   const outPath = path.join(wellKnownDir, "mcp-settings.json");
   // Merge with existing if present to preserve any custom fields user may have added manually
-  let merged = newSettings;
+  const merged = newSettings;
   if (existsSync(outPath)) {
     try {
       const existing = JSON.parse(readFileSync(outPath, "utf-8"));
