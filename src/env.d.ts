@@ -7,6 +7,8 @@ interface ImportMetaEnv {
 	readonly AGENT_SESSIONS?: KVNamespace; // KV namespace for agent session persistence (optional)
 	readonly AGENT_RL?: KVNamespace; // KV namespace for agent rate limiting (optional)
 	readonly FEATURE_AGENT_SCHEMA?: string; // Optional feature flag to enable schema validation ("true" to enforce)
+	readonly VERIFICATION_SIGNATURE?: string; // Optional signed verification statement
+	readonly VERIFICATION_PUBKEY?: string; // Public key (hex/base64) used to verify the signature
 }
 
 interface ImportMeta {
@@ -25,6 +27,8 @@ declare global {
 					AGENT_SESSIONS?: KVNamespace; // KV namespace for agent session persistence (optional)
 					AGENT_RL?: KVNamespace; // KV namespace for agent rate limiting (optional)
 						FEATURE_AGENT_SCHEMA?: string; // Optional feature flag to enable schema validation
+						VERIFICATION_SIGNATURE?: string;
+						VERIFICATION_PUBKEY?: string;
 				}
 			}
 		}

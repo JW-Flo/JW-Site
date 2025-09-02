@@ -17,7 +17,7 @@ const easterEggs = {
     window.unlockUltimateEasterEgg =
       window.unlockUltimateEasterEgg ||
       (() => {
-        console.log("Ultimate easter egg placeholder");
+        console.log("Ultimate easter egg locked. Hint: combine the Konami code with a cryptic cipher.");
       });
   },
 

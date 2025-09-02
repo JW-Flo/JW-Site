@@ -1,17 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-const dnsTxtRecords = [
-  { name: '_identity.andreysergeevich.me', value: 'v=proof;id=joseph-whittle;sig=PLACEHOLDER_SIGNATURE' }
-];
-const signedStatement = `I, Joe Whittle ("Andrey Sergeevich" professionally), assert control over the domain andreysergeevich.me for portfolio and identity verification purposes. Signed: PLACEHOLDER_SIGNATURE`;
+const sig = Astro.locals?.runtime?.env?.VERIFICATION_SIGNATURE || (import.meta as any).env?.VERIFICATION_SIGNATURE || '';
+const pub = Astro.locals?.runtime?.env?.VERIFICATION_PUBKEY || (import.meta as any).env?.VERIFICATION_PUBKEY || '';
+const hasProof = !!(sig && pub);
+const dnsTxtRecords = hasProof ? [
+  { name: '_identity.andreysergeevich.me', value: `v=proof;id=joseph-whittle;alg=ed25519;pub=${pub};sig=${sig}` }
+] : [];
+const signedStatement = hasProof
+  ? `I, Joe Whittle ("Andrey Sergeevich" professionally), assert control over the domain andreysergeevich.me for portfolio and identity verification purposes. Signature (ed25519): ${sig}`
+  : 'Verification signature not yet configured. Provide VERIFICATION_SIGNATURE and VERIFICATION_PUBKEY to enable this statement.';
 ---
 <BaseLayout title="Verification" description="Identity verification records">
   <h1 class="text-2xl font-semibold mb-4">Verification</h1>
   <h2 class="text-lg font-medium mb-2">DNS TXT Records</h2>
-  <ul class="mb-6 list-disc ml-6 text-sm">
-    {dnsTxtRecords.map(r => <li><code>{r.name}</code>: <code>{r.value}</code></li>)}
-  </ul>
+  {hasProof ? (
+    <ul class="mb-6 list-disc ml-6 text-sm">
+      {dnsTxtRecords.map(r => <li><code>{r.name}</code>: <code>{r.value}</code></li>)}
+    </ul>
+  ) : (
+    <p class="text-sm mb-6 italic opacity-70">No DNS proof configured yet.</p>
+  )}
   <h2 class="text-lg font-medium mb-2">Signed Statement</h2>
   <pre class="text-xs bg-gray-100 p-3 overflow-auto">{signedStatement}</pre>
-  <p class="text-xs opacity-70 mt-4">Replace PLACEHOLDER_SIGNATURE with an actual detached signature or cryptographic proof.</p>
+  {!hasProof && <p class="text-xs opacity-70 mt-4">Set VERIFICATION_SIGNATURE and VERIFICATION_PUBKEY environment variables (ed25519 recommended) to publish verification proof.</p>}
 </BaseLayout>
