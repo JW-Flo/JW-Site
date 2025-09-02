@@ -1,20 +1,5 @@
 ---
 <section class="text-center py-16 md:py-24 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/30 to-slate-900 border-b border-retro-cyan/20">
-  <!-- Refined Retro Background -->
-  <div class="absolute inset-0 opacity-20">
-    <svg class="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="retro-grid" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-          <rect width="20" height="20" fill="none"/>
-          <path d="M0 10h20M10 0v20" stroke="currentColor" stroke-width="0.5" fill="none" class="text-retro-cyan"/>
-          <circle cx="10" cy="10" r="1" fill="currentColor" class="text-retro-pink"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#retro-grid)"/>
-    </svg>
-  </div>
-
-  <!-- Subtle Animated Elements -->
   <div class="absolute inset-0">
     <div class="w-1 h-1 bg-retro-cyan rounded-full absolute top-1/4 left-1/4 animate-pulse"></div>
     <div class="w-2 h-2 bg-retro-pink rounded-full absolute bottom-1/3 right-1/4 animate-pulse delay-700"></div>
@@ -27,7 +12,7 @@
       $ whoami
     </div>
     
-    <h1 class="text-5xl md:text-7xl font-bold font-retro mb-6 tracking-tight">
+    <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
       <span class="text-retro-cyan">JOE</span>
       <span class="text-retro-cyan ml-4">WHITTLE</span>
     </h1>
@@ -51,7 +36,7 @@
       <a href="/workflows" class="bg-gradient-to-r from-retro-purple to-retro-pink hover:from-retro-purple/80 hover:to-retro-pink/80 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-retro-purple/30">
         Live Systems
       </a>
-      <a href="/guestbook" class="bg-retro-green hover:bg-retro-green/80 text-slate-900 font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-retro-green/30">
+      <a href="/guestbook" class="bg-gradient-to-r from-retro-green to-emerald-500 hover:from-retro-green/80 hover:to-emerald-500/80 text-slate-900 font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-retro-green/30 hover:shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/30">
         Guest Book
       </a>
       <a href="/enhanced-security-scanner" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 border border-purple-400/50">
@@ -90,25 +75,6 @@
   </div>
 </section>
 
-<script>
-  // Professional typing effect
-  const text = "Building reliable systems through innovative technology solutions";
-  const typingText = document.getElementById('typing-text');
-  let index = 0;
-
-  function typeWriter() {
-    if (index < text.length && typingText) {
-      typingText.innerHTML += text.charAt(index);
-      index++;
-      setTimeout(typeWriter, 50);
-    } else if (typingText) {
-      // Add subtle cursor
-      typingText.innerHTML += '<span class="animate-pulse text-blue-400">|</span>';
-    }
-  }
-
-  // Start effect when page loads
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(typeWriter, 800);
-  });
-</script>
+<style>
+  /* Temporary inline styles for build compatibility */
+</style>
