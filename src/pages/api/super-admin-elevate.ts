@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { ScanStore } from '../../utils/scanStore.js';
+import { IS_DEV } from '../../utils/isDev.js';
 import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
 import { logger } from '../../utils/logger.js';
 
@@ -38,7 +39,15 @@ export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
     const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value));
     return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('');
   }
-  const roleSecret = env.ROLE_SIGNING_KEY || env.SESSION_SIGNING_KEY || 'dev-signing-key';
+  let roleSecret = env.ROLE_SIGNING_KEY || env.SESSION_SIGNING_KEY;
+  if (!roleSecret) {
+    if (IS_DEV) {
+      roleSecret = 'dev-signing-key';
+    } else {
+      logger.error('ROLE_SIGNING_KEY / SESSION_SIGNING_KEY missing in production');
+      return new Response(JSON.stringify({ error: 'Role signing not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
   const rsig = await hmacSign(roleSecret, base);
   const roleCookie = `escan_role=${encodeURIComponent(base+'.'+rsig)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${60*60}`;
   const setCookies = [cookieHeader, roleCookie].filter(Boolean).join(', ');

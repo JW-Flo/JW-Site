@@ -190,6 +190,9 @@ On exhaustion: HTTP 429 with the same headers and JSON body.
 | SUPER_ADMIN_KEY | Secret | Enables super-admin mode in enhanced scanner | Set only in dashboard; not committed |
 | CONSENT_ADMIN_KEY | Secret | Auth for `/api/admin/consent-stats` | 404 on mismatch; rotate periodically |
 | SESSION_SIGNING_KEY | Secret | HMAC signing for `escan_s` cookie | Required for session integrity |
+| ROLE_SIGNING_KEY | Secret | Distinct signer for role elevation cookie | Falls back to SESSION_SIGNING_KEY if unset |
+| VERIFICATION_PUBKEY | Public Config | Public key for identity proof (ed25519) | Used on /verification page & DNS TXT |
+| VERIFICATION_SIGNATURE | Secret | Signature over identity assertion statement | Displayed only when both pubkey + signature set |
 | FEATURE_WAITLIST | Flag | Enable waitlist endpoints & widget | Requires migration 002_waitlist.sql |
 | FEATURE_CONSENT_D1 | Flag | Enable consent D1 persistence | If false, consent writes disabled |
 | FEATURE_GEO_CLASSIFICATION | Flag | Enable geo hashing output | Controls additional geo-derived data |
@@ -198,6 +201,37 @@ On exhaustion: HTTP 429 with the same headers and JSON body.
 | ACTIVE_BUILD_ID (planned) | Future Config | Stale deploy invalidation gate | Not yet implemented |
 
 Secrets should be configured in the Cloudflare Pages dashboard (Production + Preview). Only non-sensitive defaults may appear in `wrangler.toml` for local dev.
+
+### Quick Setup Checklist
+
+1. Copy `.env.example` to `.env` for local development and adjust placeholder secrets.
+2. In Cloudflare Pages project settings, add (Secrets): `SUPER_ADMIN_KEY`, `SESSION_SIGNING_KEY`, `CONSENT_ADMIN_KEY`, `GEO_HASH_KEY`, optionally `ROLE_SIGNING_KEY`, `NVD_API_KEY`, `VIRUSTOTAL_API_KEY`, `OPENCVE_API_TOKEN` or `OPENCVE_BASIC_USER` / `OPENCVE_BASIC_PASSWORD`.
+3. Add (Plain text build vars): `SITE_URL`, `FEATURE_CONSENT_D1`, `FEATURE_GEO_CLASSIFICATION`, `FEATURE_WAITLIST`, `FEATURE_AGENT`, `OPENCVE_ENRICH`.
+4. (Optional) Turnstile: `PUBLIC_TURNSTILE_SITE_KEY` (plain), `TURNSTILE_SECRET_KEY` (secret).
+5. (Optional) Analytics / research: `ANALYTICS_WEBHOOK_URL`, `ANALYTICS_API_KEY`, `SECURITY_RESEARCH_ENDPOINT`, `RESEARCH_API_KEY`.
+6. Create KV namespaces if needed: `RATE_LIMIT`, `LEADERBOARD`, `ANALYTICS` (already present), optional `SESSION` (for persistent session storage) and `SCANNER_META` (for scan metadata). Update `wrangler.toml` with resulting IDs.
+7. (Optional) D1 migrations: run `npm run db:migrate` after ensuring `DB` binding present.
+8. Redeploy with Wrangler (`npm run deploy`) or push to main to trigger Pages build.
+9. Verify `/api/scanner-health` shows expected *_PRESENT flags.
+10. (Optional) Identity proof: set `VERIFICATION_PUBKEY` + `VERIFICATION_SIGNATURE` and redeploy; confirm /verification renders DNS TXT line.
+
+See comments in `wrangler.toml` and `.env.example` for guidance. Avoid committing real secrets; rotate periodically.
+
+### Identity Verification Proof
+
+The `/verification` page can publish a cryptographic assertion of domain control.
+
+1. Generate an ed25519 keypair locally (Node >= 19):
+
+```bash
+node -e "const { generateKeyPairSync, sign } = require('crypto'); const { publicKey, privateKey } = generateKeyPairSync('ed25519'); const stmt='I, Joe Whittle (\"Andrey Sergeevich\" professionally), assert control over the domain andreysergeevich.me for portfolio and identity verification purposes.'; const sig=sign(null, Buffer.from(stmt), privateKey).toString('base64'); const pub=publicKey.export({format:'der',type:'spki'}).toString('base64'); console.log('VERIFICATION_PUBKEY='+pub); console.log('VERIFICATION_SIGNATURE='+sig);"
+```
+
+2. Add the printed values to Cloudflare Pages env vars `VERIFICATION_PUBKEY` & `VERIFICATION_SIGNATURE` (Signature is treated as secret).
+3. Redeploy and visit `/verification` – a DNS TXT record suggestion plus the signed statement appears.
+4. (Optional) Publish the TXT record: `_identity.andreysergeevich.me  v=proof;id=joseph-whittle;alg=ed25519;pub=<pub>;sig=<sig>`
+
+If the variables are absent the page shows a non-intrusive notice instead of a placeholder signature.
 
 ---
 

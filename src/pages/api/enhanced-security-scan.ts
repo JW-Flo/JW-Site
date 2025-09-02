@@ -73,6 +73,12 @@ const MAX_URL_LENGTH = 2048; // Prevent abuse via extremely long URLs
 const BUILD_SUPER_ADMIN_KEY = (import.meta as any).env?.SUPER_ADMIN_KEY || '';
 
 export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
+  const reqId = Math.random().toString(36).slice(2,10);
+  const logBase = (phase: string, data?: any) => {
+    try { console.log(`[scan ${reqId}] ${phase}`, data ? JSON.stringify(data).slice(0,800) : ''); } catch { /* ignore logging errors */ }
+  };
+  logBase('start');
+  let phase = 'init';
   try {
     // Initialize session store (env accessible via locals.runtime?.env in Astro CF adapter)
     const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
@@ -89,8 +95,10 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
 
     // Basic rate limiting keyed by client IP (falls back to 'unknown')
     const rateKey = clientAddress || request.headers.get('x-forwarded-for') || 'unknown';
+    phase = 'rateLimit';
     const { allowed, remaining, resetTime } = strictRateLimit.check(`scan:${rateKey}`);
     if (!allowed) {
+      logBase('rateLimited', { rateKey });
       return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please wait before retrying.' }), {
         status: 429,
         headers: {
@@ -100,7 +108,16 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
         }
       });
     }
-  const { url, type, superAdminMode, adminKey }: EnhancedScanRequest = await request.json();
+    phase = 'parseBody';
+    let body: any;
+    try {
+      body = await request.json();
+    } catch (e) {
+      logBase('badJson', { error: (e as any)?.message });
+      return new Response(JSON.stringify({ error: 'Invalid JSON body', code: 'BAD_JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+    const { url, type, superAdminMode, adminKey }: EnhancedScanRequest = body || {};
+    logBase('body', { url, type, superAdminMode });
 
     // Basic URL length guard
     if (url && url.length > MAX_URL_LENGTH) {
@@ -111,7 +128,8 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
     }
     
     if (!url || !type) {
-  return new Response(JSON.stringify({ error: 'Missing url or type parameter', code: 'MISSING_PARAMS' }), {
+      logBase('missingParams');
+      return new Response(JSON.stringify({ error: 'Missing url or type parameter', code: 'MISSING_PARAMS' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -119,15 +137,18 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
 
     // Validate super admin access (prefer runtime env key over build-time key)
     if (superAdminMode) {
+      phase = 'adminValidation';
       const runtimeKey = env?.SUPER_ADMIN_KEY || env?.SUPER_ADMIN_KEY_DEV || '';
       const effectiveKey = runtimeKey || BUILD_SUPER_ADMIN_KEY;
       if (!effectiveKey) {
+        logBase('adminKeyMissing');
         return new Response(JSON.stringify({ error: 'Super admin key not configured on server', code: 'ADMIN_KEY_NOT_CONFIGURED' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         });
       }
       if (adminKey !== effectiveKey) {
+        logBase('adminKeyInvalid');
         return new Response(JSON.stringify({ error: 'Invalid admin key for super admin mode', code: 'INVALID_ADMIN_KEY' }), {
           status: 403,
           headers: { 'Content-Type': 'application/json' }
@@ -140,7 +161,8 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
     try {
       targetUrl = new URL(url);
     } catch {
-  return new Response(JSON.stringify({ error: 'Invalid URL format', code: 'INVALID_URL' }), {
+      logBase('invalidUrl');
+      return new Response(JSON.stringify({ error: 'Invalid URL format', code: 'INVALID_URL' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -148,7 +170,8 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
 
     // Only allow HTTP/HTTPS protocols
     if (!['http:', 'https:'].includes(targetUrl.protocol)) {
-  return new Response(JSON.stringify({ error: 'Only HTTP and HTTPS URLs are supported', code: 'UNSUPPORTED_PROTOCOL' }), {
+      logBase('badProtocol', { protocol: targetUrl.protocol });
+      return new Response(JSON.stringify({ error: 'Only HTTP and HTTPS URLs are supported', code: 'UNSUPPORTED_PROTOCOL' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -156,7 +179,9 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
 
     let result: EnhancedScanResult;
 
-    switch (type) {
+  phase = `scan:${type}`;
+  logBase('scanDispatch', { type });
+  switch (type) {
       case 'headers':
         result = await scanEnhancedSecurityHeaders(targetUrl.toString(), superAdminMode);
         break;
@@ -247,7 +272,7 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
         uaHash: consent.research ? hashUA(request.headers.get('user-agent') || '') : undefined
       }, consent);
     } catch (e) {
-      console.warn('Failed to add scan metadata', e);
+      logBase('storeAddScanFailed', { error: (e as any)?.message });
     }
 
     const headers: Record<string,string> = {
@@ -256,10 +281,11 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
       'X-RateLimit-Reset': resetTime.toString()
     };
     if (cookieHeader) headers['Set-Cookie'] = cookieHeader;
-    return new Response(JSON.stringify(result), { headers });
+  logBase('success', { findings: result.findings.length });
+  return new Response(JSON.stringify(result), { headers });
 
   } catch (error) {
-    console.error('Enhanced security scan error:', error);
+  console.error(`[scan ${reqId}] fatal`, error, 'phase=', phase);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       code: 'INTERNAL_ERROR',

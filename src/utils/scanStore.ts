@@ -50,6 +50,7 @@ async function verifySignature(secret: string, value: string, sig: string): Prom
 }
 
 export interface ConsentState { analytics: boolean; research: boolean; }
+import { IS_DEV } from './isDev.js';
 
 function parseConsentCookie(cookieHeader: string | null): ConsentState {
   if (!cookieHeader) return { analytics: false, research: false };
@@ -73,7 +74,14 @@ export class ScanStore {
   private readonly roleSigningKey: string;
   private readonly kv: KVNamespace | undefined;
   constructor(env: any) {
-    this.signingKey = env.SESSION_SIGNING_KEY || 'dev-signing-key';
+    if (!env.SESSION_SIGNING_KEY) {
+      if (!IS_DEV) {
+        throw new Error('SESSION_SIGNING_KEY must be configured in production environment');
+      }
+      this.signingKey = 'dev-signing-key';
+    } else {
+      this.signingKey = env.SESSION_SIGNING_KEY;
+    }
     this.roleSigningKey = env.ROLE_SIGNING_KEY || this.signingKey;
     this.kv = env.SCANNER_META; // optional
   }
@@ -92,6 +100,8 @@ export class ScanStore {
     } catch { return undefined; }
   }
   async getOrCreateSession(request: Request): Promise<{ record: SessionRecord; cookieHeader?: string; consent: ConsentState; }> {
+    // Opportunistic cleanup (avoids background interval in edge runtime)
+    try { cleanupExpiredSessions(); } catch {}
     const cookie = request.headers.get('Cookie') || '';
     const consent = parseConsentCookie(cookie);
     const role = await this.parseRole(cookie);
@@ -155,4 +165,17 @@ export function sanitizeUrl(raw: string): string {
   }
 }
 
-setInterval(() => { const now = Date.now(); for (const [id, rec] of sessions.entries()) { if ((now - rec.last) > SESSION_TTL_MS) sessions.delete(id); } }, 60_000);
+// NOTE: Avoid using a perpetual interval timer in edge runtime (Pages Functions) which can
+// cause issues during module evaluation in some execution contexts. Instead perform
+// opportunistic cleanup during session access. This keeps memory bounded without relying
+// on setInterval. If running in a traditional long-lived Node process, you can re-enable
+// a background cleanup scheduler.
+function cleanupExpiredSessions(now = Date.now()) {
+  for (const [id, rec] of sessions.entries()) {
+    if ((now - rec.last) > SESSION_TTL_MS) sessions.delete(id);
+  }
+}
+
+// Exported for potential test hooks
+export const __internalCleanupSessions = cleanupExpiredSessions;
+

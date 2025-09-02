@@ -47,6 +47,16 @@ binding = "ANALYTICS"
 id = "3dd7938561f5402bb41760edda181030"
 preview_id = "64323cab0ce447d182e8a5038461e6d3"
 
+# Optional KV namespace for session persistence (Astro Cloudflare adapter logs a warning when missing).
+# Create via:
+#   wrangler kv:namespace create SESSION
+#   wrangler kv:namespace create SESSION --env=production
+# Then add produced ids below and uncomment this block.
+# [[kv_namespaces]]
+# binding = "SESSION"
+# id = "<prod-session-namespace-id>"
+# preview_id = "<preview-session-namespace-id>"
+
 # Lightweight metadata persistence for scanner sessions (stores ONLY minimal, non-personal aggregates per consent)
 # NOTE: Disabled placeholder binding to prevent deploy failure. Uncomment and set real IDs after creating namespace:
 #   wrangler kv:namespace create SCANNER_META --env=production
@@ -77,6 +87,7 @@ kv_namespaces = [
 	{ binding = "LEADERBOARD", id = "4792010013254ed7815b2d66adb9a50e" },
 	{ binding = "ANALYTICS", id = "3dd7938561f5402bb41760edda181030" },
 	# { binding = "SCANNER_META", id = "<prod-scanner-meta-id>" }
+	# { binding = "SESSION", id = "<prod-session-namespace-id>" }
 ]
 
 # Workflows configuration (implemented as functions for now)
@@ -90,3 +101,34 @@ kv_namespaces = [
 # name = "guestbook-cleanup"
 # file = "workflows/guestbook-cleanup.ts"
 # binding = "CLEANUP_WORKFLOW"
+
+# -----------------------------------------------------------------------------
+# Environment Variable Reference (set in Cloudflare Pages dashboard, not here)
+# -----------------------------------------------------------------------------
+# Core Secrets:
+#   SUPER_ADMIN_KEY                -> Enables super-admin scan mode
+#   SESSION_SIGNING_KEY            -> Signs session cookies
+#   ROLE_SIGNING_KEY (optional)    -> Separate key for role elevation tokens
+#   CONSENT_ADMIN_KEY              -> /api/admin/consent-stats access
+#   GEO_HASH_KEY                   -> Stable hashing for geo classification
+#   TURNSTILE_SECRET_KEY           -> Turnstile verification
+#   NVD_API_KEY                    -> NVD CVE enrichment
+#   VIRUSTOTAL_API_KEY             -> Threat intel enrichment
+#   OPENCVE_API_TOKEN (optional)   -> OpenCVE token auth (used if no Basic creds)
+#   OPENCVE_BASIC_USER / OPENCVE_BASIC_PASSWORD (optional) -> OpenCVE Basic auth (takes precedence)
+
+# Feature Flags (plain text):
+#   FEATURE_CONSENT_D1=true
+#   FEATURE_GEO_CLASSIFICATION=true
+#   FEATURE_WAITLIST=true
+#   FEATURE_AGENT=true
+#   OPENCVE_ENRICH=true            -> Enables OpenCVE enrichment logic
+
+# Analytics / Research (optional):
+#   ANALYTICS_WEBHOOK_URL, ANALYTICS_API_KEY
+#   SECURITY_RESEARCH_ENDPOINT, RESEARCH_API_KEY
+
+# Optional scanner metadata KV (minimal aggregated stats): SCANNER_META
+# Optional session persistence KV: SESSION
+
+# For local dev you may create a .env (or .dev.vars) with non-production placeholder values.
