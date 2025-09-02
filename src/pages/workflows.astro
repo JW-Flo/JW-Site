@@ -192,7 +192,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <a href="/guestbook" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
             Try Guestbook Workflow
           </a>
-          <a href="/#retro-arcade" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+          <a href="/arcade" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
             Test Game Analytics
           </a>
         </div>
@@ -206,21 +206,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   async function loadWorkflowMetrics() {
     try {
       // Load guestbook count
-      const guestbookResponse = await fetch('/functions/guestbook');
+      const guestbookResponse = await fetch('/api/guestbook');
       const guestbookData = await guestbookResponse.json();
       document.getElementById('guestbook-entries').textContent = guestbookData.length.toString();
-      
+
       // Simulate some other metrics (in production these would come from actual analytics)
       document.getElementById('total-games').textContent = Math.floor(Math.random() * 500 + 100).toString();
-      
+
     } catch (error) {
       console.error('Error loading workflow metrics:', error);
     }
   }
-  
+
   // Load metrics on page load
   loadWorkflowMetrics();
-  
+
   // Update metrics every 30 seconds
   setInterval(loadWorkflowMetrics, 30000);
 </script>

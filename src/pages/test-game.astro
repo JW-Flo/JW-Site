@@ -64,7 +64,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     result.textContent = 'Testing score submission...';
     
     try {
-      const response = await fetch('/api/workflows/game-score-processor', {
+      const response = await fetch('/functions/workflows/game-score-processor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,7 +144,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     btn.textContent = 'Loading...';
     
     try {
-      const response = await fetch('/api/workflows/game-score-processor');
+      const response = await fetch('/functions/workflows/game-score-processor');
       const data = await response.json();
       
       if (response.ok) {
