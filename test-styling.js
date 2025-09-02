@@ -7,7 +7,7 @@
 
 import https from "https";
 
-const SITE_URL = "https://855e99b5.jw-site-7q2.pages.dev";
+const SITE_URL = "https://thewanderingwhittle.com";
 
 async function makeRequest(url) {
   return new Promise((resolve, reject) => {
