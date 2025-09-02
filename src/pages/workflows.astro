@@ -192,9 +192,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <a href="/guestbook" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
             Try Guestbook Workflow
           </a>
-          <a href="/arcade" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+          <button onclick="launchArcadeFromButton()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
             Test Game Analytics
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -215,6 +215,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     } catch (error) {
       console.error('Error loading workflow metrics:', error);
+    }
+  }
+
+  // Launch arcade directly when button is clicked
+  function launchArcadeFromButton() {
+    // Simulate clicking the game trigger button
+    const gameTrigger = document.getElementById('game-trigger');
+    if (gameTrigger) {
+      gameTrigger.click();
+    } else {
+      // Fallback if the trigger button isn't found
+      alert('🎮 Click the floating controller button (🎮) in the bottom-right corner to launch the arcade!');
     }
   }
 
