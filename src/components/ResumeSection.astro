@@ -50,7 +50,7 @@ import resume from '../data/resume.json';
                 {resume.certifications.slice(0, 3).map((cert) => (
                   <div class="text-xs">
                     <div class="font-medium text-slate-300">{cert.name}</div>
-                    <div class="text-neon-pink">{cert.issuer}</div>
+                    <div class="text-neon-pink">{cert.issuer}{cert.issued ? ` • ${cert.issued}` : ''}{cert.expires ? ` • ${cert.expires}` : ''}</div>
                   </div>
                 ))}
               </div>

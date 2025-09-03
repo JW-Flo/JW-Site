@@ -202,17 +202,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  // Load some basic analytics data
+
+  // Load all live workflow metrics from /api/metrics
   async function loadWorkflowMetrics() {
     try {
-      // Load guestbook count
-      const guestbookResponse = await fetch('/api/guestbook');
-      const guestbookData = await guestbookResponse.json();
-      document.getElementById('guestbook-entries').textContent = guestbookData.length.toString();
-
-      // Simulate some other metrics (in production these would come from actual analytics)
-      document.getElementById('total-games').textContent = Math.floor(Math.random() * 500 + 100).toString();
-
+      const res = await fetch('/api/metrics');
+      const data = await res.json();
+      document.getElementById('total-games').textContent = data.gamesProcessed?.toString() || '-';
+      document.getElementById('guestbook-entries').textContent = data.guestbookEntries?.toString() || '-';
+      document.getElementById('security-checks').textContent = data.systemUptime || '-';
+      document.getElementById('response-time').textContent = data.avgResponse || '-';
+      // Optionally update workflow status indicators here if you add them to the DOM
     } catch (error) {
       console.error('Error loading workflow metrics:', error);
     }

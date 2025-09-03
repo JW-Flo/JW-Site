@@ -559,9 +559,10 @@ export class AsteroidsGame {
   gameLoop() {
     this.update();
     this.draw();
-    const raf = (typeof requestAnimationFrame !== 'undefined')
-      ? requestAnimationFrame
-      : (cb) => setTimeout(cb, 16);
+    const raf =
+      typeof requestAnimationFrame !== "undefined"
+        ? requestAnimationFrame
+        : (cb) => setTimeout(cb, 16);
     this.animationId = raf(() => this.gameLoop());
   }
 

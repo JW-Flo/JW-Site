@@ -20,32 +20,15 @@ SITE_URL = "https://thewanderingwhittle.com"
 
 # If you later add KV / D1 / R2 bindings, document them here.
 
-[[kv_namespaces]]
-binding = "RATE_LIMIT"
-id = "33fcae0c755840f996bfbb3ca3f9394f"
-preview_id = "ec6a2c7250064a89b0fa71accdaf51ba"
-# Namespace used for rate limiting buckets (keys rl:*). Previously VISITS; renamed for clarity.
-
-[[d1_databases]]
-binding = "DB"
-database_name = "guestbook_demo"
-database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
-# Schema includes guestbook tables and consent_events (see migrations/001_consent_events.sql)
+# R2 bucket binding for object storage (MEDIA)
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "jw-site-media"
+preview_bucket_name = "jw-site-media-preview"
 
 # Turnstile environment variables (set in Pages dashboard, not stored here):
 # - TURNSTILE_SECRET_KEY (Secret)
 # - PUBLIC_TURNSTILE_SITE_KEY (Build variable)
-
-# Additional KV namespaces for game features
-[[kv_namespaces]]
-binding = "LEADERBOARD"
-id = "4792010013254ed7815b2d66adb9a50e"
-preview_id = "508f61d2b5d6442bae53fbe541698360"
-
-[[kv_namespaces]]
-binding = "ANALYTICS"
-id = "3dd7938561f5402bb41760edda181030"
-preview_id = "64323cab0ce447d182e8a5038461e6d3"
 
 # Optional KV namespace for session persistence (Astro Cloudflare adapter logs a warning when missing).
 # Create via:
@@ -80,14 +63,21 @@ preview_id = "64323cab0ce447d182e8a5038461e6d3"
 
 # NOTE: Removed unsupported [env.staging] section for Cloudflare Pages. Pages supports only preview/production.
 
+
 [env.production]
-vars = { SITE_URL = "https://thewanderingwhittle.com" }
+vars = { SITE_URL = "https://thewhittlewandering.com" }
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "guestbook_demo"
+database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
+[[env.production.r2_buckets]]
+binding = "MEDIA"
+bucket_name = "jw-site-media"
+preview_bucket_name = "jw-site-media-preview"
 kv_namespaces = [
 	{ binding = "RATE_LIMIT", id = "33fcae0c755840f996bfbb3ca3f9394f" },
 	{ binding = "LEADERBOARD", id = "4792010013254ed7815b2d66adb9a50e" },
 	{ binding = "ANALYTICS", id = "3dd7938561f5402bb41760edda181030" },
-	# { binding = "SCANNER_META", id = "<prod-scanner-meta-id>" }
-	# { binding = "SESSION", id = "<prod-session-namespace-id>" }
 ]
 
 # Workflows configuration (implemented as functions for now)

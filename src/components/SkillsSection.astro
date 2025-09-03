@@ -79,7 +79,7 @@ import resume from '../data/resume.json';
             index < 6 ? 'animate-fade-in-up' : ''
           }`} style={`animation-delay: ${index * 0.1}s`}>
             <div class="font-semibold text-slate-100">{cert.name}</div>
-            <div class="text-xs text-slate-400 mt-1">{cert.issuer} • Issued: {cert.issued} • Expires: {cert.expires}</div>
+            <div class="text-xs text-slate-400 mt-1">{cert.issuer}{cert.issued ? ` • ${cert.issued}` : ''}{cert.expires ? ` • ${cert.expires}` : ''}</div>
           </div>
         ))}
       </div>

@@ -16,7 +16,7 @@ class RetroArcade {
     this.gameOverlay = null;
     this.isActive = false;
 
-  this.bindEvents();
+    this.bindEvents();
     console.log("🎯 Retro Arcade initialized - modular architecture ready!");
   }
 
@@ -67,14 +67,14 @@ class RetroArcade {
       this.canvas.style.zIndex = "35"; // Above navigation but below modal elements
       if (this.triggerWord) this.triggerWord.style.opacity = "0";
 
-  // Apply enhanced retro styling for game mode + scroll lock & key suppression
-  document.body.classList.add("game-mode");
-  document.body.classList.add("game-mode-scroll-lock");
-  this._addScrollKeySuppression();
+      // Apply enhanced retro styling for game mode + scroll lock & key suppression
+      document.body.classList.add("game-mode");
+      document.body.classList.add("game-mode-scroll-lock");
+      this._addScrollKeySuppression();
 
       console.log("🎯 Importing GameOverlay...");
       // Initialize modular game overlay
-  const { GameOverlay } = await import("../components/GameOverlay.js");
+      const { GameOverlay } = await import("../components/GameOverlay.js");
       console.log("🎯 GameOverlay imported successfully");
 
       this.gameOverlay = new GameOverlay(this.canvas);
@@ -99,9 +99,9 @@ class RetroArcade {
       if (this.triggerWord) {
         this.triggerWord.style.opacity = "0.3";
       }
-  document.body.classList.remove("game-mode");
-  document.body.classList.remove("game-mode-scroll-lock");
-  this._removeScrollKeySuppression();
+      document.body.classList.remove("game-mode");
+      document.body.classList.remove("game-mode-scroll-lock");
+      this._removeScrollKeySuppression();
 
       // Show lightweight inline error indicator (avoid blocking alert)
       const trigger = document.getElementById("game-trigger");
@@ -122,9 +122,9 @@ class RetroArcade {
     if (this.triggerWord) this.triggerWord.style.opacity = "0.3";
 
     // Remove enhanced game mode styling
-  document.body.classList.remove("game-mode");
-  document.body.classList.remove("game-mode-scroll-lock");
-  this._removeScrollKeySuppression();
+    document.body.classList.remove("game-mode");
+    document.body.classList.remove("game-mode-scroll-lock");
+    this._removeScrollKeySuppression();
 
     if (this.gameOverlay) {
       this.gameOverlay.deactivate();
@@ -165,7 +165,7 @@ class RetroArcade {
         "PageUp",
         "PageDown",
         "Home",
-        "End"
+        "End",
       ];
       if (keysToBlock.includes(e.key)) {
         e.preventDefault();
