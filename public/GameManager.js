@@ -6,7 +6,7 @@ export class GameManager {
     this.overlay = overlay;
     this.currentGame = null;
     this.isActive = false;
-  this.lastGameName = null; // Track last started game for restart functionality
+    this.lastGameName = null; // Track last started game for restart functionality
 
     // Game progression order - start with simple games
     this.games = ["Asteroids", "Pac-Man", "Tetris", "Space Invaders"];
@@ -71,7 +71,7 @@ export class GameManager {
     }
 
     // Remember last played (non-menu) game for restart support
-    if (gameName && gameName !== 'Menu') {
+    if (gameName && gameName !== "Menu") {
       this.lastGameName = gameName;
     }
 

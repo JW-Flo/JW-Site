@@ -67,10 +67,10 @@ class RetroArcade {
       this.canvas.style.zIndex = "35"; // Above navigation but below modal elements
       if (this.triggerWord) this.triggerWord.style.opacity = "0";
 
-  // Apply enhanced retro styling for game mode + scroll lock
-  document.body.classList.add("game-mode");
-  document.body.classList.add("game-mode-scroll-lock");
-  this._addScrollKeySuppression();
+      // Apply enhanced retro styling for game mode + scroll lock
+      document.body.classList.add("game-mode");
+      document.body.classList.add("game-mode-scroll-lock");
+      this._addScrollKeySuppression();
 
       console.log("🎯 Importing GameOverlay...");
       // Initialize modular game overlay
@@ -117,10 +117,10 @@ class RetroArcade {
     this.canvas.style.zIndex = "30"; // Back to normal z-index
     if (this.triggerWord) this.triggerWord.style.opacity = "0.3";
 
-  // Remove enhanced game mode styling & scroll lock
-  document.body.classList.remove("game-mode");
-  document.body.classList.remove("game-mode-scroll-lock");
-  this._removeScrollKeySuppression();
+    // Remove enhanced game mode styling & scroll lock
+    document.body.classList.remove("game-mode");
+    document.body.classList.remove("game-mode-scroll-lock");
+    this._removeScrollKeySuppression();
 
     if (this.gameOverlay) {
       this.gameOverlay.deactivate();
@@ -133,13 +133,19 @@ class RetroArcade {
 
   showLeaderboard() {
     // Leaderboard currently removed; guard for absence.
-    if (this.gameOverlay && typeof this.gameOverlay.showLeaderboard === 'function') {
+    if (
+      this.gameOverlay &&
+      typeof this.gameOverlay.showLeaderboard === "function"
+    ) {
       this.gameOverlay.showLeaderboard();
     }
   }
 
   hideLeaderboard() {
-    if (this.gameOverlay && typeof this.gameOverlay.hideLeaderboard === 'function') {
+    if (
+      this.gameOverlay &&
+      typeof this.gameOverlay.hideLeaderboard === "function"
+    ) {
       this.gameOverlay.hideLeaderboard();
     }
   }
@@ -163,7 +169,7 @@ class RetroArcade {
         "PageUp",
         "PageDown",
         "Home",
-        "End"
+        "End",
       ];
       if (keysToBlock.includes(e.key)) {
         e.preventDefault();

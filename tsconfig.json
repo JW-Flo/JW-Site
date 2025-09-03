@@ -6,15 +6,15 @@
     "strict": true,
     "jsx": "preserve",
     "jsxImportSource": "react",
-  "types": ["node", "@cloudflare/workers-types", "vitest"],
+    "types": ["node", "@cloudflare/workers-types", "vitest"],
     "baseUrl": ".",
     "paths": {},
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-  "forceConsistentCasingInFileNames": true,
-  "noEmit": true,
-  "allowImportingTsExtensions": true
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "functions"],
   "exclude": ["node_modules", "dist"]

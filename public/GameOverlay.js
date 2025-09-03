@@ -39,11 +39,11 @@ export class GameOverlay {
         // If a game is active, return to menu; otherwise deactivate overlay
         if (gm.currentGame) {
           e.preventDefault();
-            gm.returnToMenu();
+          gm.returnToMenu();
           return;
         }
         this.deactivate();
-      } else if (e.key.toLowerCase() === 'r') {
+      } else if (e.key.toLowerCase() === "r") {
         // Restart current/last game
         if (gm.lastGameName) {
           e.preventDefault();
@@ -60,12 +60,71 @@ export class GameOverlay {
     const { GameManager } = await import("./GameManager.js");
     this.gameManager = new GameManager(this);
 
-    // Note: overlay styling is handled by BaseLayout's RetroArcade class
-    // We don't need to modify overlay styles here
-
+    // Show leaderboard UI
     this.showLeaderboard();
+
+    // Fetch persistent leaderboard from server for all games
+    await this.fetchAndDisplayPersistentLeaderboard();
+
     await this.gameManager.activate();
-  this.injectGameControls();
+    this.injectGameControls();
+  }
+  // Fetch persistent leaderboard from server for all games and update UI
+  async fetchAndDisplayPersistentLeaderboard() {
+    // List of all games (should match GameManager)
+    const games = ["Asteroids", "Pac-Man", "Tetris", "Space Invaders"];
+    let allEntries = [];
+    let fetchFailed = false;
+
+    // Helper to fetch leaderboard for a single game
+    const fetchLeaderboardForGame = async (game) => {
+      try {
+        const res = await fetch(
+          `/api/workflows/game-score-processor?game=${encodeURIComponent(game)}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.leaderboard)) {
+            return data.leaderboard.map((entry) => ({
+              name: entry.player,
+              score: entry.score,
+              game: game,
+            }));
+          }
+        } else {
+          fetchFailed = true;
+        }
+      } catch (err) {
+        fetchFailed = true;
+        console.warn(`Failed to fetch leaderboard for ${game}:`, err);
+      }
+      return [];
+    };
+
+    // Fetch all leaderboards in sequence (could be parallelized if needed)
+    for (const game of games) {
+      const entries = await fetchLeaderboardForGame(game);
+      allEntries = allEntries.concat(entries);
+    }
+
+    // Sort all entries by score descending, take top 10
+    allEntries.sort((a, b) => b.score - a.score);
+    const topEntries = allEntries.slice(0, 10);
+
+    if (topEntries.length > 0 && !fetchFailed) {
+      this.updateLeaderboard(topEntries);
+    } else {
+      // Fallback: load from localStorage (legacy)
+      try {
+        const saved = window.localStorage.getItem("retroArcadeLeaderboard");
+        const localEntries = saved ? JSON.parse(saved) : [];
+        this.updateLeaderboard(localEntries);
+      } catch (err) {
+        console.warn("Failed to load local leaderboard:", err);
+        // If all else fails, show empty leaderboard
+        this.updateLeaderboard([]);
+      }
+    }
   }
 
   async deactivate() {
@@ -131,27 +190,41 @@ export class GameOverlay {
 
   // Inject lightweight control buttons (Restart / Menu) overlayed at bottom-right
   injectGameControls() {
-    if (document.getElementById('arcade-controls')) return; // Avoid duplicates
-    const wrap = document.createElement('div');
-    wrap.id = 'arcade-controls';
-    wrap.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;gap:8px;font-family:monospace';
-    const btnStyle = 'background:#1e293b;color:#e2e8f0;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:background .15s';
-    const restartBtn = document.createElement('button');
-    restartBtn.textContent = 'Restart (R)';
+    if (document.getElementById("arcade-controls")) return; // Avoid duplicates
+    const wrap = document.createElement("div");
+    wrap.id = "arcade-controls";
+    wrap.style.cssText =
+      "position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;gap:8px;font-family:monospace";
+    const btnStyle =
+      "background:#1e293b;color:#e2e8f0;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:background .15s";
+    const restartBtn = document.createElement("button");
+    restartBtn.textContent = "Restart (R)";
     restartBtn.style.cssText = btnStyle;
-    restartBtn.addEventListener('mouseenter', () => restartBtn.style.background = '#334155');
-    restartBtn.addEventListener('mouseleave', () => restartBtn.style.background = '#1e293b');
-    restartBtn.addEventListener('click', () => {
+    restartBtn.addEventListener(
+      "mouseenter",
+      () => (restartBtn.style.background = "#334155")
+    );
+    restartBtn.addEventListener(
+      "mouseleave",
+      () => (restartBtn.style.background = "#1e293b")
+    );
+    restartBtn.addEventListener("click", () => {
       if (this.gameManager?.lastGameName) {
         this.gameManager.restartCurrentGame();
       }
     });
-    const menuBtn = document.createElement('button');
-    menuBtn.textContent = 'Menu (Esc)';
+    const menuBtn = document.createElement("button");
+    menuBtn.textContent = "Menu (Esc)";
     menuBtn.style.cssText = btnStyle;
-    menuBtn.addEventListener('mouseenter', () => menuBtn.style.background = '#334155');
-    menuBtn.addEventListener('mouseleave', () => menuBtn.style.background = '#1e293b');
-    menuBtn.addEventListener('click', () => {
+    menuBtn.addEventListener(
+      "mouseenter",
+      () => (menuBtn.style.background = "#334155")
+    );
+    menuBtn.addEventListener(
+      "mouseleave",
+      () => (menuBtn.style.background = "#1e293b")
+    );
+    menuBtn.addEventListener("click", () => {
       if (this.gameManager?.currentGame) {
         this.gameManager.returnToMenu();
       } else {

@@ -4,10 +4,17 @@ import ResumeSection from '../components/ResumeSection.astro';
 import resume from '../data/resume.json';
 ---
 <BaseLayout title="Resume | Joe Whittle" description="Professional cybersecurity resume for Joe Whittle">
-  <div class="flex justify-end mb-4 print:hidden">
-    <button id="printBtn" class="px-4 py-2 text-sm font-medium border border-neon-cyan text-neon-cyan rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon">
+
+  <div class="flex justify-end mb-4 print:hidden relative">
+    <button id="printBtn" class="px-4 py-2 text-sm font-medium border border-neon-cyan text-neon-cyan rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon z-20">
       📄 Print PDF
     </button>
+    <!-- Floating Scan widget placeholder: ensure this does not overlap the print button. Fade logic to be added. -->
+    <div id="scan-widget" class="absolute right-0 top-0 translate-x-full ml-4 z-10">
+      <button class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium">
+        🛡️ Scan
+      </button>
+    </div>
   </div>
 
   <!-- Name and Title Header -->

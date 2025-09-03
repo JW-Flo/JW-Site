@@ -178,6 +178,7 @@ RateLimit-Limit: 60;w=60
 RateLimit-Remaining: 42
 RateLimit-Reset: 23
 ```
+
 On exhaustion: HTTP 429 with the same headers and JSON body.
 
 ---
@@ -358,8 +359,8 @@ Core concepts:
 File:
 
 - `public/arcadeHints.js` exports:
-	- `getArcadeHint()` – returns a `{ text, segment }` object or `null` if no new hint is available.
-	- `incrementSecretProgress(n = 1)` – increments an internal counter (future unlock triggers / meta puzzles).
+ 	- `getArcadeHint()` – returns a `{ text, segment }` object or `null` if no new hint is available.
+ 	- `incrementSecretProgress(n = 1)` – increments an internal counter (future unlock triggers / meta puzzles).
 
 Menu Integration:
 
@@ -700,4 +701,3 @@ Keep namespace small; avoid adding user-identifiable data.
 ### Extensibility
 
 Future analytics dashboards can query aggregated counts without exposing personal data. Any schema expansion must go through updated consent documentation before deployment.
-

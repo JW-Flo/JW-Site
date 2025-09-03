@@ -9,14 +9,14 @@ export class MenuGame {
     this.unlockedGames = gameManager.unlockedGames;
     // Provide alias mapping (e.g., user said "defenders" referring to Space Invaders)
     this.aliases = {
-      'Defenders': 'Space Invaders',
-      'Defender': 'Space Invaders'
+      Defenders: "Space Invaders",
+      Defender: "Space Invaders",
     };
     this.animationId = null;
 
-  // Ephemeral lock feedback
-  this.lockMessageTimer = 0; // frames remaining to show message
-  this.lockMessage = "";
+    // Ephemeral lock feedback
+    this.lockMessageTimer = 0; // frames remaining to show message
+    this.lockMessage = "";
 
     // Animation properties
     this.titleGlow = 0;
@@ -33,7 +33,7 @@ export class MenuGame {
     this.boundHandleKeyPress = (e) => this.handleKeyPress(e);
 
     this.canvas.addEventListener("click", this.boundHandleClick);
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       document.addEventListener("keydown", this.boundHandleKeyPress);
     }
   }
@@ -48,7 +48,7 @@ export class MenuGame {
     }
     // Remove event listeners using the bound function references
     this.canvas.removeEventListener("click", this.boundHandleClick);
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       document.removeEventListener("keydown", this.boundHandleKeyPress);
     }
   }
@@ -122,7 +122,7 @@ export class MenuGame {
     this.updateTitleGlow();
     this.draw();
     // Avoid perpetuating animation loops in test environment to prevent unhandled async after teardown
-    if (typeof globalThis !== 'undefined' && globalThis.__TEST__) {
+    if (typeof globalThis !== "undefined" && globalThis.__TEST__) {
       return; // do not schedule next frame
     }
     this.animationId = requestAnimationFrame(() => this.gameLoop());
@@ -211,8 +211,8 @@ export class MenuGame {
     // Guard against minimal/mocked contexts in tests
     const ctx = this.ctx;
     if (!ctx) return;
-    const canStroke = typeof ctx.strokeRect === 'function';
-    const canFill = typeof ctx.fillRect === 'function';
+    const canStroke = typeof ctx.strokeRect === "function";
+    const canFill = typeof ctx.fillRect === "function";
     // Retro arcade machine frame
     if (canStroke) {
       ctx.strokeStyle = "#444444";
@@ -284,7 +284,7 @@ export class MenuGame {
     const menuStartY = this.canvas.height / 2 - 100;
     const itemSpacing = 60;
 
-  this.games.forEach((game, index) => {
+    this.games.forEach((game, index) => {
       const y = menuStartY + index * itemSpacing;
       const isSelected = index === this.selectedGame;
       const isUnlocked = this.unlockedGames[index];
@@ -325,8 +325,8 @@ export class MenuGame {
       this.ctx.font = "bold 24px monospace";
       // Show alias hint if player has referred to game differently (Space Invaders => Defenders)
       let displayName = game;
-      if (game === 'Space Invaders') {
-        displayName = 'Space Invaders'; // base
+      if (game === "Space Invaders") {
+        displayName = "Space Invaders"; // base
       }
       this.ctx.fillText(displayName, this.canvas.width / 2, y);
 
@@ -337,7 +337,7 @@ export class MenuGame {
         this.ctx.fillText("🔒", this.canvas.width / 2 + 120, y);
 
         // Unlock requirements and progress
-  if (requiredScore > 0) {
+        if (requiredScore > 0) {
           // Use total player score for locked progress (more intuitive)
           const totalScore = this.gameManager.totalPlayerScore || 0;
           const progressPercent = Math.min(
@@ -347,15 +347,13 @@ export class MenuGame {
 
           this.ctx.fillStyle = "#888888";
           this.ctx.font = "12px monospace";
-          let progressText = `${totalScore}/${requiredScore} pts (${Math.round(progressPercent)}%)`;
-          if (game === 'Space Invaders') {
-            progressText += ' - Final challenge';
+          let progressText = `${totalScore}/${requiredScore} pts (${Math.round(
+            progressPercent
+          )}%)`;
+          if (game === "Space Invaders") {
+            progressText += " - Final challenge";
           }
-          this.ctx.fillText(
-            progressText,
-            this.canvas.width / 2,
-            y + 20
-          );
+          this.ctx.fillText(progressText, this.canvas.width / 2, y + 20);
 
           // Progress bar
           const barWidth = 150;
@@ -390,9 +388,10 @@ export class MenuGame {
     const total = this.gameManager.totalPlayerScore || 0;
     if (required) {
       const remaining = Math.max(required - total, 0);
-      this.lockMessage = remaining > 0
-        ? `${gameName} unlocks at ${required} pts. Need ${remaining} more.`
-        : `${gameName} will unlock after next score save.`;
+      this.lockMessage =
+        remaining > 0
+          ? `${gameName} unlocks at ${required} pts. Need ${remaining} more.`
+          : `${gameName} will unlock after next score save.`;
     } else {
       this.lockMessage = `${gameName} is currently locked.`;
     }
@@ -467,19 +466,27 @@ export class MenuGame {
 
     // Optional dynamic hint (single line) from ArcadeHints module if present and not already drawn this frame
     try {
-      if (typeof window !== 'undefined' && window.ArcadeHints && !this._lastHintTs) {
+      if (
+        typeof window !== "undefined" &&
+        window.ArcadeHints &&
+        !this._lastHintTs
+      ) {
         const hint = window.ArcadeHints.getArcadeHint();
         if (hint && hint.text) {
-          this.ctx.fillStyle = '#ffaa00';
-          this.ctx.font = '10px monospace';
-          this.ctx.fillText(hint.text, this.canvas.width / 2, instructionsY + 80);
+          this.ctx.fillStyle = "#ffaa00";
+          this.ctx.font = "10px monospace";
+          this.ctx.fillText(
+            hint.text,
+            this.canvas.width / 2,
+            instructionsY + 80
+          );
           this._lastHintTs = Date.now();
         }
       }
     } catch (e) {
       // Non-fatal hint retrieval issue
-      if (typeof console !== 'undefined' && console.debug) {
-        console.debug('Hint retrieval failed', e);
+      if (typeof console !== "undefined" && console.debug) {
+        console.debug("Hint retrieval failed", e);
       }
     }
   }

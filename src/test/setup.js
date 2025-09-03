@@ -9,7 +9,7 @@ const mockElement = {
   style: {},
   appendChild: () => {},
   removeChild: () => {},
-  parentNode: null
+  parentNode: null,
 };
 
 // Mock canvas with DOM methods
@@ -34,12 +34,12 @@ const mockCanvas = {
     scale: () => {},
     rotate: () => {},
     measureText: () => ({ width: 0 }),
-    fillStyle: '',
-    strokeStyle: '',
-    font: '',
-    textAlign: '',
-    globalAlpha: 1
-  })
+    fillStyle: "",
+    strokeStyle: "",
+    font: "",
+    textAlign: "",
+    globalAlpha: 1,
+  }),
 };
 
 // @ts-ignore - Mocking browser APIs for testing
@@ -49,9 +49,13 @@ globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
 // @ts-ignore
 globalThis.performance = { now: () => Date.now() };
 // @ts-ignore
-globalThis.Audio = function() { return {}; };
+globalThis.Audio = function () {
+  return {};
+};
 // @ts-ignore
-const CanvasCtor = (globalThis).HTMLCanvasElement || (globalThis.window && globalThis.window.HTMLCanvasElement);
+const CanvasCtor =
+  globalThis.HTMLCanvasElement ||
+  (globalThis.window && globalThis.window.HTMLCanvasElement);
 if (CanvasCtor && CanvasCtor.prototype) {
   // @ts-ignore
   CanvasCtor.prototype.getContext = () => mockCanvas.getContext();
@@ -67,7 +71,7 @@ globalThis.document = {
   addEventListener: () => {},
   removeEventListener: () => {},
   querySelector: () => mockElement,
-  querySelectorAll: () => []
+  querySelectorAll: () => [],
 };
 
 // @ts-ignore - Mocking window for testing
@@ -77,11 +81,15 @@ globalThis.window = {
     getItem: () => null,
     setItem: () => {},
     removeItem: () => {},
-    clear: () => {}
+    clear: () => {},
   },
-  prompt: () => 'Test Player',
-  AudioContext: function() { return {}; },
-  webkitAudioContext: function() { return {}; }
+  prompt: () => "Test Player",
+  AudioContext: function () {
+    return {};
+  },
+  webkitAudioContext: function () {
+    return {};
+  },
 };
 
 // Signal to runtime that we are in a test environment (used to disable animations, etc.)

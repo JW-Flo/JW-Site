@@ -105,9 +105,10 @@ export class MenuGame {
     this.updateTitleGlow();
     this.draw();
     // Guard for environments (tests) where requestAnimationFrame may be undefined post-teardown
-    const raf = (typeof requestAnimationFrame !== 'undefined')
-      ? requestAnimationFrame
-      : (cb) => setTimeout(cb, 16);
+    const raf =
+      typeof requestAnimationFrame !== "undefined"
+        ? requestAnimationFrame
+        : (cb) => setTimeout(cb, 16);
     this.animationId = raf(() => this.gameLoop());
   }
 

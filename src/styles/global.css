@@ -855,15 +855,18 @@ nav a {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 0 10px rgba(59,130,246,0.4), 0 0 20px rgba(99,102,241,0.25);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(99, 102, 241, 0.25);
 }
 
-.game-trigger-button:hover, .game-trigger-button:focus {
+.game-trigger-button:hover,
+.game-trigger-button:focus {
   outline: none;
   border-color: #8b5cf6;
   color: #8b5cf6;
   transform: scale(1.1) rotate(-5deg);
-  box-shadow: 0 0 15px rgba(139,92,246,0.6), 0 0 30px rgba(59,130,246,0.35);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(59, 130, 246, 0.35);
 }
 
 /* When cookie consent banner is visible, lift the trigger above it using measured height */
