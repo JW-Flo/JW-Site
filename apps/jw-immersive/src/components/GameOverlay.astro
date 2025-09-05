@@ -1,0 +1,33 @@
+---
+// GameOverlay.astro - Game overlay HTML structure
+---
+
+<div id="game-overlay" class="fixed inset-0 z-50 pointer-events-none opacity-0 transition-opacity duration-1000">
+  <!-- Game Canvas Container -->
+  <div id="game-container" class="relative w-full h-full">
+    <canvas id="game-canvas" class="absolute inset-0 bg-black/10"></canvas>
+    
+    <!-- Game UI Overlay -->
+    <div id="game-ui" class="absolute inset-0 pointer-events-auto">
+      <!-- Leaderboard -->
+      <div id="leaderboard" class="absolute top-4 right-4 bg-dark border border-neon-blue rounded-lg p-4 opacity-0 transition-opacity duration-500 max-w-xs">
+        <h3 class="text-neon-pink font-bold mb-2">🏆 Top Recruiters</h3>
+        <div id="leaderboard-list" class="text-sm space-y-1"></div>
+        <button id="close-leaderboard" class="mt-2 text-xs text-slate-400 hover:text-neon-blue">× Close</button>
+      </div>
+      
+      <!-- Game Trigger -->
+      <div id="game-trigger" class="absolute bottom-4 right-4 text-xs text-slate-500 hover:text-neon-blue transition-colors duration-300 cursor-pointer opacity-30 hover:opacity-100">
+        Ready to <span id="trigger-word" class="font-bold underline">level</span> up your recruitment game?
+      </div>
+      
+      <!-- Game Instructions -->
+      <div id="game-instructions" class="absolute bottom-4 left-4 text-xs text-slate-400 opacity-0 transition-opacity duration-300">
+        <div class="bg-dark border border-neon-blue rounded p-2">
+          <div class="text-neon-blue font-bold mb-1">Controls:</div>
+          <div id="control-hints" class="space-y-1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,144 @@
+---
+import SEO from '../components/SEO.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import { loadFlags, projectClientFlags } from '../config/flags';
+// import IPTracker from '../components/IPTracker.astro';
+import '../styles/global.css';
+export interface Props { title?: string; description?: string; url?: string; noIndex?: boolean; }
+const { title, description, url, noIndex } = Astro.props as Props;
+// Load feature flags from runtime environment and prepare safe client projection
+const serverFlags = loadFlags((Astro as any).env || {});
+const clientFlags = projectClientFlags(serverFlags);
+---
+<html lang="en" class="scroll-smooth dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="dark" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
+    <SEO {title} {description} {url} noIndex={noIndex} />
+  </head>
+  <body class="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
+    <script nonce={Astro.locals.cspNonce}>
+      // Safely expose selected non-sensitive environment flags
+      window.ENV = Object.assign({}, (window.ENV||{}), JSON.parse('{"flags":' + JSON.stringify(clientFlags).replace(/</g,'\\u003c') + '}'));
+    </script>
+    <!-- Game Canvas Overlay -->
+    <canvas id="game-canvas" class="fixed inset-0 pointer-events-none z-30 opacity-0 transition-opacity duration-1000 cursor-pointer bg-black/80"></canvas>
+    
+    <!-- IP Tracker Component -->
+    <!-- <IPTracker /> -->
+    
+    <!-- Interactive Demo Trigger -->
+          <div class="game-trigger-container">
+        <button 
+          id="game-trigger" 
+          class="game-trigger-button" 
+          aria-label="Launch Retro Arcade"
+          title="Click to play retro games!"
+        >
+          🎮
+        </button>
+      </div>
+      
+  <!-- Security Scanner Link (points to enhanced scanner) -->
+  <!-- TODO: Floating Scan widget should be implemented here and faded with the background when overlays/modals are active. -->
+  <!-- <div id="scan-widget" class="fixed bottom-24 right-4 z-50 transition-opacity duration-500 opacity-100"> -->
+  <!--   <button class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium"> -->
+  <!--     🛡️ Scan -->
+  <!--   </button> -->
+  <!-- </div> -->
+  <div class="fixed top-24 md:top-20 right-4 z-50">
+        <a 
+          href="/enhanced-security-scanner"
+          class="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 flex items-center gap-2 text-sm font-medium"
+          title="Enhanced Security Scanner"
+          aria-label="Open Enhanced Security Scanner"
+        >
+          🛡️ Scan
+        </a>
+      </div>
+    
+    <!-- Leaderboard removed (hidden for now to prevent nav overlap & simplify UI). Preserve commented block for potential future clue panel. -->
+    {/**
+    <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-6 opacity-0 transition-all duration-500 z-40 max-w-sm shadow-2xl shadow-slate-900/50">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-blue-400 font-bold text-lg flex items-center">
+          🏆 Arcade Leaderboard
+        </h3>
+        <button id="close-leaderboard" class="text-slate-400 hover:text-red-400 text-xl font-bold">×</button>
+      </div>
+      <div id="leaderboard-list" class="text-sm space-y-2 max-h-64 overflow-y-auto">
+        <!-- Leaderboard entries will be populated by JavaScript -->
+      </div>
+    </div>
+    */}
+    
+    <!-- Compact Dynamic Navigation -->
+    <nav class="bg-slate-900/95 backdrop-blur-sm border-b border-slate-600 px-4 md:px-8 py-3 relative z-40 shadow-lg shadow-slate-900/50">
+      <div class="flex justify-between items-center max-w-7xl mx-auto">
+        <a href="/" class="text-cyan-400 hover:text-green-400 transition-colors duration-200 font-bold text-lg tracking-wide">Joe Whittle</a>
+        <div class="hidden md:flex space-x-6 relative z-50">
+          <a href="/projects" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Projects</a>
+          <a href="/workflows" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Workflows</a>
+          <a href="/demos" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Demos</a>
+          <a href="/about" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">About</a>
+          <a href="/resume" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Resume</a>
+          <a href="/guestbook" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Guestbook</a>
+          <a href="/contact" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Contact</a>
+
+
+        </div>
+        <!-- Mobile menu button -->
+        <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-blue-400">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 space-y-2">
+        <a href="/projects" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Projects</a>
+        <a href="/workflows" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Workflows</a>
+        <a href="/demos" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Demos</a>
+        <a href="/about" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">About</a>
+        <a href="/resume" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Resume</a>
+        <a href="/guestbook" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Guestbook</a>
+        <a href="/contact" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Contact</a>
+  <a href="/enhanced-security-scanner" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Scanner</a>
+
+      </div>
+    </nav>
+    <main class="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+      <slot />
+    </main>
+    <!-- Enhanced Professional Footer -->
+    <footer class="bg-slate-900/95 backdrop-blur-sm border-t border-slate-600 p-8 text-center shadow-lg shadow-slate-900/50">
+      <div class="max-w-4xl mx-auto">
+        <p class="text-slate-300 mb-3 font-medium">&copy; {new Date().getFullYear()} Joe Whittle. All rights reserved.</p>
+        <p class="text-slate-400 text-sm mb-6">Built with Astro & Tailwind. Modern & performant.</p>
+        <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-8">
+          <a href="https://github.com/JW-Flo" class="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center justify-center space-x-2">
+            <span>GitHub</span>
+          </a>
+          <a href="https://www.linkedin.com/in/joseph-whittle-9920537b/" class="text-blue-400 hover:text-blue-300 transition-colors duration-200 flex items-center justify-center space-x-2">
+            <span>LinkedIn</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+    
+  <!-- External RetroArcade script (served from public/). Using public path /retro-arcade.js -->
+  <script type="module" src="/retro-arcade.js" nonce={Astro.locals.cspNonce}></script>
+    
+    <!-- Dev easter eggs script -->
+    <script type="module" src="/src/scripts/dev-easter-eggs.client.js"></script>
+    
+    <!-- Cookie Consent -->
+    <CookieConsent />
+  </body>
+</html>

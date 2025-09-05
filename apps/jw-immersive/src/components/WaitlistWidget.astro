@@ -1,0 +1,36 @@
+---
+// Waitlist signup widget (feature-gated by FEATURE_WAITLIST)
+// Only render when explicit flag is set to true (avoid leaking by default)
+const enabled = (Astro?.locals?.runtime?.env?.FEATURE_WAITLIST === 'true') || (import.meta.env?.FEATURE_WAITLIST === 'true');
+---
+{enabled && (
+  <div class="waitlist-widget max-w-md mx-auto mt-12 bg-slate-800/70 backdrop-blur border border-cyan-500/30 rounded-xl p-4 shadow-lg shadow-cyan-500/10">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-cyan-400 font-semibold text-sm tracking-wide">Early Access Waitlist</h3>
+      <span id="waitlist-count" class="text-xs text-slate-400">Loading...</span>
+    </div>
+    <form id="waitlist-form" class="flex gap-2" novalidate>
+      <input type="email" name="email" required placeholder="you@example.com" class="flex-1 px-3 py-2 text-sm rounded-lg bg-slate-900/60 border border-slate-600 focus:border-cyan-500 focus:outline-none text-slate-200 placeholder-slate-500" />
+      <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white transition-colors">Join</button>
+    </form>
+    <p id="waitlist-msg" class="text-xs mt-2 text-slate-400"></p>
+  </div>
+)}
+<script>
+(async function(){
+  const countEl = document.getElementById('waitlist-count');
+  const form = document.getElementById('waitlist-form');
+  const msg = document.getElementById('waitlist-msg');
+  async function refreshCount(){
+    try { const r = await fetch('/api/waitlist'); if(!r.ok) return; const d = await r.json(); if(countEl) countEl.textContent = d.count + ' waiting'; } catch {}
+  }
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = (form.querySelector('input[name=email]')||{}).value?.trim();
+    if(!email){ msg.textContent='Enter an email'; return; }
+    msg.textContent='...';
+    try { const r = await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}); const d= await r.json(); if(r.ok){ msg.textContent = d.duplicate? 'You are already on the list!':'Added to waitlist!'; refreshCount(); } else { msg.textContent = d.error || 'Error'; } } catch { msg.textContent='Network error'; }
+  });
+  refreshCount();
+})();
+</script>

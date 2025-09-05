@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import projects from '../data/projects.json';
+---
+<BaseLayout title="Live Demos | Joe Whittle" description="Interactive demos of featured projects and applications">
+  <section class="py-20 relative min-h-screen">
+    <div class="absolute inset-0 bg-gradient-to-br from-dark via-dark/95 to-neon-blue/10"></div>
+
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-neon-green/5 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neon-blue/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4">
+      <div class="text-center mb-16">
+        <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-neon-blue via-neon-green to-neon-pink bg-clip-text text-transparent mb-6">
+          Live Project Demos
+        </h1>
+        <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+          Experience my latest projects in action. These are live, production-ready applications
+          showcasing modern web technologies, cloud infrastructure, and innovative solutions.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+        {projects.filter(p => p.live && p.live !== 'https://atlasit.example').map(project => (
+          <div class="group relative">
+            <!-- Card container with enhanced styling -->
+            <div class="bg-dark/80 backdrop-blur-sm border border-neon-green/30 rounded-xl p-8 h-full
+                        hover:border-neon-blue/50 hover:shadow-2xl hover:shadow-neon-blue/20
+                        transition-all duration-500 transform hover:scale-105">
+
+              <!-- Status badge -->
+              <div class="absolute top-4 right-4">
+                <span class={`px-3 py-1 text-xs font-semibold rounded-full ${
+                  project.status === 'production'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                }`}>
+                  {project.status}
+                </span>
+              </div>
+
+              <!-- Project icon -->
+              <div class="w-16 h-16 bg-gradient-to-br from-neon-blue to-neon-green rounded-lg
+                          flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <span class="text-2xl">🚀</span>
+              </div>
+
+              <!-- Project details -->
+              <h3 class="text-2xl font-bold text-white mb-3 group-hover:text-neon-blue transition-colors">
+                {project.name}
+              </h3>
+
+              <p class="text-slate-300 mb-6 leading-relaxed">
+                {project.description}
+              </p>
+
+              <!-- Tags -->
+              <div class="flex flex-wrap gap-2 mb-6">
+                {project.tags.map(tag => (
+                  <span class="px-3 py-1 bg-neon-green/10 text-neon-green text-sm rounded-full border border-neon-green/20">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <!-- Action buttons -->
+              <div class="flex space-x-4">
+                <a href={project.live}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="flex-1 bg-gradient-to-r from-neon-blue to-neon-green text-white font-semibold
+                          py-3 px-6 rounded-lg text-center hover:shadow-lg hover:shadow-neon-blue/30
+                          transition-all duration-300 transform hover:scale-105">
+                  🚀 Launch Demo
+                </a>
+
+                {project.github && (
+                  <a href={project.github}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     class="bg-dark border border-neon-green/30 text-neon-green font-semibold
+                            py-3 px-6 rounded-lg text-center hover:border-neon-green hover:shadow-lg
+                            hover:shadow-neon-green/20 transition-all duration-300 transform hover:scale-105">
+                    📁 Code
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <!-- Hover effect overlay -->
+            <div class="absolute inset-0 bg-gradient-to-r from-neon-blue/5 to-neon-green/5
+                        rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Technical details section -->
+      <div class="bg-dark/50 backdrop-blur-sm border border-neon-green/20 rounded-xl p-8">
+        <h2 class="text-3xl font-bold text-center text-neon-blue mb-8">Technical Architecture</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-neon-blue/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">☁️</span>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Cloudflare Edge</h3>
+            <p class="text-slate-300 text-sm">Global CDN, edge computing, and serverless functions for optimal performance</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-neon-green/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">⚡</span>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Modern Stack</h3>
+            <p class="text-slate-300 text-sm">React, TypeScript, Node.js with cutting-edge web technologies</p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 bg-neon-pink/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">🔒</span>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">Authentication</h3>
+            <p class="text-slate-300 text-sm">User authentication and access management features</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Call to action -->
+      <div class="text-center mt-16">
+        <p class="text-slate-300 mb-6">
+          Interested in collaborating or have questions about these projects?
+        </p>
+        <a href="/contact"
+           class="inline-block bg-gradient-to-r from-neon-pink to-neon-blue text-white font-semibold
+                  py-3 px-8 rounded-lg hover:shadow-lg hover:shadow-neon-pink/30
+                  transition-all duration-300 transform hover:scale-105">
+          Get In Touch
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,12 @@
+---
+import resume from '../data/resume.json';
+---
+<section class="py-20">
+  <h2 class="text-4xl font-bold font-sans text-center text-neon-pink mb-12">Contact</h2>
+  <div class="text-center space-y-4">
+    <p class="text-lg text-slate-300">Ready to collaborate? Reach out.</p>
+    <p>Email: <a href={`mailto:${resume.contact.email}`} class="text-neon-blue hover:text-neon-green transition">{resume.contact.email}</a></p>
+    <p>GitHub: <a href={`https://github.com/${resume.contact.github}`} class="text-neon-blue hover:text-neon-green transition">{resume.contact.github}</a></p>
+    <p>LinkedIn: <a href={`https://${resume.contact.linkedin}`} class="text-neon-blue hover:text-neon-green transition">{resume.contact.linkedin}</a></p>
+  </div>
+</section>

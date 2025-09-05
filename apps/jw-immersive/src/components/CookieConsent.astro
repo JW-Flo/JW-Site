@@ -1,0 +1,405 @@
+---
+// Cookie Consent Component for GDPR/CCPA compliance
+---
+
+<div id="cookie-consent" class="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-cyan-500/30 px-3 py-2 z-[1200] shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out pointer-events-auto text-sm">
+  <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+    <div class="flex-1 leading-snug">
+      <span class="text-cyan-400 font-semibold">Cookies:</span>
+      <span class="text-gray-300"> Essential for site & security features. Optional analytics & research improve tools.</span>
+      <button id="cc-more" class="text-cyan-400 underline text-xs ml-2">details</button>
+      <div id="cc-details" class="hidden mt-1 text-xs text-gray-400 space-y-1">
+        <div>Anonymous scanner usage & performance metrics</div>
+        <div>Geographic region (hashed IP) for threat intel</div>
+        <div>Browser compatibility data</div>
+      </div>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row gap-2 min-w-fit">
+      <button 
+        id="cookie-decline" 
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors text-sm font-medium"
+      >
+        Essential Only
+      </button>
+      <button 
+        id="cookie-settings" 
+        class="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-lg transition-colors text-sm font-medium"
+      >
+        Customize
+      </button>
+      <button 
+        id="cookie-accept" 
+        class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors text-sm font-medium"
+      >
+        Accept All
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cookie Settings Modal -->
+<div id="cookie-settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1300] hidden items-center justify-center p-4">
+  <div class="bg-gray-900 border border-cyan-500/30 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-cyan-400">Cookie Preferences</h2>
+        <button id="close-settings" class="text-gray-400 hover:text-white transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="space-y-6">
+        <!-- Essential Cookies -->
+        <div class="border border-gray-700 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-white">Essential Cookies</h3>
+            <span class="text-sm text-green-400 bg-green-400/10 px-2 py-1 rounded">Always Active</span>
+          </div>
+          <p class="text-gray-400 text-sm">Required for basic site functionality, security, and user authentication.</p>
+        </div>
+        
+        <!-- Analytics Cookies -->
+        <div class="border border-gray-700 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-white">Analytics & Performance</h3>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="analytics-toggle" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+            </label>
+          </div>
+          <p class="text-gray-400 text-sm">Help us understand scanner usage patterns and improve security tool performance.</p>
+        </div>
+        
+        <!-- Security Research -->
+        <div class="border border-gray-700 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-white">Security Research</h3>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="research-toggle" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+            </label>
+          </div>
+          <p class="text-gray-400 text-sm">Anonymous threat intelligence and vulnerability research data to enhance cybersecurity tools.</p>
+        </div>
+        
+        <!-- Marketing -->
+        <div class="border border-gray-700 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-white">Marketing & Personalization</h3>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="marketing-toggle" class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+            </label>
+          </div>
+          <p class="text-gray-400 text-sm">Personalized content and relevant cybersecurity insights based on your interests.</p>
+        </div>
+      </div>
+      
+      <div class="flex gap-3 mt-8">
+        <button id="save-preferences" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-lg font-medium transition-colors">
+          Save Preferences
+        </button>
+        <button id="accept-all-modal" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-lg font-medium transition-colors">
+          Accept All
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Cookie consent management
+  class CookieConsentManager {
+    constructor() {
+      this.consent = this.getStoredConsent();
+      this.init();
+    }
+    
+    init() {
+      if (!this.consent) {
+        this.showBanner();
+      } else {
+        this.applyConsent();
+      }
+      
+      this.bindEvents();
+    }
+    
+  showBanner() {
+      const banner = document.getElementById('cookie-consent');
+      if (banner) {
+        setTimeout(() => {
+          banner.classList.remove('translate-y-full');
+      // Ensure banner always on top of any game/overlay layers
+      banner.style.zIndex = '1200';
+      banner.style.pointerEvents = 'auto';
+  // Add body class + CSS variable so floating UI (arcade trigger) can offset above banner
+  const h = banner.offsetHeight || 0;
+  document.body.classList.add('cookie-banner-visible');
+  document.documentElement.style.setProperty('--cookie-banner-height', h + 'px');
+        }, 1000);
+      }
+    }
+    
+    hideBanner() {
+      const banner = document.getElementById('cookie-consent');
+      if (banner) {
+        banner.classList.add('translate-y-full');
+  document.body.classList.remove('cookie-banner-visible');
+  // Leave variable but set to zero for smooth transition
+  document.documentElement.style.setProperty('--cookie-banner-height', '0px');
+      }
+    }
+    
+    bindEvents() {
+      // Accept all cookies
+      document.getElementById('cookie-accept')?.addEventListener('click', () => {
+        this.setConsent({
+          essential: true,
+          analytics: true,
+          research: true,
+          marketing: true,
+          timestamp: Date.now()
+        });
+        this.hideBanner();
+      });
+      
+      // Essential only
+      document.getElementById('cookie-decline')?.addEventListener('click', () => {
+        this.setConsent({
+          essential: true,
+          analytics: false,
+          research: false,
+          marketing: false,
+          timestamp: Date.now()
+        });
+        this.hideBanner();
+      });
+      
+      // Open settings
+      document.getElementById('cookie-settings')?.addEventListener('click', () => {
+        this.showSettings();
+      });
+      
+      // Close settings
+      document.getElementById('close-settings')?.addEventListener('click', () => {
+        this.hideSettings();
+      });
+      
+      // Save custom preferences
+      document.getElementById('save-preferences')?.addEventListener('click', () => {
+        this.saveCustomPreferences();
+      });
+      
+      // Accept all from modal
+      document.getElementById('accept-all-modal')?.addEventListener('click', () => {
+        this.setConsent({
+          essential: true,
+          analytics: true,
+          research: true,
+          marketing: true,
+          timestamp: Date.now()
+        });
+        this.hideSettings();
+        this.hideBanner();
+      });
+    }
+    
+  showSettings() {
+      const modal = document.getElementById('cookie-settings-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    modal.style.zIndex = '1300';
+    modal.style.pointerEvents = 'auto';
+    // Prevent background scroll while modal open
+    document.body.classList.add('modal-open');
+      }
+    }
+    
+  hideSettings() {
+      const modal = document.getElementById('cookie-settings-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    document.body.classList.remove('modal-open');
+      }
+    }
+    
+    saveCustomPreferences() {
+      const analytics = document.getElementById('analytics-toggle')?.checked;
+      const research = document.getElementById('research-toggle')?.checked;
+      const marketing = document.getElementById('marketing-toggle')?.checked;
+      
+      this.setConsent({
+        essential: true,
+        analytics: analytics,
+        research: research,
+        marketing: marketing,
+        timestamp: Date.now()
+      });
+      
+      this.hideSettings();
+      this.hideBanner();
+    }
+    
+    setConsent(consent) {
+      this.consent = consent;
+      localStorage.setItem('cookie-consent', JSON.stringify(consent));
+      this.applyConsent();
+      
+      // Trigger custom event for other scripts
+      window.dispatchEvent(new CustomEvent('cookieConsentUpdated', { 
+        detail: consent 
+      }));
+
+      // Attempt persistence if feature flag enabled
+      this.persistConsent(consent).catch(err => {
+        console.warn('Consent persistence failed', err);
+      });
+    }
+    
+    getStoredConsent() {
+      try {
+        const stored = localStorage.getItem('cookie-consent');
+        if (stored) {
+          const consent = JSON.parse(stored);
+          // Check if consent is less than 1 year old
+          if (consent.timestamp && (Date.now() - consent.timestamp) < 365 * 24 * 60 * 60 * 1000) {
+            return consent;
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing stored consent:', e);
+      }
+      return null;
+    }
+    
+    applyConsent() {
+      if (!this.consent) return;
+      
+      // Apply analytics consent
+      if (this.consent.analytics) {
+        this.enableAnalytics();
+      }
+      
+      // Apply research consent
+      if (this.consent.research) {
+        this.enableSecurityResearch();
+      }
+      
+      // Apply marketing consent
+      if (this.consent.marketing) {
+        this.enableMarketing();
+      }
+    }
+    
+    enableAnalytics() {
+      // Initialize analytics (Google Analytics, etc.)
+      console.log('🔍 Analytics enabled');
+      
+      // Example: Initialize Google Analytics 4
+      if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+          'analytics_storage': 'granted'
+        });
+      }
+    }
+    
+    enableSecurityResearch() {
+      // Enable security research data collection
+      console.log('🛡️ Security research data collection enabled');
+      
+      // Track scanner usage patterns
+      window.securityResearchEnabled = true;
+    }
+    
+    enableMarketing() {
+      // Enable marketing cookies
+      console.log('📢 Marketing cookies enabled');
+      
+      if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+          'ad_storage': 'granted'
+        });
+      }
+    }
+    
+    hasConsent(type) {
+      return this.consent && this.consent[type] === true;
+    }
+
+    getOrCreateSessionId() {
+      let sid = localStorage.getItem('session-id');
+      if (!sid) {
+        // simple UUID v4 generator
+        sid = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxxyxxx'.replace(/[xy]/g, c => {
+          const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8); return v.toString(16);
+        });
+        localStorage.setItem('session-id', sid);
+      }
+      return sid;
+    }
+
+    async fetchGeoPrivacy() {
+      try {
+        const resp = await fetch('/api/geo');
+        if (!resp.ok) return undefined;
+        const data = await resp.json();
+        if (data && data.featureGeo && data.ipHash) {
+          return { ipHash: data.ipHash, hashAlgo: data.hashAlgo, geo: data.geo };
+        }
+      } catch (e) {
+        // ignore
+      }
+      return undefined;
+    }
+
+    isConsentFeatureEnabled() {
+      return (window?.ENV && window.ENV.FEATURE_CONSENT_D1 === 'true') || (typeof FEATURE_CONSENT_D1 !== 'undefined' && FEATURE_CONSENT_D1 === 'true') || false;
+    }
+
+    async persistConsent(consent) {
+      if (!this.isConsentFeatureEnabled()) return;
+      const sessionId = this.getOrCreateSessionId();
+      const basePayload = {
+        sessionId,
+        ...consent,
+        version: 'v1'
+      };
+      // Try to augment with geo/hash if available (do not block on failure)
+      const geo = await this.fetchGeoPrivacy();
+      const payload = geo ? { ...basePayload, ...geo } : basePayload;
+      try {
+        await fetch('/api/consent', {
+          method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        // swallow
+      }
+    }
+  }
+  
+  // Toggle details
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t && t.id === 'cc-more') {
+      const d = document.getElementById('cc-details');
+      if (d) d.classList.toggle('hidden');
+    }
+  });
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.cookieConsent = new CookieConsentManager();
+    });
+  } else {
+    window.cookieConsent = new CookieConsentManager();
+  }
+</script>

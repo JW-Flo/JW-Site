@@ -1,0 +1,366 @@
+{
+  "name": "Access Control Management",
+  "description": "Manage user access rights and permissions across IT systems",
+  "category": "access-control",
+  "version": "1.0.0",
+  "triggers": ["api", "webhook"],
+  "steps": [
+    {
+      "id": "validate-access-request",
+      "type": "validation",
+      "name": "Validate Access Request",
+      "description": "Validate access control request data",
+      "config": {
+        "schema": {
+          "type": "object",
+          "required": ["userEmail", "action", "resource"],
+          "properties": {
+            "userEmail": {"type": "string", "format": "email"},
+            "action": {"type": "string", "enum": ["grant", "revoke", "modify"]},
+            "resource": {"type": "string"},
+            "resourceType": {"type": "string", "enum": ["group", "role", "permission", "license", "application"]},
+            "systems": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["activeDirectory", "office365", "aws", "gcp", "azure", "okta", "jumpcloud"]
+              }
+            },
+            "justification": {"type": "string", "minLength": 10},
+            "requestedBy": {"type": "string", "format": "email"},
+            "effectiveDate": {"type": "string", "format": "date"},
+            "expirationDate": {"type": "string", "format": "date"}
+          }
+        }
+      },
+      "order": 1
+    },
+    {
+      "id": "check-approval-requirements",
+      "type": "http-request",
+      "name": "Check Approval Requirements",
+      "description": "Determine if approval is required for this access change",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.governance.baseUrl}}/access/approval-required",
+        "headers": {
+          "Authorization": "{{auth.governance.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userEmail": "{{inputs.userEmail}}",
+          "action": "{{inputs.action}}",
+          "resource": "{{inputs.resource}}",
+          "resourceType": "{{inputs.resourceType}}",
+          "justification": "{{inputs.justification}}"
+        }
+      },
+      "order": 2,
+      "dependsOn": ["validate-access-request"]
+    },
+    {
+      "id": "request-approval",
+      "type": "conditional",
+      "name": "Request Approval",
+      "description": "Request approval if required",
+      "config": {
+        "condition": "{{steps.check-approval-requirements.response.requiresApproval}}",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.approvalWorkflow.baseUrl}}/requests",
+            "headers": {
+              "Authorization": "{{auth.approvalWorkflow.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "type": "access_control",
+              "requester": "{{inputs.requestedBy}}",
+              "subject": "{{inputs.userEmail}}",
+              "action": "{{inputs.action}}",
+              "resource": "{{inputs.resource}}",
+              "justification": "{{inputs.justification}}",
+              "systems": "{{inputs.systems}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"approved": true, "autoApproved": true}
+          }
+        }
+      },
+      "order": 3,
+      "dependsOn": ["check-approval-requirements"]
+    },
+    {
+      "id": "wait-for-approval",
+      "type": "wait",
+      "name": "Wait for Approval",
+      "description": "Wait for approval if required",
+      "config": {
+        "condition": "{{steps.request-approval.response.approved}} === true",
+        "timeoutMs": 604800000,
+        "pollIntervalMs": 30000
+      },
+      "order": 4,
+      "dependsOn": ["request-approval"]
+    },
+    {
+      "id": "grant-ad-group-membership",
+      "type": "http-request",
+      "name": "Grant AD Group Membership",
+      "description": "Add user to Active Directory security group",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.activeDirectory.baseUrl}}/groups/{{inputs.resource}}/members",
+        "headers": {
+          "Authorization": "{{auth.activeDirectory.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userEmail": "{{inputs.userEmail}}"
+        },
+        "condition": "{{inputs.action}} === 'grant' && {{inputs.systems}} includes 'activeDirectory' && {{inputs.resourceType}} === 'group'"
+      },
+      "order": 5,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "revoke-ad-group-membership",
+      "type": "http-request",
+      "name": "Revoke AD Group Membership",
+      "description": "Remove user from Active Directory security group",
+      "config": {
+        "method": "DELETE",
+        "url": "{{systems.activeDirectory.baseUrl}}/groups/{{inputs.resource}}/members/{{inputs.userEmail}}",
+        "headers": {
+          "Authorization": "{{auth.activeDirectory.token}}"
+        },
+        "condition": "{{inputs.action}} === 'revoke' && {{inputs.systems}} includes 'activeDirectory' && {{inputs.resourceType}} === 'group'"
+      },
+      "order": 6,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "grant-office365-license",
+      "type": "http-request",
+      "name": "Grant Office 365 License",
+      "description": "Assign Office 365 license to user",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.office365.baseUrl}}/users/{{inputs.userEmail}}/assignLicense",
+        "headers": {
+          "Authorization": "Bearer {{auth.office365.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "skuId": "{{inputs.resource}}"
+        },
+        "condition": "{{inputs.action}} === 'grant' && {{inputs.systems}} includes 'office365' && {{inputs.resourceType}} === 'license'"
+      },
+      "order": 7,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "revoke-office365-license",
+      "type": "http-request",
+      "name": "Revoke Office 365 License",
+      "description": "Remove Office 365 license from user",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.office365.baseUrl}}/users/{{inputs.userEmail}}/revokeLicense",
+        "headers": {
+          "Authorization": "Bearer {{auth.office365.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "skuId": "{{inputs.resource}}"
+        },
+        "condition": "{{inputs.action}} === 'revoke' && {{inputs.systems}} includes 'office365' && {{inputs.resourceType}} === 'license'"
+      },
+      "order": 8,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "grant-aws-iam-role",
+      "type": "http-request",
+      "name": "Grant AWS IAM Role",
+      "description": "Attach IAM role to user in AWS",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.aws.baseUrl}}/iam/users/{{inputs.userEmail}}/roles",
+        "headers": {
+          "Authorization": "AWS4-HMAC-SHA256 {{auth.aws.signature}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "roleName": "{{inputs.resource}}",
+          "policyArns": "{{inputs.additionalPolicies}}"
+        },
+        "condition": "{{inputs.action}} === 'grant' && {{inputs.systems}} includes 'aws' && {{inputs.resourceType}} === 'role'"
+      },
+      "order": 9,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "revoke-aws-iam-role",
+      "type": "http-request",
+      "name": "Revoke AWS IAM Role",
+      "description": "Detach IAM role from user in AWS",
+      "config": {
+        "method": "DELETE",
+        "url": "{{systems.aws.baseUrl}}/iam/users/{{inputs.userEmail}}/roles/{{inputs.resource}}",
+        "headers": {
+          "Authorization": "AWS4-HMAC-SHA256 {{auth.aws.signature}}"
+        },
+        "condition": "{{inputs.action}} === 'revoke' && {{inputs.systems}} includes 'aws' && {{inputs.resourceType}} === 'role'"
+      },
+      "order": 10,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "grant-okta-group-membership",
+      "type": "http-request",
+      "name": "Grant Okta Group Membership",
+      "description": "Add user to Okta group",
+      "config": {
+        "method": "PUT",
+        "url": "{{systems.okta.baseUrl}}/api/v1/groups/{{inputs.resource}}/users/{{oktaUserId}}",
+        "headers": {
+          "Authorization": "SSWS {{auth.okta.token}}",
+          "Content-Type": "application/json"
+        },
+        "condition": "{{inputs.action}} === 'grant' && {{inputs.systems}} includes 'okta' && {{inputs.resourceType}} === 'group'"
+      },
+      "order": 11,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "revoke-okta-group-membership",
+      "type": "http-request",
+      "name": "Revoke Okta Group Membership",
+      "description": "Remove user from Okta group",
+      "config": {
+        "method": "DELETE",
+        "url": "{{systems.okta.baseUrl}}/api/v1/groups/{{inputs.resource}}/users/{{oktaUserId}}",
+        "headers": {
+          "Authorization": "SSWS {{auth.okta.token}}"
+        },
+        "condition": "{{inputs.action}} === 'revoke' && {{inputs.systems}} includes 'okta' && {{inputs.resourceType}} === 'group'"
+      },
+      "order": 12,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "update-gcp-iam-policy",
+      "type": "http-request",
+      "name": "Update GCP IAM Policy",
+      "description": "Update IAM policy for user in Google Cloud",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.gcp.baseUrl}}/v1/projects/{{projectId}}:setIamPolicy",
+        "headers": {
+          "Authorization": "Bearer {{auth.gcp.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "policy": {
+            "bindings": [
+              {
+                "role": "{{inputs.resource}}",
+                "members": ["user:{{inputs.userEmail}}"]
+              }
+            ]
+          }
+        },
+        "condition": "{{inputs.action}} === 'grant' && {{inputs.systems}} includes 'gcp' && {{inputs.resourceType}} === 'role'"
+      },
+      "order": 13,
+      "dependsOn": ["wait-for-approval"]
+    },
+    {
+      "id": "log-access-change",
+      "type": "http-request",
+      "name": "Log Access Change",
+      "description": "Log access control change to audit system",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.auditLog.baseUrl}}/events",
+        "headers": {
+          "Authorization": "{{auth.auditLog.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "access_control_change",
+          "userEmail": "{{inputs.userEmail}}",
+          "action": "{{inputs.action}}",
+          "resource": "{{inputs.resource}}",
+          "resourceType": "{{inputs.resourceType}}",
+          "systems": "{{inputs.systems}}",
+          "requestedBy": "{{inputs.requestedBy}}",
+          "justification": "{{inputs.justification}}",
+          "approved": "{{steps.wait-for-approval.response.approved}}",
+          "timestamp": "{{currentTimestamp}}",
+          "status": "success"
+        }
+      },
+      "order": 14,
+      "dependsOn": ["grant-ad-group-membership", "revoke-ad-group-membership", "grant-office365-license", "revoke-office365-license", "grant-aws-iam-role", "revoke-aws-iam-role", "grant-okta-group-membership", "revoke-okta-group-membership", "update-gcp-iam-policy"]
+    },
+    {
+      "id": "send-notification",
+      "type": "http-request",
+      "name": "Send Notification",
+      "description": "Send notification to user and manager about access change",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.emailService.baseUrl}}/emails/send",
+        "headers": {
+          "Authorization": "{{auth.emailService.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "to": ["{{inputs.userEmail}}", "{{inputs.managerEmail}}"],
+          "template": "access-change-notification",
+          "data": {
+            "userEmail": "{{inputs.userEmail}}",
+            "action": "{{inputs.action}}",
+            "resource": "{{inputs.resource}}",
+            "resourceType": "{{inputs.resourceType}}",
+            "effectiveDate": "{{inputs.effectiveDate}}",
+            "requestedBy": "{{inputs.requestedBy}}"
+          }
+        }
+      },
+      "order": 15,
+      "dependsOn": ["log-access-change"]
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 2,
+      "backoffMs": 3000
+    },
+    "rollbackSteps": [
+      {
+        "stepId": "grant-ad-group-membership",
+        "action": "revoke-ad-group-membership",
+        "system": "activeDirectory"
+      },
+      {
+        "stepId": "grant-office365-license",
+        "action": "revoke-office365-license",
+        "system": "office365"
+      }
+    ]
+  },
+  "metadata": {
+    "estimatedDuration": "5-15 minutes",
+    "systems": ["activeDirectory", "office365", "aws", "gcp", "okta", "governance", "approvalWorkflow", "auditLog", "emailService"],
+    "tags": ["access-control", "permissions", "governance", "compliance"]
+  }
+}

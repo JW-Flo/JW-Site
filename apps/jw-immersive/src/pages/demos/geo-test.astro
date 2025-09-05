@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Geographic Location Test" description="Test geographic location detection and data">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 bg-clip-text text-transparent">
+        Geographic Location Test
+      </h1>
+      <p class="text-xl text-slate-300 mb-4">
+        View your geographic location data as detected by Cloudflare
+      </p>
+    </div>
+
+    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-blue-400 mb-6">Your Location Data</h2>
+      
+      <div id="geo-output" class="bg-slate-700/30 rounded-lg p-6 border border-slate-600/50">
+        <div class="text-center text-slate-400 py-8">
+          Loading geographic data...
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  (async () => {
+    try {
+      const response = await fetch('/api/geo');
+      const data = await response.json();
+      document.getElementById('geo-output').innerHTML = `
+        <pre class="text-sm bg-slate-900/50 p-4 rounded overflow-auto text-green-300">${JSON.stringify(data, null, 2)}</pre>
+      `;
+    } catch (error) {
+      document.getElementById('geo-output').innerHTML = `
+        <div class="text-center text-red-400 py-4">
+          Error loading geographic data. Please check the console for details.
+        </div>
+      `;
+      console.error('Geo test error:', error);
+    }
+  })();
+</script>

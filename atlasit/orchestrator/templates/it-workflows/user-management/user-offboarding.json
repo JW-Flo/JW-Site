@@ -1,0 +1,272 @@
+{
+  "name": "User Offboarding Workflow",
+  "description": "Complete user offboarding and account deactivation across all systems",
+  "category": "user-management",
+  "version": "1.0.0",
+  "triggers": ["api", "webhook", "schedule"],
+  "steps": [
+    {
+      "id": "validate-offboarding-request",
+      "type": "validation",
+      "name": "Validate Offboarding Request",
+      "description": "Validate offboarding request data",
+      "config": {
+        "schema": {
+          "type": "object",
+          "required": ["email", "terminationDate"],
+          "properties": {
+            "email": {"type": "string", "format": "email"},
+            "terminationDate": {"type": "string", "format": "date"},
+            "reason": {"type": "string", "enum": ["voluntary", "involuntary", "retirement", "transfer"]},
+            "immediate": {"type": "boolean", "default": false},
+            "transferAccess": {"type": "boolean", "default": false}
+          }
+        }
+      },
+      "order": 1
+    },
+    {
+      "id": "check-data-retention-policy",
+      "type": "http-request",
+      "name": "Check Data Retention Policy",
+      "description": "Determine data retention requirements based on termination reason",
+      "config": {
+        "method": "GET",
+        "url": "{{systems.compliance.baseUrl}}/retention-policy?reason={{inputs.reason}}",
+        "headers": {
+          "Authorization": "{{auth.compliance.token}}"
+        }
+      },
+      "order": 2,
+      "dependsOn": ["validate-offboarding-request"]
+    },
+    {
+      "id": "disable-office365-access",
+      "type": "http-request",
+      "name": "Disable Office 365 Access",
+      "description": "Disable user access in Microsoft 365",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.office365.baseUrl}}/users/{{inputs.email}}",
+        "headers": {
+          "Authorization": "Bearer {{auth.office365.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "accountEnabled": false,
+          "terminationDate": "{{inputs.terminationDate}}"
+        }
+      },
+      "order": 3,
+      "dependsOn": ["check-data-retention-policy"]
+    },
+    {
+      "id": "revoke-software-licenses",
+      "type": "http-request",
+      "name": "Revoke Software Licenses",
+      "description": "Revoke all software licenses assigned to the user",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.licenseManager.baseUrl}}/licenses/revoke",
+        "headers": {
+          "Authorization": "{{auth.licenseManager.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userEmail": "{{inputs.email}}",
+          "revocationReason": "{{inputs.reason}}",
+          "effectiveDate": "{{inputs.terminationDate}}"
+        }
+      },
+      "order": 4,
+      "dependsOn": ["disable-office365-access"]
+    },
+    {
+      "id": "disable-slack-access",
+      "type": "http-request",
+      "name": "Disable Slack Access",
+      "description": "Deactivate user in Slack workspace",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.slack.baseUrl}}/api/admin.users.deactivate",
+        "headers": {
+          "Authorization": "Bearer {{auth.slack.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user": "{{inputs.email}}"
+        }
+      },
+      "order": 5,
+      "dependsOn": ["disable-office365-access"]
+    },
+    {
+      "id": "disable-ad-account",
+      "type": "http-request",
+      "name": "Disable Active Directory Account",
+      "description": "Disable user account in Active Directory",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.activeDirectory.baseUrl}}/users/{{inputs.email}}",
+        "headers": {
+          "Authorization": "{{auth.activeDirectory.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "enabled": false,
+          "terminationDate": "{{inputs.terminationDate}}"
+        }
+      },
+      "order": 6,
+      "dependsOn": ["revoke-software-licenses"]
+    },
+    {
+      "id": "transfer-or-archive-data",
+      "type": "conditional",
+      "name": "Transfer or Archive Data",
+      "description": "Transfer data to manager or archive based on retention policy",
+      "config": {
+        "condition": "{{inputs.transferAccess}}",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.dataTransfer.baseUrl}}/transfer",
+            "headers": {
+              "Authorization": "{{auth.dataTransfer.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "fromUser": "{{inputs.email}}",
+              "toUser": "{{inputs.managerEmail}}",
+              "transferType": "access_transfer",
+              "reason": "{{inputs.reason}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.archiveService.baseUrl}}/archive",
+            "headers": {
+              "Authorization": "{{auth.archiveService.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "userEmail": "{{inputs.email}}",
+              "retentionPeriod": "{{retentionPolicy.period}}",
+              "archiveReason": "{{inputs.reason}}"
+            }
+          }
+        }
+      },
+      "order": 7,
+      "dependsOn": ["disable-ad-account"]
+    },
+    {
+      "id": "revoke-api-access",
+      "type": "http-request",
+      "name": "Revoke API Access",
+      "description": "Revoke API keys and access tokens",
+      "config": {
+        "method": "DELETE",
+        "url": "{{systems.apiManager.baseUrl}}/users/{{inputs.email}}/tokens",
+        "headers": {
+          "Authorization": "{{auth.apiManager.token}}"
+        }
+      },
+      "order": 8,
+      "dependsOn": ["transfer-or-archive-data"]
+    },
+    {
+      "id": "update-hrbp-system",
+      "type": "http-request",
+      "name": "Update HR/BP System",
+      "description": "Update termination status in HR system",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.hrSystem.baseUrl}}/employees/{{inputs.email}}",
+        "headers": {
+          "Authorization": "{{auth.hrSystem.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "terminated",
+          "terminationDate": "{{inputs.terminationDate}}",
+          "terminationReason": "{{inputs.reason}}"
+        }
+      },
+      "order": 9,
+      "dependsOn": ["revoke-api-access"]
+    },
+    {
+      "id": "send-exit-survey",
+      "type": "http-request",
+      "name": "Send Exit Survey",
+      "description": "Send exit survey email if voluntary termination",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.emailService.baseUrl}}/emails/send",
+        "headers": {
+          "Authorization": "{{auth.emailService.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "to": "{{inputs.email}}",
+          "template": "exit-survey",
+          "data": {
+            "firstName": "{{inputs.firstName}}",
+            "terminationDate": "{{inputs.terminationDate}}"
+          }
+        },
+        "condition": "{{inputs.reason}} === 'voluntary'"
+      },
+      "order": 10,
+      "dependsOn": ["update-hrbp-system"]
+    },
+    {
+      "id": "log-offboarding-completion",
+      "type": "http-request",
+      "name": "Log Offboarding Completion",
+      "description": "Log successful offboarding to audit system",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.auditLog.baseUrl}}/events",
+        "headers": {
+          "Authorization": "{{auth.auditLog.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "user_offboarding_completed",
+          "userEmail": "{{inputs.email}}",
+          "timestamp": "{{currentTimestamp}}",
+          "systems": ["office365", "licenses", "slack", "activeDirectory", "apiManager", "hrSystem"],
+          "status": "success",
+          "dataArchived": "{{!inputs.transferAccess}}",
+          "terminationReason": "{{inputs.reason}}"
+        }
+      },
+      "order": 11,
+      "dependsOn": ["send-exit-survey"]
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 2,
+      "backoffMs": 3000
+    },
+    "compensatingActions": [
+      {
+        "onFailure": "disable-office365-access",
+        "action": "reenable-office365-access",
+        "system": "office365"
+      }
+    ]
+  },
+  "metadata": {
+    "estimatedDuration": "10-15 minutes",
+    "systems": ["office365", "licenseManager", "slack", "activeDirectory", "dataTransfer", "archiveService", "apiManager", "hrSystem", "emailService", "auditLog"],
+    "tags": ["offboarding", "user-management", "compliance", "data-retention"]
+  }
+}

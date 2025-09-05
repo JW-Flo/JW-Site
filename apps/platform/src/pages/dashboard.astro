@@ -1,0 +1,177 @@
+---
+import { LayoutShell, Card } from '@atlasit/ui';
+
+const title = "Dashboard - AtlasIT";
+const content = `
+  <div id="user-info" class="mb-8"></div>
+  
+  <!-- Welcome Section -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Welcome to AtlasIT</h1>
+    <p class="text-slate-400 text-lg">Your enterprise IT automation platform for seamless business operations</p>
+  </div>
+  
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-slate-400 text-sm">Active Policies</p>
+          <p class="text-2xl font-bold text-blue-400">5</p>
+        </div>
+        <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-slate-400 text-sm">Security Score</p>
+          <p class="text-2xl font-bold text-green-400">85%</p>
+        </div>
+        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-slate-400 text-sm">Compliance Rate</p>
+          <p class="text-2xl font-bold text-purple-400">95%</p>
+        </div>
+        <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-slate-400 text-sm">Active Workflows</p>
+          <p class="text-2xl font-bold text-orange-400">12</p>
+        </div>
+        <div class="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Dashboard Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    ${Card({
+      title: 'IT Policies & Compliance',
+      content: 'Manage enterprise policies, ensure regulatory compliance, and maintain governance standards across your organization.',
+      link: { text: 'Manage Policies', href: '/it/policies' }
+    })}
+    ${Card({
+      title: 'Security Management',
+      content: 'Comprehensive security center with threat monitoring, vulnerability scanning, and automated security responses.',
+      link: { text: 'View Security', href: '/security' }
+    })}
+    ${Card({
+      title: 'Data Governance',
+      content: 'Control data lifecycle, manage consent, and ensure compliance with privacy regulations like GDPR and HIPAA.',
+      link: { text: 'Manage Governance', href: '/governance/compliance' }
+    })}
+    ${Card({
+      title: 'Backup & Recovery',
+      content: 'Automated backup solutions, disaster recovery planning, and data restoration capabilities.',
+      link: { text: 'Configure Backup', href: '/it/backup' }
+    })}
+    ${Card({
+      title: 'API Management',
+      content: 'Centralized API management, monitoring, and integration with third-party services and applications.',
+      link: { text: 'Manage APIs', href: '/api-manager' }
+    })}
+    ${Card({
+      title: 'Workflow Orchestration',
+      content: 'Automate complex business processes, integrate systems, and streamline operations with visual workflow designer.',
+      link: { text: 'Design Workflows', href: '/orchestrator' }
+    })}
+  </div>
+  
+  <!-- Recent Activity -->
+  <div class="mt-12">
+    <h2 class="text-2xl font-bold mb-6 text-slate-100">Recent Activity</h2>
+    <div class="glass-effect rounded-xl border border-slate-700/50 overflow-hidden">
+      <div class="p-6">
+        <div class="space-y-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 font-medium">Security scan completed</p>
+              <p class="text-slate-400 text-sm">2 minutes ago</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 font-medium">Backup completed successfully</p>
+              <p class="text-slate-400 text-sm">1 hour ago</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="text-slate-200 font-medium">New workflow deployed</p>
+              <p class="text-slate-400 text-sm">3 hours ago</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+export const dashboardHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={dashboardHtml}></html>
+
+<script>
+  const user = localStorage.getItem('atlasit_user');
+  if (!user) {
+    window.location.href = '/login';
+  } else {
+    const userData = JSON.parse(user);
+    document.getElementById('user-info').innerHTML = \`
+      <div class="flex justify-between items-center">
+        <span>Welcome, \${userData.company || userData.email}!</span>
+        <button onclick="logout()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Logout</button>
+      </div>
+    \`;
+  }
+
+  function logout() {
+    localStorage.removeItem('atlasit_user');
+    window.location.href = '/login';
+  }
+</script>

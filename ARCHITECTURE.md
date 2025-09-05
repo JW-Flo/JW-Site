@@ -1,5 +1,15 @@
 # Architecture Overview
 
+---
+**Strategic Alignment:**
+This architecture is designed and maintained in direct alignment with authoritative market research and industry analysis. For full context and rationale, see:
+
+- [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) — Professional market intelligence, competitive analysis, and strategic recommendations
+- [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md) — Small business IT automation market sizing, competitive gaps, and platform feature recommendations
+
+All architectural decisions, security layers, and future enhancements are referenced to these reports. Please consult them for justification and ongoing strategic alignment.
+---
+
 ## High-Level Components
 
 ```text
@@ -104,11 +114,11 @@ flowchart TD
 
 ## Future Enhancements (Suggested)
 
-- Replace inline style allowance by extracting critical styles or using hashed class safelist to drop 'unsafe-inline' in style-src.
-- Central logging sink (e.g., Logpush or external) with sampling and PII scrubbing.
-- Stale Deployment Guard: KV key storing ACTIVE_BUILD_ID; middleware compares against BUILD_ID and returns 404/redirect if mismatch.
-- Structured error responses with correlation to request ID for all catch paths.
-- Scheduled workflow to rotate signing keys (dual key grace period).
+
+---
+**Research Reference:**
+All future enhancements and architectural changes are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for strategic context and justification.
+---
 
 ---
 

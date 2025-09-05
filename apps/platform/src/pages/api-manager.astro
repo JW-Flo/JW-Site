@@ -1,0 +1,47 @@
+---
+import { LayoutShell, Card, Button } from '@atlasit/ui';
+
+const title = "API Manager - AtlasIT";
+const content = `
+  <h1 class="text-3xl font-bold mb-6">API Manager</h1>
+
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-4">Connected APIs</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      ${Card({
+        title: 'Microsoft Graph API',
+        content: 'Connected - Last sync: 2 hours ago',
+        link: { text: 'Configure', href: '/api-manager/microsoft' }
+      })}
+      ${Card({
+        title: 'Slack API',
+        content: 'Not connected',
+        link: { text: 'Connect', href: '/api-manager/slack' }
+      })}
+      ${Card({
+        title: 'Google Workspace API',
+        content: 'Connected - Last sync: 1 hour ago',
+        link: { text: 'Configure', href: '/api-manager/google' }
+      })}
+    </div>
+  </div>
+
+  <div class="bg-gray-800 p-6 rounded-lg">
+    <h2 class="text-xl font-semibold mb-4">API Usage</h2>
+    <div class="space-y-2">
+      <div class="flex justify-between">
+        <span>Microsoft Graph API</span>
+        <span>1,234 requests today</span>
+      </div>
+      <div class="flex justify-between">
+        <span>Google Workspace API</span>
+        <span>567 requests today</span>
+      </div>
+    </div>
+  </div>
+`;
+
+export const apiManagerHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={apiManagerHtml}></html>

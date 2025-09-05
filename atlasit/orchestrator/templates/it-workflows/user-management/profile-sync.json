@@ -1,0 +1,275 @@
+{
+  "name": "User Profile Synchronization",
+  "description": "Synchronize user profile attributes across multiple systems",
+  "category": "user-management",
+  "version": "1.0.0",
+  "triggers": ["api", "webhook", "schedule"],
+  "steps": [
+    {
+      "id": "validate-sync-request",
+      "type": "validation",
+      "name": "Validate Sync Request",
+      "description": "Validate synchronization request data",
+      "config": {
+        "schema": {
+          "type": "object",
+          "required": ["userEmail", "sourceSystem"],
+          "properties": {
+            "userEmail": {"type": "string", "format": "email"},
+            "sourceSystem": {"type": "string", "enum": ["hr", "activeDirectory", "office365", "manual"]},
+            "attributes": {
+              "type": "object",
+              "properties": {
+                "firstName": {"type": "string"},
+                "lastName": {"type": "string"},
+                "displayName": {"type": "string"},
+                "department": {"type": "string"},
+                "jobTitle": {"type": "string"},
+                "manager": {"type": "string", "format": "email"},
+                "phoneNumber": {"type": "string"},
+                "officeLocation": {"type": "string"},
+                "employeeId": {"type": "string"}
+              }
+            },
+            "syncTargets": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["activeDirectory", "office365", "slack", "zoom", "salesforce"]
+              }
+            }
+          }
+        }
+      },
+      "order": 1
+    },
+    {
+      "id": "get-current-profile",
+      "type": "http-request",
+      "name": "Get Current Profile",
+      "description": "Retrieve current user profile from source system",
+      "config": {
+        "method": "GET",
+        "url": "{{systems.{{inputs.sourceSystem}}.baseUrl}}/users/{{inputs.userEmail}}",
+        "headers": {
+          "Authorization": "{{auth.{{inputs.sourceSystem}}.token}}"
+        }
+      },
+      "order": 2,
+      "dependsOn": ["validate-sync-request"]
+    },
+    {
+      "id": "merge-profile-data",
+      "type": "transform",
+      "name": "Merge Profile Data",
+      "description": "Merge source data with provided attributes",
+      "config": {
+        "operation": "merge",
+        "sourceData": "{{steps.get-current-profile.response}}",
+        "inputData": "{{inputs.attributes}}",
+        "mergeStrategy": "input_overrides_source",
+        "requiredFields": ["firstName", "lastName", "email"]
+      },
+      "order": 3,
+      "dependsOn": ["get-current-profile"]
+    },
+    {
+      "id": "sync-active-directory",
+      "type": "http-request",
+      "name": "Sync Active Directory",
+      "description": "Update user profile in Active Directory",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.activeDirectory.baseUrl}}/users/{{inputs.userEmail}}",
+        "headers": {
+          "Authorization": "{{auth.activeDirectory.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "givenName": "{{mergedData.firstName}}",
+          "sn": "{{mergedData.lastName}}",
+          "displayName": "{{mergedData.displayName}}",
+          "department": "{{mergedData.department}}",
+          "title": "{{mergedData.jobTitle}}",
+          "manager": "{{mergedData.manager}}",
+          "telephoneNumber": "{{mergedData.phoneNumber}}",
+          "physicalDeliveryOfficeName": "{{mergedData.officeLocation}}",
+          "employeeID": "{{mergedData.employeeId}}"
+        },
+        "condition": "{{inputs.syncTargets}} includes 'activeDirectory'"
+      },
+      "order": 4,
+      "dependsOn": ["merge-profile-data"]
+    },
+    {
+      "id": "sync-office365",
+      "type": "http-request",
+      "name": "Sync Office 365",
+      "description": "Update user profile in Microsoft 365",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.office365.baseUrl}}/users/{{inputs.userEmail}}",
+        "headers": {
+          "Authorization": "Bearer {{auth.office365.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "givenName": "{{mergedData.firstName}}",
+          "surname": "{{mergedData.lastName}}",
+          "displayName": "{{mergedData.displayName}}",
+          "department": "{{mergedData.department}}",
+          "jobTitle": "{{mergedData.jobTitle}}",
+          "manager": "{{mergedData.manager}}",
+          "businessPhones": ["{{mergedData.phoneNumber}}"],
+          "officeLocation": "{{mergedData.officeLocation}}",
+          "employeeId": "{{mergedData.employeeId}}"
+        },
+        "condition": "{{inputs.syncTargets}} includes 'office365'"
+      },
+      "order": 5,
+      "dependsOn": ["merge-profile-data"]
+    },
+    {
+      "id": "sync-slack",
+      "type": "http-request",
+      "name": "Sync Slack Profile",
+      "description": "Update user profile in Slack",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.slack.baseUrl}}/api/users.profile.set",
+        "headers": {
+          "Authorization": "Bearer {{auth.slack.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "user": "{{inputs.userEmail}}",
+          "profile": {
+            "first_name": "{{mergedData.firstName}}",
+            "last_name": "{{mergedData.lastName}}",
+            "display_name": "{{mergedData.displayName}}",
+            "title": "{{mergedData.jobTitle}}",
+            "phone": "{{mergedData.phoneNumber}}"
+          }
+        },
+        "condition": "{{inputs.syncTargets}} includes 'slack'"
+      },
+      "order": 6,
+      "dependsOn": ["merge-profile-data"]
+    },
+    {
+      "id": "sync-zoom",
+      "type": "http-request",
+      "name": "Sync Zoom Profile",
+      "description": "Update user profile in Zoom",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.zoom.baseUrl}}/users/{{inputs.userEmail}}",
+        "headers": {
+          "Authorization": "Bearer {{auth.zoom.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "first_name": "{{mergedData.firstName}}",
+          "last_name": "{{mergedData.lastName}}",
+          "display_name": "{{mergedData.displayName}}",
+          "department": "{{mergedData.department}}",
+          "job_title": "{{mergedData.jobTitle}}",
+          "location": "{{mergedData.officeLocation}}"
+        },
+        "condition": "{{inputs.syncTargets}} includes 'zoom'"
+      },
+      "order": 7,
+      "dependsOn": ["merge-profile-data"]
+    },
+    {
+      "id": "sync-salesforce",
+      "type": "http-request",
+      "name": "Sync Salesforce Contact",
+      "description": "Update contact record in Salesforce",
+      "config": {
+        "method": "PATCH",
+        "url": "{{systems.salesforce.baseUrl}}/sobjects/Contact/{{salesforceContactId}}",
+        "headers": {
+          "Authorization": "Bearer {{auth.salesforce.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "FirstName": "{{mergedData.firstName}}",
+          "LastName": "{{mergedData.lastName}}",
+          "Title": "{{mergedData.jobTitle}}",
+          "Department": "{{mergedData.department}}",
+          "Phone": "{{mergedData.phoneNumber}}",
+          "MailingCity": "{{mergedData.officeLocation}}"
+        },
+        "condition": "{{inputs.syncTargets}} includes 'salesforce'"
+      },
+      "order": 8,
+      "dependsOn": ["merge-profile-data"]
+    },
+    {
+      "id": "validate-sync-results",
+      "type": "validation",
+      "name": "Validate Sync Results",
+      "description": "Validate that all sync operations completed successfully",
+      "config": {
+        "rules": [
+          {
+            "field": "sync-active-directory",
+            "condition": "response.status === 200",
+            "required": "{{inputs.syncTargets}} includes 'activeDirectory'"
+          },
+          {
+            "field": "sync-office365",
+            "condition": "response.status === 200",
+            "required": "{{inputs.syncTargets}} includes 'office365'"
+          },
+          {
+            "field": "sync-slack",
+            "condition": "response.ok === true",
+            "required": "{{inputs.syncTargets}} includes 'slack'"
+          }
+        ]
+      },
+      "order": 9,
+      "dependsOn": ["sync-active-directory", "sync-office365", "sync-slack", "sync-zoom", "sync-salesforce"]
+    },
+    {
+      "id": "log-sync-completion",
+      "type": "http-request",
+      "name": "Log Sync Completion",
+      "description": "Log successful profile synchronization",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.auditLog.baseUrl}}/events",
+        "headers": {
+          "Authorization": "{{auth.auditLog.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "user_profile_sync_completed",
+          "userEmail": "{{inputs.userEmail}}",
+          "timestamp": "{{currentTimestamp}}",
+          "sourceSystem": "{{inputs.sourceSystem}}",
+          "targetSystems": "{{inputs.syncTargets}}",
+          "attributesUpdated": "{{Object.keys(mergedData)}}",
+          "status": "success"
+        }
+      },
+      "order": 10,
+      "dependsOn": ["validate-sync-results"]
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 2,
+      "backoffMs": 2000
+    },
+    "continueOnFailure": true,
+    "partialSuccessThreshold": 0.5
+  },
+  "metadata": {
+    "estimatedDuration": "2-5 minutes",
+    "systems": ["activeDirectory", "office365", "slack", "zoom", "salesforce", "auditLog"],
+    "tags": ["synchronization", "user-management", "profile-management"]
+  }
+}

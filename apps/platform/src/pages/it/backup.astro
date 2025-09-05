@@ -1,0 +1,52 @@
+---
+import { LayoutShell, Card, Button } from '@atlasit/ui';
+
+const title = "Backup & Recovery - AtlasIT";
+const content = `
+  <h1 class="text-3xl font-bold mb-6">Backup & Recovery</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    ${Card({
+      title: 'Automated Backups',
+      content: 'Schedule automatic backups for all your systems and data.',
+      link: { text: 'Configure', href: '/automation/backup/schedule' }
+    })}
+    ${Card({
+      title: 'Backup Status',
+      content: 'Monitor the status of all backup jobs and recovery points.',
+      link: { text: 'View Status', href: '/automation/backup/status' }
+    })}
+  </div>
+
+  <div class="bg-gray-800 p-6 rounded-lg">
+    <h2 class="text-xl font-semibold mb-4">Recent Backups</h2>
+    <div class="space-y-2">
+      <div class="flex justify-between items-center py-2 border-b border-gray-700">
+        <div>
+          <span class="font-medium">Server Backup</span>
+          <span class="text-gray-400 text-sm block">Completed 2 hours ago</span>
+        </div>
+        <span class="text-green-400">Success</span>
+      </div>
+      <div class="flex justify-between items-center py-2 border-b border-gray-700">
+        <div>
+          <span class="font-medium">Database Backup</span>
+          <span class="text-gray-400 text-sm block">Completed 4 hours ago</span>
+        </div>
+        <span class="text-green-400">Success</span>
+      </div>
+      <div class="flex justify-between items-center py-2">
+        <div>
+          <span class="font-medium">File Share Backup</span>
+          <span class="text-gray-400 text-sm block">Failed 6 hours ago</span>
+        </div>
+        <span class="text-red-400">Failed</span>
+      </div>
+    </div>
+  </div>
+`;
+
+export const backupHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={backupHtml}></html>

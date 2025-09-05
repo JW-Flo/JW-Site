@@ -1,0 +1,346 @@
+{
+  "name": "User System Migration",
+  "description": "Migrate user accounts and data between IT systems",
+  "category": "system-integration",
+  "version": "1.0.0",
+  "triggers": ["api", "webhook"],
+  "steps": [
+    {
+      "id": "validate-migration-request",
+      "type": "validation",
+      "name": "Validate Migration Request",
+      "description": "Validate migration request parameters",
+      "config": {
+        "schema": {
+          "type": "object",
+          "required": ["userEmail", "sourceSystem", "targetSystem"],
+          "properties": {
+            "userEmail": {"type": "string", "format": "email"},
+            "sourceSystem": {"type": "string"},
+            "targetSystem": {"type": "string"},
+            "migrationType": {
+              "type": "string",
+              "enum": ["full", "incremental", "selective"],
+              "default": "full"
+            },
+            "attributes": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "dataTransfer": {"type": "boolean", "default": true},
+            "permissionsTransfer": {"type": "boolean", "default": true},
+            "disableSourceAccount": {"type": "boolean", "default": true},
+            "migrationDate": {"type": "string", "format": "date"}
+          }
+        }
+      },
+      "order": 1
+    },
+    {
+      "id": "check-migration-prerequisites",
+      "type": "http-request",
+      "name": "Check Migration Prerequisites",
+      "description": "Verify source and target systems are ready for migration",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.migrationService.baseUrl}}/prerequisites/check",
+        "headers": {
+          "Authorization": "{{auth.migrationService.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userEmail": "{{inputs.userEmail}}",
+          "sourceSystem": "{{inputs.sourceSystem}}",
+          "targetSystem": "{{inputs.targetSystem}}",
+          "migrationType": "{{inputs.migrationType}}"
+        }
+      },
+      "order": 2,
+      "dependsOn": ["validate-migration-request"]
+    },
+    {
+      "id": "export-user-data",
+      "type": "http-request",
+      "name": "Export User Data",
+      "description": "Export user profile and data from source system",
+      "config": {
+        "method": "GET",
+        "url": "{{systems.{{inputs.sourceSystem}}.baseUrl}}/users/{{inputs.userEmail}}/export",
+        "headers": {
+          "Authorization": "{{auth.{{inputs.sourceSystem}}.token}}",
+          "Accept": "application/json"
+        },
+        "queryParams": {
+          "attributes": "{{inputs.attributes}}",
+          "includePermissions": "{{inputs.permissionsTransfer}}"
+        }
+      },
+      "order": 3,
+      "dependsOn": ["check-migration-prerequisites"]
+    },
+    {
+      "id": "transform-user-data",
+      "type": "transform",
+      "name": "Transform User Data",
+      "description": "Transform user data to match target system format",
+      "config": {
+        "operation": "map",
+        "sourceData": "{{steps.export-user-data.response}}",
+        "mappingRules": {
+          "email": "email",
+          "firstName": "givenName",
+          "lastName": "surname",
+          "displayName": "displayName",
+          "department": "department",
+          "jobTitle": "jobTitle",
+          "manager": "manager",
+          "phoneNumber": "businessPhones[0]",
+          "officeLocation": "officeLocation",
+          "employeeId": "employeeId"
+        },
+        "targetSystem": "{{inputs.targetSystem}}"
+      },
+      "order": 4,
+      "dependsOn": ["export-user-data"]
+    },
+    {
+      "id": "create-target-account",
+      "type": "http-request",
+      "name": "Create Target Account",
+      "description": "Create user account in target system",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.{{inputs.targetSystem}}.baseUrl}}/users",
+        "headers": {
+          "Authorization": "{{auth.{{inputs.targetSystem}}.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": "{{transformedData}}"
+      },
+      "order": 5,
+      "dependsOn": ["transform-user-data"]
+    },
+    {
+      "id": "transfer-permissions",
+      "type": "conditional",
+      "name": "Transfer Permissions",
+      "description": "Transfer user permissions and access rights",
+      "config": {
+        "condition": "{{inputs.permissionsTransfer}}",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.permissionTransfer.baseUrl}}/transfer",
+            "headers": {
+              "Authorization": "{{auth.permissionTransfer.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "userEmail": "{{inputs.userEmail}}",
+              "sourceSystem": "{{inputs.sourceSystem}}",
+              "targetSystem": "{{inputs.targetSystem}}",
+              "permissions": "{{steps.export-user-data.response.permissions}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"permissionsTransferred": false}
+          }
+        }
+      },
+      "order": 6,
+      "dependsOn": ["create-target-account"]
+    },
+    {
+      "id": "transfer-user-data",
+      "type": "conditional",
+      "name": "Transfer User Data",
+      "description": "Transfer user files and data if requested",
+      "config": {
+        "condition": "{{inputs.dataTransfer}}",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.dataTransfer.baseUrl}}/transfer",
+            "headers": {
+              "Authorization": "{{auth.dataTransfer.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "userEmail": "{{inputs.userEmail}}",
+              "sourceSystem": "{{inputs.sourceSystem}}",
+              "targetSystem": "{{inputs.targetSystem}}",
+              "dataTypes": ["files", "emails", "documents"],
+              "migrationDate": "{{inputs.migrationDate}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"dataTransferred": false}
+          }
+        }
+      },
+      "order": 7,
+      "dependsOn": ["transfer-permissions"]
+    },
+    {
+      "id": "verify-target-account",
+      "type": "http-request",
+      "name": "Verify Target Account",
+      "description": "Verify that target account was created successfully",
+      "config": {
+        "method": "GET",
+        "url": "{{systems.{{inputs.targetSystem}}.baseUrl}}/users/{{inputs.userEmail}}",
+        "headers": {
+          "Authorization": "{{auth.{{inputs.targetSystem}}.token}}"
+        }
+      },
+      "order": 8,
+      "dependsOn": ["transfer-user-data"]
+    },
+    {
+      "id": "disable-source-account",
+      "type": "conditional",
+      "name": "Disable Source Account",
+      "description": "Disable or mark source account as migrated",
+      "config": {
+        "condition": "{{inputs.disableSourceAccount}}",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "PATCH",
+            "url": "{{systems.{{inputs.sourceSystem}}.baseUrl}}/users/{{inputs.userEmail}}",
+            "headers": {
+              "Authorization": "{{auth.{{inputs.sourceSystem}}.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "status": "migrated",
+              "migrationDate": "{{inputs.migrationDate}}",
+              "targetSystem": "{{inputs.targetSystem}}",
+              "migratedBy": "{{inputs.requestedBy}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"sourceAccountDisabled": false}
+          }
+        }
+      },
+      "order": 9,
+      "dependsOn": ["verify-target-account"]
+    },
+    {
+      "id": "update-directory-services",
+      "type": "http-request",
+      "name": "Update Directory Services",
+      "description": "Update directory services with migration information",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.activeDirectory.baseUrl}}/users/{{inputs.userEmail}}/migration",
+        "headers": {
+          "Authorization": "{{auth.activeDirectory.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "migrationStatus": "completed",
+          "sourceSystem": "{{inputs.sourceSystem}}",
+          "targetSystem": "{{inputs.targetSystem}}",
+          "migrationDate": "{{inputs.migrationDate}}"
+        }
+      },
+      "order": 10,
+      "dependsOn": ["disable-source-account"]
+    },
+    {
+      "id": "send-migration-notification",
+      "type": "http-request",
+      "name": "Send Migration Notification",
+      "description": "Send notification to user about successful migration",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.emailService.baseUrl}}/emails/send",
+        "headers": {
+          "Authorization": "{{auth.emailService.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "to": "{{inputs.userEmail}}",
+          "template": "migration-complete",
+          "data": {
+            "userEmail": "{{inputs.userEmail}}",
+            "sourceSystem": "{{inputs.sourceSystem}}",
+            "targetSystem": "{{inputs.targetSystem}}",
+            "migrationDate": "{{inputs.migrationDate}}",
+            "dataTransferred": "{{inputs.dataTransfer}}",
+            "permissionsTransferred": "{{inputs.permissionsTransfer}}"
+          }
+        }
+      },
+      "order": 11,
+      "dependsOn": ["update-directory-services"]
+    },
+    {
+      "id": "log-migration-completion",
+      "type": "http-request",
+      "name": "Log Migration Completion",
+      "description": "Log successful migration to audit system",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.auditLog.baseUrl}}/events",
+        "headers": {
+          "Authorization": "{{auth.auditLog.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "user_migration_completed",
+          "userEmail": "{{inputs.userEmail}}",
+          "timestamp": "{{currentTimestamp}}",
+          "sourceSystem": "{{inputs.sourceSystem}}",
+          "targetSystem": "{{inputs.targetSystem}}",
+          "migrationType": "{{inputs.migrationType}}",
+          "dataTransferred": "{{inputs.dataTransfer}}",
+          "permissionsTransferred": "{{inputs.permissionsTransferred}}",
+          "sourceAccountDisabled": "{{inputs.disableSourceAccount}}",
+          "status": "success"
+        }
+      },
+      "order": 12,
+      "dependsOn": ["send-migration-notification"]
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 2,
+      "backoffMs": 5000
+    },
+    "rollbackSteps": [
+      {
+        "stepId": "create-target-account",
+        "action": "delete-target-account",
+        "system": "{{inputs.targetSystem}}"
+      },
+      {
+        "stepId": "disable-source-account",
+        "action": "reenable-source-account",
+        "system": "{{inputs.sourceSystem}}"
+      }
+    ]
+  },
+  "metadata": {
+    "estimatedDuration": "15-45 minutes",
+    "systems": ["migrationService", "dataTransfer", "permissionTransfer", "activeDirectory", "emailService", "auditLog"],
+    "tags": ["migration", "system-integration", "data-transfer"]
+  }
+}

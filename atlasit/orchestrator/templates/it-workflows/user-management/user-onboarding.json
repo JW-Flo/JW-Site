@@ -1,0 +1,196 @@
+{
+  "name": "User Onboarding Workflow",
+  "description": "Complete user onboarding across multiple IT systems",
+  "category": "user-management",
+  "version": "1.0.0",
+  "triggers": ["api", "webhook"],
+  "steps": [
+    {
+      "id": "validate-user-data",
+      "type": "validation",
+      "name": "Validate User Data",
+      "description": "Validate incoming user data against schema",
+      "config": {
+        "schema": {
+          "type": "object",
+          "required": ["email", "firstName", "lastName", "department"],
+          "properties": {
+            "email": {"type": "string", "format": "email"},
+            "firstName": {"type": "string", "minLength": 1},
+            "lastName": {"type": "string", "minLength": 1},
+            "department": {"type": "string", "minLength": 1},
+            "manager": {"type": "string", "format": "email"},
+            "startDate": {"type": "string", "format": "date"}
+          }
+        }
+      },
+      "order": 1
+    },
+    {
+      "id": "create-ad-account",
+      "type": "http-request",
+      "name": "Create Active Directory Account",
+      "description": "Create user account in Active Directory",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.activeDirectory.baseUrl}}/users",
+        "headers": {
+          "Authorization": "{{auth.activeDirectory.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "{{inputs.email}}",
+          "firstName": "{{inputs.firstName}}",
+          "lastName": "{{inputs.lastName}}",
+          "department": "{{inputs.department}}",
+          "manager": "{{inputs.manager}}",
+          "startDate": "{{inputs.startDate}}"
+        },
+        "retry": {
+          "maxAttempts": 3,
+          "backoffMs": 1000
+        }
+      },
+      "order": 2,
+      "dependsOn": ["validate-user-data"]
+    },
+    {
+      "id": "create-office365-account",
+      "type": "http-request",
+      "name": "Create Office 365 Account",
+      "description": "Create user account in Microsoft 365",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.office365.baseUrl}}/users",
+        "headers": {
+          "Authorization": "Bearer {{auth.office365.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userPrincipalName": "{{inputs.email}}",
+          "displayName": "{{inputs.firstName}} {{inputs.lastName}}",
+          "mail": "{{inputs.email}}",
+          "department": "{{inputs.department}}",
+          "jobTitle": "{{inputs.jobTitle}}"
+        }
+      },
+      "order": 3,
+      "dependsOn": ["create-ad-account"]
+    },
+    {
+      "id": "create-slack-account",
+      "type": "http-request",
+      "name": "Create Slack Account",
+      "description": "Create user account in Slack workspace",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.slack.baseUrl}}/api/admin.users.invite",
+        "headers": {
+          "Authorization": "Bearer {{auth.slack.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "{{inputs.email}}",
+          "first_name": "{{inputs.firstName}}",
+          "last_name": "{{inputs.lastName}}",
+          "channels": "{{inputs.slackChannels}}"
+        }
+      },
+      "order": 4,
+      "dependsOn": ["create-office365-account"]
+    },
+    {
+      "id": "assign-software-licenses",
+      "type": "http-request",
+      "name": "Assign Software Licenses",
+      "description": "Assign required software licenses based on department",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.licenseManager.baseUrl}}/licenses/assign",
+        "headers": {
+          "Authorization": "{{auth.licenseManager.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userEmail": "{{inputs.email}}",
+          "department": "{{inputs.department}}",
+          "licenses": "{{inputs.requiredLicenses}}"
+        }
+      },
+      "order": 5,
+      "dependsOn": ["create-office365-account"]
+    },
+    {
+      "id": "send-welcome-email",
+      "type": "http-request",
+      "name": "Send Welcome Email",
+      "description": "Send welcome email with account information",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.emailService.baseUrl}}/emails/send",
+        "headers": {
+          "Authorization": "{{auth.emailService.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "to": "{{inputs.email}}",
+          "template": "welcome-email",
+          "data": {
+            "firstName": "{{inputs.firstName}}",
+            "email": "{{inputs.email}}",
+            "startDate": "{{inputs.startDate}}",
+            "department": "{{inputs.department}}"
+          }
+        }
+      },
+      "order": 6,
+      "dependsOn": ["create-slack-account", "assign-software-licenses"]
+    },
+    {
+      "id": "log-onboarding-completion",
+      "type": "http-request",
+      "name": "Log Onboarding Completion",
+      "description": "Log successful onboarding to audit system",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.auditLog.baseUrl}}/events",
+        "headers": {
+          "Authorization": "{{auth.auditLog.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "user_onboarding_completed",
+          "userEmail": "{{inputs.email}}",
+          "timestamp": "{{currentTimestamp}}",
+          "systems": ["activeDirectory", "office365", "slack", "licenses"],
+          "status": "success"
+        }
+      },
+      "order": 7,
+      "dependsOn": ["send-welcome-email"]
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffMs": 2000
+    },
+    "rollbackSteps": [
+      {
+        "stepId": "create-ad-account",
+        "action": "delete-user",
+        "system": "activeDirectory"
+      },
+      {
+        "stepId": "create-office365-account",
+        "action": "delete-user",
+        "system": "office365"
+      }
+    ]
+  },
+  "metadata": {
+    "estimatedDuration": "5-10 minutes",
+    "systems": ["activeDirectory", "office365", "slack", "licenseManager", "emailService", "auditLog"],
+    "tags": ["onboarding", "user-management", "multi-system"]
+  }
+}

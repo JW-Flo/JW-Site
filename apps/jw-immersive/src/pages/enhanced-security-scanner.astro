@@ -1,0 +1,458 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Enhanced Security Scanner | JW Portfolio" description="Lean tri-mode security scanner (Business / Engineer / Super Admin)">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+    <!-- Header Section -->
+  <div class="text-center space-y-4">
+    <h1 class="text-4xl sm:text-5xl leading-tight font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
+        🚀 Enhanced Security Scanner
+      </h1>
+    <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto">
+        Professional-grade web security assessment with business impact analysis and comprehensive reporting
+      </p>
+      
+    <!-- Mode Toggle -->
+    <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4" id="mode-controls" aria-label="Scanner Mode Selection">
+        <button data-mode="business" class="mode-btn px-4 py-2 rounded bg-slate-700 text-slate-200 text-sm font-medium ring-1 ring-slate-600">Business</button>
+        <button data-mode="engineer" class="mode-btn px-4 py-2 rounded bg-slate-800 text-slate-400 hover:text-white text-sm font-medium ring-1 ring-slate-700">Engineer</button>
+        <div class="flex items-center gap-2">
+      <button data-mode="super-admin" class="mode-btn px-4 py-2 rounded bg-slate-800 text-slate-400 hover:text-white text-sm font-medium ring-1 ring-slate-700 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-purple-500" id="super-admin-btn" disabled>Super Admin</button>
+      <label for="super-admin-pass" class="sr-only">Super admin passphrase</label>
+      <input type="password" id="super-admin-pass" placeholder="passphrase" class="px-2 py-1 text-xs bg-slate-800 border border-slate-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded" />
+        </div>
+      </div>
+      
+      <!-- Secret Infrastructure Analysis Access -->
+    <div class="text-center max-w-2xl mx-auto text-xs text-slate-400" id="super-admin-note" hidden>
+        Super Admin mode unlocked. Curated extra scans enabled (content, privacy, performance). Heavy infrastructure suite moved to external product coming soon.
+      </div>
+      
+  <div id="mode-description" class="text-sm text-slate-400 max-w-2xl mx-auto"></div>
+    </div>
+
+    <!-- Legal Disclaimer -->
+    <section class="bg-red-900/20 border border-red-500/30 rounded-lg p-5 sm:p-6 space-y-3" aria-labelledby="legal-heading">
+      <h2 id="legal-heading" class="text-lg font-bold text-red-400 flex items-center">
+        ⚠️ Important Legal Notice & Usage Guidelines
+      </h2>
+      <div class="text-sm text-slate-300 space-y-1.5 leading-relaxed">
+        <p><strong>Authorized Use Only:</strong> Only scan websites you own or have explicit written permission to test.</p>
+        <p><strong>No Data Storage:</strong> All scan results are processed in real-time and not permanently stored.</p>
+        <p><strong>Educational Purpose:</strong> This tool is for security awareness, education, and legitimate security testing.</p>
+        <p><strong>Professional Assessment:</strong> Results provide insights but should be validated by security professionals.</p>
+        <p><strong>Compliance:</strong> Users are responsible for compliance with all applicable laws and regulations.</p>
+        <p><strong>Rate Limiting:</strong> Tool includes intelligent rate limiting to respect target servers.</p>
+      </div>
+    </section>
+
+    <section class="p-5 sm:p-6 rounded-lg border border-purple-500/30 bg-gradient-to-r from-purple-900/30 to-pink-900/30 space-y-2" id="upgrade-cta" aria-labelledby="upgrade-heading">
+      <h2 id="upgrade-heading" class="text-lg font-bold text-purple-300">🌟 Coming Soon: Full Infrastructure Assessment Platform</h2>
+      <p class="text-sm text-slate-300 leading-relaxed">Want deep cloud, API, supply chain, brand, and infrastructure mapping? A separate professional platform is launching soon. This page intentionally stays lean for fast portfolio demos.</p>
+      <p class="text-sm text-purple-200 leading-relaxed">Drop your domain now and run a quick tri-mode scan. For early access to the full suite, <a href="#" class="underline text-pink-300 hover:text-pink-200">join the waitlist</a>.</p>
+    </section>
+
+    <!-- Scanner Interface -->
+  <div class="grid lg:grid-cols-3 gap-8 items-start">
+      <!-- Input Section -->
+      <div class="lg:col-span-1">
+        <section class="bg-slate-800/50 rounded-lg p-5 sm:p-6 border border-slate-600 space-y-5" aria-labelledby="target-config-heading">
+          <h3 id="target-config-heading" class="text-xl font-bold text-blue-400">🎯 Enhanced Target Configuration</h3>
+          <div id="rate-limit-warning" class="hidden text-sm rounded-md border border-yellow-500/40 bg-yellow-900/30 p-3 text-yellow-200" role="alert" aria-live="assertive"></div>
+          
+          <form id="enhanced-scan-form" class="space-y-5" novalidate>
+            <div>
+              <label for="target-url" class="block text-sm font-medium text-slate-300 mb-2">
+                Target URL
+              </label>
+              <input
+                type="url"
+                id="target-url"
+                placeholder="https://example.com/"
+                required
+                class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                Enter the full URL including https://
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-3">
+                Enhanced Scan Types
+              </label>
+              <div class="space-y-3">
+                <!-- Standard Security Scans -->
+                <div class="border-b border-slate-600 pb-4 mb-4 space-y-2">
+                  <h4 class="text-sm font-bold text-blue-300 mb-2">🛡️ Core Security</h4>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-headers" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">Enhanced Security Headers</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-ssl" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">SSL/TLS Deep Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-info" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">Information Disclosure</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-common" checked class="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-slate-300">Common Vulnerabilities</span>
+                  </label>
+                </div>
+                
+                <!-- Engineer Mode Options -->
+                <div id="engineer-options" class="hidden border-b border-slate-600 pb-4 mb-4 space-y-2">
+                  <h4 class="text-sm font-bold text-green-300 mb-2">⚡ Advanced Technical</h4>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-advanced-headers" class="rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500">
+                    <span class="ml-2 text-sm text-green-300">Advanced Header Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-waf" class="rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500">
+                    <span class="ml-2 text-sm text-green-300">WAF Detection</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-tech-stack" class="rounded border-slate-600 bg-slate-700 text-green-500 focus:ring-green-500">
+                    <span class="ml-2 text-sm text-green-300">Technology Fingerprinting</span>
+                  </label>
+                </div>
+
+                <div id="super-admin-options" class="hidden border-t border-slate-600 pt-4 mt-4 space-y-2">
+                  <h4 class="text-sm font-bold text-purple-300 mb-2">🌟 Super Admin Add-ons (Lite)</h4>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-content-analysis" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500" checked>
+                    <span class="ml-2 text-sm text-purple-300">Content Analysis</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-privacy-compliance" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500" checked>
+                    <span class="ml-2 text-sm text-purple-300">Privacy Compliance</span>
+                  </label>
+                  <label class="flex items-center">
+                    <input type="checkbox" id="scan-performance-security" class="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500" checked>
+                    <span class="ml-2 text-sm text-purple-300">Performance Security</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <input type="checkbox" id="legal-agreement" required class="mt-0.5 rounded border-slate-600 bg-slate-700 text-red-500 focus:ring-red-500 focus:outline-none">
+              <span class="text-sm text-slate-300 leading-relaxed">I confirm I have authorization to scan this website</span>
+            </div>
+
+      <button type="submit" id="start-scan-btn" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-pink-400 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300">Run Scan<span class="sr-only"> (start selected scans)</span></button>
+          </form>
+    </section>
+
+        <!-- Scan Progress -->
+        <div id="scan-progress" class="hidden bg-slate-800/50 rounded-lg p-5 sm:p-6 border border-slate-600 mt-6" aria-live="polite" aria-atomic="true">
+          <h3 class="text-xl font-bold text-green-400 mb-3">📊 Scan Progress</h3>
+          <div class="space-y-2 text-sm text-slate-300">
+              <div id="current-task" class="text-slate-400">Preparing...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="lg:col-span-2">
+        <div id="scan-results" class="hidden" aria-live="polite" aria-atomic="false">
+          <div class="bg-slate-800/50 rounded-lg p-5 sm:p-6 border border-slate-600 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h3 class="text-xl font-bold text-purple-400">🔍 Scan Results</h3>
+              <div id="scores" class="text-sm text-slate-400 sm:text-right"></div>
+            </div>
+
+            <!-- Business Metrics Dashboard -->
+            <div id="business-dashboard" class="hidden mb-6 grid md:grid-cols-4 gap-4 p-4 bg-slate-700/30 rounded-lg border border-purple-500/30">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-400" id="dashboard-trust">--</div>
+                <div class="text-xs text-slate-400">Trust Score</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-400" id="dashboard-ux">--</div>
+                <div class="text-xs text-slate-400">User Experience</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-400" id="dashboard-prof">--</div>
+                <div class="text-xs text-slate-400">Professionalism</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-purple-400" id="dashboard-brand">--</div>
+                <div class="text-xs text-slate-400">Brand Protection</div>
+              </div>
+            </div>
+
+            <!-- Results will be populated here -->
+            <div id="results-container" class="space-y-5">
+            </div>
+
+            <!-- Enhanced Actions -->
+            <div class="flex flex-wrap gap-3 mt-4 pt-5 border-t border-slate-600">
+              <button id="download-json" class="bg-slate-700 hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500 text-white py-2 px-4 rounded-lg text-sm">Download JSON</button>
+              <button id="new-scan" class="bg-slate-700 hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white py-2 px-4 rounded-lg text-sm ml-auto">New Scan</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Welcome Message -->
+  <div id="welcome-message" class="bg-slate-800/50 rounded-lg p-6 sm:p-8 border border-slate-600 space-y-6">
+          <div class="text-center">
+            <div class="text-5xl sm:text-6xl mb-4" aria-hidden="true">🚀</div>
+            <h3 class="text-2xl font-bold text-purple-400 mb-3">Lite Tri-Mode Security Scanner</h3>
+            <p class="text-slate-300 mb-6 leading-relaxed">Business, Engineer and (hidden) Super Admin add-ons. Focused, fast, and demo-friendly.</p>
+            
+            <div class="grid md:grid-cols-2 gap-4 text-left">
+              <div class="bg-slate-700/30 p-4 rounded-lg space-y-2">
+                <h4 class="font-bold text-purple-400 mb-2">✅ Modes</h4>
+                <ul class="text-sm text-slate-300 space-y-1">
+                  <li>• Business: Core headers, SSL, info, common</li>
+                  <li>• Engineer: Adds advanced headers, WAF, tech stack</li>
+                  <li>• Super Admin: Adds content, privacy, performance</li>
+                </ul>
+              </div>
+              
+              <div class="bg-slate-700/30 p-4 rounded-lg space-y-2">
+                <h4 class="font-bold text-pink-400 mb-2">⚡ Why Lite?</h4>
+                <ul class="text-sm text-slate-300 space-y-1">
+                  <li>• Fast portfolio demo</li>
+                  <li>• Minimal bundle size</li>
+                  <li>• Clear upgrade path</li>
+                  <li>• Simple tri-mode logic</li>
+                  <li>• Extensible architecture</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .scanning {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+</style>
+
+<script>
+  const PASS_HASH = 'ae731e334f6ca897553b94ab466d24c7c02aa855982850a4edb816540562135d'; // sha256('chalant')
+  // SUPER ADMIN ACTIVATION NOTES:
+  // 1. User enters local passphrase (not the admin key) to reveal Super Admin mode button.
+  // 2. When switching to Super Admin mode first time, we prompt for the server SUPER_ADMIN_KEY (never stored).
+  // 3. That key is sent per-request as adminKey ONLY when mode === 'super-admin'.
+  async function sha256(str){
+    const buf = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  const modeDesc = {
+    business: 'Core security headers, SSL/TLS, info disclosure and common issues.',
+    engineer: 'Adds advanced header analysis, WAF detection and tech stack fingerprinting.',
+    'super-admin': 'Adds curated content, privacy and performance security scans (lite).'
+  };
+  const defaultChecks = {
+    business: ['headers','ssl','info','common'],
+    engineer: ['headers','ssl','info','common','advanced-headers','waf','tech-stack'],
+    'super-admin': ['headers','ssl','info','common','advanced-headers','waf','tech-stack','content-analysis','privacy-compliance','performance-security']
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('enhanced-scan-form');
+    const modeButtons = Array.from(document.querySelectorAll('.mode-btn'));
+    const passInput = document.getElementById('super-admin-pass');
+    const superBtn = document.getElementById('super-admin-btn');
+    const superNote = document.getElementById('super-admin-note');
+    const modeDescription = document.getElementById('mode-description');
+    const prog = document.getElementById('scan-progress');
+    const results = document.getElementById('scan-results');
+    const welcome = document.getElementById('welcome-message');
+    const currentTask = document.getElementById('current-task');
+    const resultsContainer = document.getElementById('results-container');
+    const scoreBox = document.getElementById('scores');
+    const newScanBtn = document.getElementById('new-scan');
+    const downloadBtn = document.getElementById('download-json');
+  const rateLimitBox = document.getElementById('rate-limit-warning');
+  let rateLimitTimer = null;
+  let mode = 'business';
+  let superAdminServerKey = null; // ephemeral per-tab
+  let superAdminElevated = false;
+    modeDescription.textContent = modeDesc[mode];
+    async function tryUnlock(){
+      const val = passInput.value.trim();
+      if(!val) return;
+      if(await sha256(val) === PASS_HASH){
+        superBtn.disabled = false;
+        superNote.hidden = false;
+        passInput.classList.add('border-green-500');
+      } else {
+        superBtn.disabled = true;
+        superNote.hidden = true;
+        passInput.classList.remove('border-green-500');
+      }
+    }
+    passInput.addEventListener('input', () => { tryUnlock(); });
+    modeButtons.forEach(btn=>btn.addEventListener('click', async () => {
+      if(btn.disabled) return;
+      mode = btn.dataset.mode;
+  if(mode==='super-admin' && !superAdminElevated){
+        // Require local passphrase validation
+        if(passInput.value.trim() === '' || !(await sha256(passInput.value.trim()) === PASS_HASH)){
+          alert('Enter correct passphrase first to unlock Super Admin mode');
+          mode='business';
+        } else if(!superAdminServerKey){
+          superAdminServerKey = prompt('Enter SUPER_ADMIN_KEY (server secret) to elevate (one-time this session). Not stored.');
+          if(!superAdminServerKey){ mode='business'; }
+          else {
+            try {
+              const resp = await fetch('/api/super-admin-elevate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ key: superAdminServerKey }) });
+              if(resp.ok){
+                const data = await resp.json();
+                if(data.elevated){ superAdminElevated = true; }
+                else { alert('Elevation rejected'); mode='business'; }
+              } else {
+                alert('Elevation failed'); mode='business';
+              }
+            } catch { alert('Network error elevating'); mode='business'; }
+          }
+        }
+      }
+      modeButtons.forEach(b=>{
+        if(b===btn){ b.classList.replace('bg-slate-800','bg-slate-700'); b.classList.add('text-slate-200'); }
+        else { b.classList.add('bg-slate-800'); b.classList.remove('bg-slate-700'); b.classList.remove('text-slate-200'); }
+      });
+      modeDescription.textContent = modeDesc[mode];
+      // Prefill target URL only for super admin mode (one-time convenience)
+      if(mode==='super-admin'){
+        const target = document.getElementById('target-url');
+        if(target && !target.value){
+          target.value = 'https://www.chalant.net/';
+        }
+      }
+      // show / hide super admin options
+      document.getElementById('engineer-options').classList.toggle('hidden', mode==='business');
+      document.getElementById('super-admin-options').classList.toggle('hidden', mode!=='super-admin');
+    }));
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if(!document.getElementById('legal-agreement').checked){
+        alert('Please confirm you have authorization to scan this website.');
+        return;
+      }
+      const url = (document.getElementById('target-url').value || '').trim();
+      if(!url){ alert('Enter target URL'); return; }
+  // Clear any previous rate limit message
+  if(rateLimitTimer){ clearInterval(rateLimitTimer); rateLimitTimer=null; }
+  rateLimitBox.classList.add('hidden');
+      welcome.classList.add('hidden');
+      results.classList.add('hidden');
+      prog.classList.remove('hidden');
+      currentTask.textContent = 'Starting scans...';
+      const selected = [];
+      const pushIf = (id,key) => { const el = document.getElementById(id); if(el && el.checked) selected.push(key); };
+      pushIf('scan-headers','headers');
+      pushIf('scan-ssl','ssl');
+      pushIf('scan-info','info');
+      pushIf('scan-common','common');
+      if(mode!=='business'){
+        pushIf('scan-advanced-headers','advanced-headers');
+        pushIf('scan-waf','waf');
+        pushIf('scan-tech-stack','tech-stack');
+      }
+      if(mode==='super-admin'){
+        pushIf('scan-content-analysis','content-analysis');
+        pushIf('scan-privacy-compliance','privacy-compliance');
+        pushIf('scan-performance-security','performance-security');
+      }
+      // ensure baseline defaults if none manually checked
+      if(selected.length===0) selected.push(...defaultChecks[mode]);
+      try {
+        // Preflight API call (headers) to surface server-side rate limiting (discard findings)
+        try {
+          const preflightRes = await fetch('/api/enhanced-security-scan', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ url, type: 'headers', superAdminMode: false })
+          });
+          if(preflightRes.status === 429){
+            const data = await preflightRes.json().catch(()=>({error:'Rate limit exceeded'}));
+            const retryAfter = parseInt(preflightRes.headers.get('Retry-After')||'0',10);
+            const resetSeconds = isNaN(retryAfter)?30:retryAfter;
+            let remaining = resetSeconds;
+            rateLimitBox.innerHTML = `⏳ Rate limit exceeded. Please wait <span id="rl-seconds">${remaining}</span>s before retrying.`;
+            rateLimitBox.classList.remove('hidden');
+            form.querySelector('button[type="submit"]').disabled = true;
+            rateLimitTimer = setInterval(()=>{
+              remaining -= 1;
+              const span = document.getElementById('rl-seconds');
+              if(span) span.textContent = String(remaining);
+              if(remaining <= 0){
+                clearInterval(rateLimitTimer);
+                rateLimitTimer=null;
+                rateLimitBox.classList.add('hidden');
+                form.querySelector('button[type="submit"]').disabled = false;
+              }
+            },1000);
+            prog.classList.add('hidden');
+            return; // Abort full local scan due to rate limit
+          }
+        } catch(preErr){ /* network issues ignored for preflight */ }
+  const { runScan } = await import('../utils/scanner/dispatcher.js');
+  const bundle = await runScan({ url, mode, selected, adminKey: mode==='super-admin' ? superAdminServerKey : undefined });
+        prog.classList.add('hidden');
+        results.classList.remove('hidden');
+        resultsContainer.innerHTML='';
+        const grouped = bundle.findings.reduce((acc,f)=>{ (acc[f.category]=acc[f.category]||[]).push(f); return acc; },{});
+        Object.entries(grouped).forEach(([cat, arr])=>{
+          const wrap = document.createElement('div');
+          wrap.className='bg-slate-700/30 rounded-lg p-4 border border-slate-600 mb-4';
+            wrap.innerHTML = `<h4 class='font-bold text-white mb-3'>${cat} (${arr.length})</h4>` +
+              arr.map(f=>`<div class='border-l-4 pl-3 mb-3 ${severityBorder(f.severity)}'><div class='flex justify-between'><span class='font-medium text-white'>${f.title}</span><span class='text-xs px-2 py-1 rounded ${severityBadge(f.severity)}'>${f.severity.toUpperCase()}</span></div><p class='text-xs text-slate-400 mt-1'>${f.description}</p>${f.recommendation?`<p class='text-xs text-green-300 mt-1'><strong>Fix:</strong> ${f.recommendation}</p>`:''}</div>`).join('');
+          resultsContainer.appendChild(wrap);
+        });
+        scoreBox.innerHTML = `<div class='text-purple-300'>Business Score: <span class='font-bold'>${bundle.scores.businessScore}</span></div><div class='text-slate-400'>Technical Score: <span class='font-bold text-slate-200'>${bundle.scores.technicalScore}</span></div><div class='text-xs mt-1 text-slate-500'>Findings: ${bundle.findings.length}</div>`;
+        downloadBtn.onclick = () => {
+          const blob = new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'});
+          const u = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=u; a.download='scan-results.json'; a.click(); URL.revokeObjectURL(u);
+        };
+      } catch(err){
+        prog.classList.add('hidden');
+        alert('Scan failed: '+ err.message);
+      }
+    });
+    newScanBtn.addEventListener('click', () => {
+      results.classList.add('hidden');
+      welcome.classList.remove('hidden');
+      form.reset();
+    });
+    function severityBorder(s){
+      return {
+        critical:'border-red-500', high:'border-orange-500', medium:'border-yellow-500', low:'border-blue-500', warning:'border-purple-500', info:'border-slate-500', excellent:'border-green-500'
+      }[s]||'border-slate-500';
+    }
+    function severityBadge(s){
+      return {
+        critical:'bg-red-900 text-red-300', high:'bg-orange-900 text-orange-300', medium:'bg-yellow-900 text-yellow-300', low:'bg-blue-900 text-blue-300', warning:'bg-purple-900 text-purple-300', info:'bg-slate-900 text-slate-300', excellent:'bg-green-900 text-green-300'
+      }[s]||'bg-slate-900 text-slate-300';
+    }
+  });
+</script>

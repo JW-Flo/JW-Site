@@ -1,0 +1,15 @@
+---
+// Legacy basic security scanner route now permanently redirects to the enhanced scanner.
+// We use a 308 Permanent Redirect (preserves method) for ideal SEO + semantics.
+// Explicitly disable prerender so the runtime can emit proper redirect status instead of static HTML only.
+export const prerender = false;
+export async function GET() {
+  return new Response(null, { status: 308, headers: { Location: '/enhanced-security-scanner' } });
+}
+export async function POST() {
+  return new Response(null, { status: 308, headers: { Location: '/enhanced-security-scanner' } });
+}
+// Minimal fallback HTML for rare clients not following 301 automatically.
+const html = `<!DOCTYPE html><html lang="en"><head><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0; url=/enhanced-security-scanner\" /><link rel=\"canonical\" href=\"/enhanced-security-scanner\" /><title>Redirecting...</title></head><body><noscript><meta http-equiv=\"refresh\" content=\"0; url=/enhanced-security-scanner\" /></noscript><p>Redirecting to <a href=\"/enhanced-security-scanner\">Enhanced Security Scanner</a>...</p></body></html>`;
+---
+{html}

@@ -1,0 +1,43 @@
+---
+import { LayoutShell, Button, Card } from '@atlasit/ui';
+
+const title = "Security - AtlasIT";
+const content = `
+  <h1 class="text-3xl font-bold mb-6">Security Center</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    ${Card({
+      title: 'Security Scanner',
+      content: 'Run comprehensive security scans on your systems and applications.',
+      link: { text: 'Start Scan', href: '/enhanced-security-scanner' }
+    })}
+    ${Card({
+      title: 'MFA Settings',
+      content: 'Manage multi-factor authentication for all users.',
+      link: { text: 'Configure MFA', href: '/security/mfa' }
+    })}
+  </div>
+
+  <div class="bg-gray-800 p-6 rounded-lg">
+    <h2 class="text-xl font-semibold mb-4">Recent Security Events</h2>
+    <div class="space-y-2">
+      <div class="flex justify-between items-center py-2 border-b border-gray-700">
+        <span>Login attempt from unknown IP</span>
+        <span class="text-yellow-400">Warning</span>
+      </div>
+      <div class="flex justify-between items-center py-2 border-b border-gray-700">
+        <span>Password changed for user admin</span>
+        <span class="text-green-400">Info</span>
+      </div>
+      <div class="flex justify-between items-center py-2">
+        <span>Security scan completed</span>
+        <span class="text-blue-400">Info</span>
+      </div>
+    </div>
+  </div>
+`;
+
+export const securityHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={securityHtml}></html>

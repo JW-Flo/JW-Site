@@ -1,0 +1,47 @@
+{
+  "name": "@atlasit/orchestrator",
+  "version": "1.0.0",
+  "description": "AtlasWeave - Dynamic workflow orchestration engine for IT automation with proprietary FlowWeave format",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "deploy": "wrangler deploy",
+    "flowweave:validate": "node dist/cli/validate.js",
+    "flowweave:compile": "node dist/cli/compile.js",
+    "flowweave:simulate": "node dist/cli/simulate.js"
+  },
+  "dependencies": {
+    "@atlasit/shared": "file:../shared",
+    "hono": "^3.12.0",
+    "zod": "^3.22.4",
+    "node-cron": "^3.0.3",
+    "ioredis": "^5.3.2",
+    "bullmq": "^4.15.0",
+    "axios": "^1.6.0",
+    "joi": "^17.11.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "uuid": "^9.0.1",
+    "jsonpath": "^1.1.1",
+    "handlebars": "^4.7.8",
+    "cron-parser": "^4.9.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.22.0"
+  },
+  "keywords": [
+    "workflow",
+    "orchestration",
+    "automation",
+    "it-ops",
+    "flowweave"
+  ]
+}

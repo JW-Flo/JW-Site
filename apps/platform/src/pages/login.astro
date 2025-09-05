@@ -1,0 +1,100 @@
+---
+import { LayoutShell, Input, Button } from '@atlasit/ui';
+
+const title = "Login - AtlasIT";
+const content = `
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-md w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center space-x-3 mb-6">
+          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <span class="text-white font-bold text-xl">AI</span>
+          </div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+        <h2 class="text-2xl font-semibold text-slate-100 mb-2">Welcome Back</h2>
+        <p class="text-slate-400">Sign in to your AtlasIT account</p>
+      </div>
+      
+      <!-- Login Form -->
+      <div class="glass-effect p-8 rounded-2xl border border-slate-700/50 shadow-2xl">
+        <form class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+            ${Input({
+              type: 'email',
+              placeholder: 'Enter your email',
+              name: 'email',
+              required: true
+            })}
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+            ${Input({
+              type: 'password',
+              placeholder: 'Enter your password',
+              name: 'password',
+              required: true
+            })}
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <label class="flex items-center">
+              <input type="checkbox" class="w-4 h-4 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2">
+              <span class="ml-2 text-sm text-slate-400">Remember me</span>
+            </label>
+            <a href="#" class="text-sm text-blue-400 hover:text-blue-300">Forgot password?</a>
+          </div>
+          
+          ${Button({
+            children: 'Sign In',
+            variant: 'primary',
+            size: 'lg'
+          })}
+        </form>
+        
+        <div class="mt-6 text-center">
+          <p class="text-slate-400">
+            Don't have an account? 
+            <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200">Create one</a>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Demo Credentials -->
+      <div class="mt-6 glass-effect p-4 rounded-lg border border-slate-700/50">
+        <p class="text-slate-400 text-sm text-center mb-2">Demo Credentials:</p>
+        <p class="text-slate-300 text-xs text-center">Email: demo@atlasit.com | Password: demo123</p>
+      </div>
+    </div>
+  </div>
+`;
+
+export const loginHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={loginHtml}></html>
+
+<script>
+    document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = e.target.email.value;
+      const password = e.target.password.value;
+
+      // Mock authentication
+      if (email && password) {
+        localStorage.setItem('atlasit_user', JSON.stringify({ email, loggedIn: true }));
+        window.location.href = '/dashboard';
+      } else {
+        alert('Please enter email and password');
+      }
+    });
+
+    // Check if already logged in
+    const user = localStorage.getItem('atlasit_user');
+    if (user) {
+      window.location.href = '/dashboard';
+    }
+  </script>

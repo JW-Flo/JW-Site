@@ -1,0 +1,44 @@
+---
+import { LayoutShell, Card } from '@atlasit/ui';
+
+const title = "Marketplace - AtlasIT";
+const content = `
+  <h1 class="text-3xl font-bold mb-6">App Marketplace</h1>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    ${Card({
+      title: 'Microsoft 365 Integration',
+      content: 'Seamlessly integrate with Microsoft 365 for enhanced productivity and security.',
+      link: { text: 'Install', href: '/marketplace/microsoft365' }
+    })}
+    ${Card({
+      title: 'Slack Integration',
+      content: 'Connect your team communication with automated workflows.',
+      link: { text: 'Install', href: '/marketplace/slack' }
+    })}
+    ${Card({
+      title: 'Google Workspace',
+      content: 'Integrate with Google Workspace for unified collaboration.',
+      link: { text: 'Install', href: '/marketplace/google' }
+    })}
+    ${Card({
+      title: 'Backup Solution',
+      content: 'Automated cloud backup for all your critical data.',
+      link: { text: 'Install', href: '/marketplace/backup' }
+    })}
+    ${Card({
+      title: 'Security Scanner',
+      content: 'Advanced security scanning and threat detection.',
+      link: { text: 'Install', href: '/marketplace/security' }
+    })}
+    ${Card({
+      title: 'Compliance Manager',
+      content: 'Ensure compliance with industry standards and regulations.',
+      link: { text: 'Install', href: '/marketplace/compliance' }
+    })}
+  </div>
+`;
+
+export const marketplaceHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={marketplaceHtml}></html>
