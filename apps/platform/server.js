@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.get('/team/jw', (req, res) => {
+app.get("/team/jw", (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">

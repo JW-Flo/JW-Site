@@ -9,7 +9,7 @@ This platform and all planning, architecture, and feature development are rigoro
 - [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) — Professional market intelligence, competitive analysis, and strategic recommendations (IDC, Gartner, 6sense, etc.)
 - [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md) — Small business IT automation market sizing, competitive gaps, and platform feature recommendations
 
-All roadmap decisions, architectural choices, and feature prioritization are referenced to these reports. Please consult them for rationale, data, and ongoing alignment.
+All roadmap decisions, architectural choices, and feature prioritization are referenced to these reports. Please consult them for rationale, data, and ongoing alignment
 ---
 
 **Primary Domain:** atlasit.pro  
@@ -26,12 +26,14 @@ This app is part of the AtlasIT monorepo:
 - Other apps: `apps/platform/`, `apps/marketing/`
 
 To run this app in the monorepo:
+
 ```bash
 cd apps/jw-immersive
 npm run dev
 ```
 
 For full monorepo development:
+
 ```bash
 npm run dev  # from root
 ```
@@ -223,7 +225,6 @@ On exhaustion: HTTP 429 with the same headers and JSON body.
 
 ---
 
-
 ## AI Model Configuration (HuggingFace & Together.ai)
 
 **Together.ai Free Model (as of Sep 2025):**
@@ -233,10 +234,12 @@ On exhaustion: HTTP 429 with the same headers and JSON body.
 - Set your `TOGETHER_API_KEY` in `.env` for free-tier access (~1M tokens/month).
 
 **HuggingFace:**
+
 - Default summarization model: `facebook/bart-large-cnn` (can be changed in code for reliability)
 - Set your `HF_API_KEY` in `.env` for higher rate limits (optional, but recommended).
 
 ---
+
 ## Environment Variables & Secrets
 
 | Name | Type | Purpose | Notes |
@@ -295,8 +298,9 @@ If the variables are absent the page shows a non-intrusive notice instead of a p
 See `ARCHITECTURE.md` for diagrams (ASCII + Mermaid), data flow, and future enhancement backlog. That document is the authoritative source for component relationships.
 
 ---
+
 **Research Reference:**
-All architectural decisions and future enhancements are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for justification and strategic context.
+All architectural decisions and future enhancements are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for justification and strategic context
 ---
 
 ---

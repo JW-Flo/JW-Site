@@ -1,8 +1,21 @@
 ---
-import { LayoutShell, Input, Button } from '@atlasit/ui';
-
 const title = "Login - AtlasIT";
-const content = `
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - AtlasIT</title>
+  
+  <style>
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .input-field { transition: all 0.2s ease; }
+    .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="max-w-md w-full">
       <!-- Header -->
@@ -16,30 +29,32 @@ const content = `
         <h2 class="text-2xl font-semibold text-slate-100 mb-2">Welcome Back</h2>
         <p class="text-slate-400">Sign in to your AtlasIT account</p>
       </div>
-      
+
       <!-- Login Form -->
       <div class="glass-effect p-8 rounded-2xl border border-slate-700/50 shadow-2xl">
         <form class="space-y-6">
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-            ${Input({
-              type: 'email',
-              placeholder: 'Enter your email',
-              name: 'email',
-              required: true
-            })}
+            <input
+              type="email"
+              placeholder="Enter your email"
+              name="email"
+              required
+              class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none"
+            >
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
-            ${Input({
-              type: 'password',
-              placeholder: 'Enter your password',
-              name: 'password',
-              required: true
-            })}
+            <input
+              type="password"
+              placeholder="Enter your password"
+              name="password"
+              required
+              class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none"
+            >
           </div>
-          
+
           <div class="flex items-center justify-between">
             <label class="flex items-center">
               <input type="checkbox" class="w-4 h-4 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2">
@@ -47,22 +62,23 @@ const content = `
             </label>
             <a href="#" class="text-sm text-blue-400 hover:text-blue-300">Forgot password?</a>
           </div>
-          
-          ${Button({
-            children: 'Sign In',
-            variant: 'primary',
-            size: 'lg'
-          })}
+
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            Sign In
+          </button>
         </form>
-        
+
         <div class="mt-6 text-center">
           <p class="text-slate-400">
-            Don't have an account? 
+            Don't have an account?
             <a href="/register" class="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200">Create one</a>
           </p>
         </div>
       </div>
-      
+
       <!-- Demo Credentials -->
       <div class="mt-6 glass-effect p-4 rounded-lg border border-slate-700/50">
         <p class="text-slate-400 text-sm text-center mb-2">Demo Credentials:</p>
@@ -70,14 +86,8 @@ const content = `
       </div>
     </div>
   </div>
-`;
 
-export const loginHtml = LayoutShell({ title, children: content });
----
-
-<html lang="en" set:html={loginHtml}></html>
-
-<script>
+  <script>
     document.querySelector('form').addEventListener('submit', (e) => {
       e.preventDefault();
       const email = e.target.email.value;
@@ -98,3 +108,5 @@ export const loginHtml = LayoutShell({ title, children: content });
       window.location.href = '/dashboard';
     }
   </script>
+</body>
+</html>

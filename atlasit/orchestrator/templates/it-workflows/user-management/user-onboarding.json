@@ -15,12 +15,12 @@
           "type": "object",
           "required": ["email", "firstName", "lastName", "department"],
           "properties": {
-            "email": {"type": "string", "format": "email"},
-            "firstName": {"type": "string", "minLength": 1},
-            "lastName": {"type": "string", "minLength": 1},
-            "department": {"type": "string", "minLength": 1},
-            "manager": {"type": "string", "format": "email"},
-            "startDate": {"type": "string", "format": "date"}
+            "email": { "type": "string", "format": "email" },
+            "firstName": { "type": "string", "minLength": 1 },
+            "lastName": { "type": "string", "minLength": 1 },
+            "department": { "type": "string", "minLength": 1 },
+            "manager": { "type": "string", "format": "email" },
+            "startDate": { "type": "string", "format": "date" }
           }
         }
       },
@@ -190,7 +190,14 @@
   },
   "metadata": {
     "estimatedDuration": "5-10 minutes",
-    "systems": ["activeDirectory", "office365", "slack", "licenseManager", "emailService", "auditLog"],
+    "systems": [
+      "activeDirectory",
+      "office365",
+      "slack",
+      "licenseManager",
+      "emailService",
+      "auditLog"
+    ],
     "tags": ["onboarding", "user-management", "multi-system"]
   }
 }

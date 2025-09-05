@@ -15,9 +15,9 @@
           "type": "object",
           "required": ["userEmail", "sourceSystem", "targetSystem"],
           "properties": {
-            "userEmail": {"type": "string", "format": "email"},
-            "sourceSystem": {"type": "string"},
-            "targetSystem": {"type": "string"},
+            "userEmail": { "type": "string", "format": "email" },
+            "sourceSystem": { "type": "string" },
+            "targetSystem": { "type": "string" },
             "migrationType": {
               "type": "string",
               "enum": ["full", "incremental", "selective"],
@@ -25,12 +25,12 @@
             },
             "attributes": {
               "type": "array",
-              "items": {"type": "string"}
+              "items": { "type": "string" }
             },
-            "dataTransfer": {"type": "boolean", "default": true},
-            "permissionsTransfer": {"type": "boolean", "default": true},
-            "disableSourceAccount": {"type": "boolean", "default": true},
-            "migrationDate": {"type": "string", "format": "date"}
+            "dataTransfer": { "type": "boolean", "default": true },
+            "permissionsTransfer": { "type": "boolean", "default": true },
+            "disableSourceAccount": { "type": "boolean", "default": true },
+            "migrationDate": { "type": "string", "format": "date" }
           }
         }
       },
@@ -148,7 +148,7 @@
           "type": "transform",
           "config": {
             "operation": "set",
-            "data": {"permissionsTransferred": false}
+            "data": { "permissionsTransferred": false }
           }
         }
       },
@@ -184,7 +184,7 @@
           "type": "transform",
           "config": {
             "operation": "set",
-            "data": {"dataTransferred": false}
+            "data": { "dataTransferred": false }
           }
         }
       },
@@ -234,7 +234,7 @@
           "type": "transform",
           "config": {
             "operation": "set",
-            "data": {"sourceAccountDisabled": false}
+            "data": { "sourceAccountDisabled": false }
           }
         }
       },
@@ -340,7 +340,14 @@
   },
   "metadata": {
     "estimatedDuration": "15-45 minutes",
-    "systems": ["migrationService", "dataTransfer", "permissionTransfer", "activeDirectory", "emailService", "auditLog"],
+    "systems": [
+      "migrationService",
+      "dataTransfer",
+      "permissionTransfer",
+      "activeDirectory",
+      "emailService",
+      "auditLog"
+    ],
     "tags": ["migration", "system-integration", "data-transfer"]
   }
 }

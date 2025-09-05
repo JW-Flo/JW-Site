@@ -5,14 +5,13 @@ try {
   // dotenv not installed – ignore (keys can still come from real env)
 }
 
-
 // Debug: Log uncaught exceptions and unhandled rejections
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION:', err.stack || err);
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err.stack || err);
   process.exit(1);
 });
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('UNHANDLED REJECTION:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("UNHANDLED REJECTION:", reason);
   process.exit(1);
 });
 
@@ -21,11 +20,10 @@ const fs = require("fs").promises;
 const path = require("path");
 const fetch = require("node-fetch"); // Assume installed
 
-
-console.log('DEBUG: Initializing Express app...');
+console.log("DEBUG: Initializing Express app...");
 const app = express();
 app.use(express.json());
-console.log('DEBUG: Express app initialized.');
+console.log("DEBUG: Express app initialized.");
 
 const PORT = 5050;
 
@@ -66,7 +64,9 @@ class AIAnalyzer {
     if (model.includes("bart-large-cnn") || model.includes("llama")) {
       payload = { prompt: inputs, max_tokens: options.max_length || 150 };
     } else if (model.includes("twitter-roberta-base-sentiment")) {
-      payload = { prompt: `Analyze the sentiment of this text and respond with only: POSITIVE, NEGATIVE, or NEUTRAL followed by a confidence score (0-1):\n\n${inputs}` };
+      payload = {
+        prompt: `Analyze the sentiment of this text and respond with only: POSITIVE, NEGATIVE, or NEUTRAL followed by a confidence score (0-1):\n\n${inputs}`,
+      };
     } else if (model.includes("gpt")) {
       payload = { prompt: inputs };
     } else if (model.includes("whisper")) {
@@ -87,16 +87,38 @@ class AIAnalyzer {
 
       if (!response.ok) {
         // Log error for debugging
-        console.log(`Cloudflare AI Gateway error for ${model}: ${response.status} ${response.statusText}`);
+        console.log(
+          `Cloudflare AI Gateway error for ${model}: ${response.status} ${response.statusText}`
+        );
         // Graceful fallback: always return a default output, never error
         if (model.includes("bart-large-cnn") || model.includes("llama")) {
-          return { result: [{ summary_text: `AI summarization failed (${response.status}). Fallback: No summary generated.` }], provider: "cloudflare-ai-gateway" };
+          return {
+            result: [
+              {
+                summary_text: `AI summarization failed (${response.status}). Fallback: No summary generated.`,
+              },
+            ],
+            provider: "cloudflare-ai-gateway",
+          };
         } else if (model.includes("twitter-roberta-base-sentiment")) {
-          return { result: [[{ label: "NEUTRAL", score: 0.5 }]], provider: "cloudflare-ai-gateway" };
+          return {
+            result: [[{ label: "NEUTRAL", score: 0.5 }]],
+            provider: "cloudflare-ai-gateway",
+          };
         } else if (model.includes("gpt")) {
-          return { result: { text: `AI output failed (${response.status}). Fallback: No response generated.` }, provider: "cloudflare-ai-gateway" };
+          return {
+            result: {
+              text: `AI output failed (${response.status}). Fallback: No response generated.`,
+            },
+            provider: "cloudflare-ai-gateway",
+          };
         } else if (model.includes("whisper")) {
-          return { result: { text: `AI transcription failed (${response.status}). Fallback: No transcription generated.` }, provider: "cloudflare-ai-gateway" };
+          return {
+            result: {
+              text: `AI transcription failed (${response.status}). Fallback: No transcription generated.`,
+            },
+            provider: "cloudflare-ai-gateway",
+          };
         } else {
           return { result: {}, provider: "cloudflare-ai-gateway" };
         }
@@ -104,21 +126,43 @@ class AIAnalyzer {
 
       const result = await response.json();
       // Log successful response for debugging
-      console.log(`Cloudflare AI Gateway success for ${model}: ${JSON.stringify(result).substring(0, 200)}...`);
+      console.log(
+        `Cloudflare AI Gateway success for ${model}: ${JSON.stringify(
+          result
+        ).substring(0, 200)}...`
+      );
       // Parse result for summarization/sentiment
       if (model.includes("bart-large-cnn") || model.includes("llama")) {
-        return { result: [{ summary_text: result.response || result.result || result.text || "" }], provider: "cloudflare-ai-gateway" };
+        return {
+          result: [
+            {
+              summary_text:
+                result.response || result.result || result.text || "",
+            },
+          ],
+          provider: "cloudflare-ai-gateway",
+        };
       } else if (model.includes("twitter-roberta-base-sentiment")) {
         // Expect result.response or result.result as string
         const content = result.response || result.result || result.text || "";
         const lines = content.split("\n");
         const sentimentLine = lines.find(
-          (line) => line.includes("POSITIVE") || line.includes("NEGATIVE") || line.includes("NEUTRAL")
+          (line) =>
+            line.includes("POSITIVE") ||
+            line.includes("NEGATIVE") ||
+            line.includes("NEUTRAL")
         );
         if (sentimentLine) {
           const [label, scoreStr] = sentimentLine.split(" ");
           return {
-            result: [[{ label: label || "NEUTRAL", score: parseFloat(scoreStr) || 0.5 }]],
+            result: [
+              [
+                {
+                  label: label || "NEUTRAL",
+                  score: parseFloat(scoreStr) || 0.5,
+                },
+              ],
+            ],
             provider: "cloudflare-ai-gateway",
           };
         }
@@ -131,16 +175,39 @@ class AIAnalyzer {
       }
     } catch (err) {
       // Log detailed error for debugging
-      console.log(`Cloudflare AI Gateway fetch error for ${model}:`, err.message);
+      console.log(
+        `Cloudflare AI Gateway fetch error for ${model}:`,
+        err.message
+      );
       // Graceful fallback: always return a default output, never error
       if (model.includes("bart-large-cnn") || model.includes("llama")) {
-        return { result: [{ summary_text: `AI summarization unavailable (${err.message}). Fallback: No summary generated.` }], provider: "cloudflare-ai-gateway" };
+        return {
+          result: [
+            {
+              summary_text: `AI summarization unavailable (${err.message}). Fallback: No summary generated.`,
+            },
+          ],
+          provider: "cloudflare-ai-gateway",
+        };
       } else if (model.includes("twitter-roberta-base-sentiment")) {
-        return { result: [[{ label: "NEUTRAL", score: 0.5 }]], provider: "cloudflare-ai-gateway" };
+        return {
+          result: [[{ label: "NEUTRAL", score: 0.5 }]],
+          provider: "cloudflare-ai-gateway",
+        };
       } else if (model.includes("gpt")) {
-        return { result: { text: `AI output unavailable (${err.message}). Fallback: No response generated.` }, provider: "cloudflare-ai-gateway" };
+        return {
+          result: {
+            text: `AI output unavailable (${err.message}). Fallback: No response generated.`,
+          },
+          provider: "cloudflare-ai-gateway",
+        };
       } else if (model.includes("whisper")) {
-        return { result: { text: `AI transcription unavailable (${err.message}). Fallback: No transcription generated.` }, provider: "cloudflare-ai-gateway" };
+        return {
+          result: {
+            text: `AI transcription unavailable (${err.message}). Fallback: No transcription generated.`,
+          },
+          provider: "cloudflare-ai-gateway",
+        };
       } else {
         return { result: {}, provider: "cloudflare-ai-gateway" };
       }
@@ -150,9 +217,12 @@ class AIAnalyzer {
   getTogetherModel(hfModel) {
     const modelMap = {
       "facebook/bart-large-cnn": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-      "cardiffnlp/twitter-roberta-base-sentiment": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-      "dbmdz/bert-large-cased-finetuned-conll03-english": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-      "deepset/roberta-base-squad2": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+      "cardiffnlp/twitter-roberta-base-sentiment":
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+      "dbmdz/bert-large-cased-finetuned-conll03-english":
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+      "deepset/roberta-base-squad2":
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
     };
     return modelMap[hfModel] || "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free";
   }
@@ -348,7 +418,6 @@ const aiAnalyzer = new AIAnalyzer();
 // (Will only be active when server started via CLI, also usable in tests via exported app.)
 // Added near top for clarity.
 
-
 // Helper to read repo files with filtering
 async function readRepoFiles(dir, extensions = [".md", ".js", ".ts", ".json"]) {
   const files = [];
@@ -387,11 +456,13 @@ async function fetchWlanData(urls) {
     try {
       const response = await fetch(url, {
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
           "Accept-Language": "en-US,en;q=0.5",
           "Accept-Encoding": "gzip, deflate",
-          "Connection": "keep-alive",
+          Connection: "keep-alive",
           "Upgrade-Insecure-Requests": "1",
         },
         timeout: 15000,
@@ -406,8 +477,8 @@ async function fetchWlanData(urls) {
       const text = await response.text();
       // Extract meaningful content (remove HTML tags for basic text analysis)
       const cleanText = text
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
         .replace(/<[^>]*>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
@@ -432,11 +503,11 @@ async function fetchRSSFeeds(feeds) {
       const response = await fetch(feed.url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (compatible; AtlasIT-Research/1.0)",
-          "Accept": "application/rss+xml, application/xml, text/xml",
+          Accept: "application/rss+xml, application/xml, text/xml",
         },
         timeout: 10000,
       });
-      
+
       if (!response.ok) {
         results.push({
           feed: feed.name,
@@ -445,29 +516,39 @@ async function fetchRSSFeeds(feeds) {
         });
         continue;
       }
-      
+
       const xmlText = await response.text();
-      
+
       // Simple XML parsing for RSS
       const items = [];
       const itemMatches = xmlText.match(/<item[^>]*>[\s\S]*?<\/item>/gi) || [];
-      
-      for (const itemMatch of itemMatches.slice(0, 10)) { // Limit to 10 items per feed
-        const title = itemMatch.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '';
-        const description = itemMatch.match(/<description[^>]*>([\s\S]*?)<\/description>/i)?.[1] || '';
-        const link = itemMatch.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1] || '';
-        const pubDate = itemMatch.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i)?.[1] || '';
-        
+
+      for (const itemMatch of itemMatches.slice(0, 10)) {
+        // Limit to 10 items per feed
+        const title =
+          itemMatch.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "";
+        const description =
+          itemMatch.match(
+            /<description[^>]*>([\s\S]*?)<\/description>/i
+          )?.[1] || "";
+        const link =
+          itemMatch.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1] || "";
+        const pubDate =
+          itemMatch.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i)?.[1] || "";
+
         if (title && description) {
           items.push({
-            title: title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim(),
-            description: description.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').replace(/<[^>]*>/g, '').trim(),
-            link: link.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, '$1').trim(),
+            title: title.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1").trim(),
+            description: description
+              .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1")
+              .replace(/<[^>]*>/g, "")
+              .trim(),
+            link: link.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1").trim(),
             pubDate,
           });
         }
       }
-      
+
       results.push({
         feed: feed.name,
         url: feed.url,
@@ -476,11 +557,11 @@ async function fetchRSSFeeds(feeds) {
         itemCount: items.length,
       });
     } catch (error) {
-      results.push({ 
-        feed: feed.name, 
-        url: feed.url, 
-        error: error.message, 
-        status: "failed" 
+      results.push({
+        feed: feed.name,
+        url: feed.url,
+        error: error.message,
+        status: "failed",
       });
     }
   }
@@ -498,16 +579,16 @@ async function fetchAPIData(apis) {
           url.searchParams.append(key, value);
         });
       }
-      
+
       const response = await fetch(url.toString(), {
         headers: {
           "User-Agent": "AtlasIT-Research/1.0",
-          "Accept": "application/json",
+          Accept: "application/json",
           ...api.headers,
         },
         timeout: 10000,
       });
-      
+
       if (!response.ok) {
         results.push({
           api: api.name,
@@ -516,7 +597,7 @@ async function fetchAPIData(apis) {
         });
         continue;
       }
-      
+
       const data = await response.json();
       results.push({
         api: api.name,
@@ -525,11 +606,11 @@ async function fetchAPIData(apis) {
         status: "success",
       });
     } catch (error) {
-      results.push({ 
-        api: api.name, 
-        endpoint: api.endpoint, 
-        error: error.message, 
-        status: "failed" 
+      results.push({
+        api: api.name,
+        endpoint: api.endpoint,
+        error: error.message,
+        status: "failed",
       });
     }
   }
@@ -539,19 +620,28 @@ async function fetchAPIData(apis) {
 // Comprehensive research data aggregator
 async function fetchComprehensiveResearch(query) {
   console.log(`Fetching comprehensive research for: ${query}`);
-  
+
   // RSS Feeds
   const rssFeeds = [
     { name: "TechCrunch", url: "https://techcrunch.com/feed/" },
     { name: "HackerNews", url: "https://hnrss.org/frontpage" },
-    { name: "ArsTechnica", url: "https://feeds.arstechnica.com/arstechnica/index" },
-    { name: "MIT Technology Review", url: "https://www.technologyreview.com/topnews.rss" },
+    {
+      name: "ArsTechnica",
+      url: "https://feeds.arstechnica.com/arstechnica/index",
+    },
+    {
+      name: "MIT Technology Review",
+      url: "https://www.technologyreview.com/topnews.rss",
+    },
     { name: "Wired", url: "https://www.wired.com/feed/rss" },
     { name: "ZDNet", url: "https://www.zdnet.com/news/rss.xml" },
     { name: "VentureBeat", url: "https://venturebeat.com/feed/" },
-    { name: "TechRepublic", url: "https://www.techrepublic.com/rssfeeds/articles/" },
+    {
+      name: "TechRepublic",
+      url: "https://www.techrepublic.com/rssfeeds/articles/",
+    },
   ];
-  
+
   // Free APIs (no auth required)
   const freeAPIs = [
     {
@@ -578,7 +668,7 @@ async function fetchComprehensiveResearch(query) {
       },
     },
   ];
-  
+
   // Web sources (carefully selected to avoid blocks)
   const webSources = [
     "https://news.ycombinator.com/",
@@ -587,14 +677,14 @@ async function fetchComprehensiveResearch(query) {
     "https://www.theverge.com/",
     "https://arstechnica.com/",
   ];
-  
+
   // Fetch all data sources in parallel
   const [rssData, apiData, webData] = await Promise.all([
     fetchRSSFeeds(rssFeeds),
     fetchAPIData(freeAPIs),
     fetchWlanData(webSources),
   ]);
-  
+
   return {
     rssData,
     apiData,
@@ -607,53 +697,55 @@ async function fetchComprehensiveResearch(query) {
 // Generate comprehensive research document
 async function generateResearchDocument(data) {
   const { query, rssInsights, apiInsights, webInsights, timestamp } = data;
-  
+
   // Aggregate trends and insights
   const allTrends = [...rssInsights, ...apiInsights, ...webInsights];
   const marketTrends = {};
   const sentimentData = { POSITIVE: 0, NEGATIVE: 0, NEUTRAL: 0 };
   const keyEntities = [];
   const insights = [];
-  
+
   for (const item of allTrends) {
     if (item.trends) {
       // Count market trends
-      ['automation', 'ai', 'cloud', 'security', 'growth'].forEach(trend => {
+      ["automation", "ai", "cloud", "security", "growth"].forEach((trend) => {
         if (item.trends[trend]) {
           marketTrends[trend] = (marketTrends[trend] || 0) + item.trends[trend];
         }
       });
-      
+
       // Count sentiment
       if (item.trends.sentiment) {
-        sentimentData[item.trends.sentiment.label] = 
+        sentimentData[item.trends.sentiment.label] =
           (sentimentData[item.trends.sentiment.label] || 0) + 1;
       }
-      
+
       // Collect entities
       if (item.trends.entities) {
         keyEntities.push(...item.trends.entities);
       }
-      
+
       // Collect insights
       if (item.trends.keyInsights) {
         insights.push(...item.trends.keyInsights);
       }
     }
   }
-  
+
   // Generate document
   const document = `# Comprehensive Research Report: ${query}
 Generated: ${new Date(timestamp).toLocaleString()}
 
 ## Executive Summary
-This report aggregates data from ${allTrends.length} sources including RSS feeds, news APIs, and web content to provide comprehensive insights on "${query}".
+This report aggregates data from ${
+    allTrends.length
+  } sources including RSS feeds, news APIs, and web content to provide comprehensive insights on "${query}".
 
 ## Market Trends Analysis
 ${Object.entries(marketTrends)
-  .sort(([,a], [,b]) => b - a)
+  .sort(([, a], [, b]) => b - a)
   .map(([trend, count]) => `- **${trend.toUpperCase()}**: ${count} mentions`)
-  .join('\n')}
+  .join("\n")}
 
 ## Sentiment Analysis
 - **Positive**: ${sentimentData.POSITIVE} sources
@@ -661,19 +753,35 @@ ${Object.entries(marketTrends)
 - **Neutral**: ${sentimentData.NEUTRAL} sources
 
 ## Key Findings from RSS Feeds
-${rssInsights.slice(0, 10).map(item => 
-  `### ${item.title}\n**Source**: ${item.source}\n**Summary**: ${item.summary}\n**URL**: ${item.url}\n`
-).join('\n')}
+${rssInsights
+  .slice(0, 10)
+  .map(
+    (item) =>
+      `### ${item.title}\n**Source**: ${item.source}\n**Summary**: ${item.summary}\n**URL**: ${item.url}\n`
+  )
+  .join("\n")}
 
 ## News API Insights
-${apiInsights.slice(0, 10).map(item =>
-  `### ${item.title}\n**Source**: ${item.source}\n**Summary**: ${item.summary || 'N/A'}\n**URL**: ${item.url}\n`
-).join('\n')}
+${apiInsights
+  .slice(0, 10)
+  .map(
+    (item) =>
+      `### ${item.title}\n**Source**: ${item.source}\n**Summary**: ${
+        item.summary || "N/A"
+      }\n**URL**: ${item.url}\n`
+  )
+  .join("\n")}
 
 ## Web Content Analysis
-${webInsights.slice(0, 5).map(item =>
-  `### ${item.source}\n**Word Count**: ${item.wordCount}\n**Key Content**: ${item.content.substring(0, 300)}...\n`
-).join('\n')}
+${webInsights
+  .slice(0, 5)
+  .map(
+    (item) =>
+      `### ${item.source}\n**Word Count**: ${
+        item.wordCount
+      }\n**Key Content**: ${item.content.substring(0, 300)}...\n`
+  )
+  .join("\n")}
 
 ## Top Entities Mentioned
 ${keyEntities
@@ -682,17 +790,24 @@ ${keyEntities
     return acc;
   }, {})
   .entries()
-  .sort(([,a], [,b]) => b - a)
+  .sort(([, a], [, b]) => b - a)
   .slice(0, 10)
   .map(([entity, count]) => `- ${entity} (${count} mentions)`)
-  .join('\n')}
+  .join("\n")}
 
 ## Key Insights & Recommendations
-${insights.slice(0, 15).map(insight => `- ${insight}`).join('\n')}
+${insights
+  .slice(0, 15)
+  .map((insight) => `- ${insight}`)
+  .join("\n")}
 
 ## Data Sources Summary
-- **RSS Feeds**: ${rssInsights.length} articles from ${new Set(rssInsights.map(i => i.source)).size} sources
-- **News APIs**: ${apiInsights.length} articles from ${new Set(apiInsights.map(i => i.source)).size} APIs
+- **RSS Feeds**: ${rssInsights.length} articles from ${
+    new Set(rssInsights.map((i) => i.source)).size
+  } sources
+- **News APIs**: ${apiInsights.length} articles from ${
+    new Set(apiInsights.map((i) => i.source)).size
+  } APIs
 - **Web Sources**: ${webInsights.length} pages analyzed
 - **Total Sources**: ${allTrends.length}
 
@@ -702,9 +817,12 @@ ${insights.slice(0, 15).map(insight => `- ${insight}`).join('\n')}
 `;
 
   // Save to file
-  const filename = `ComprehensiveResearch_${query.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.md`;
+  const filename = `ComprehensiveResearch_${query.replace(
+    /[^a-zA-Z0-9]/g,
+    "_"
+  )}_${new Date().toISOString().split("T")[0]}.md`;
   await fs.writeFile(`./docs/${filename}`, document);
-  
+
   return {
     document,
     filename: `./docs/${filename}`,
@@ -714,7 +832,7 @@ ${insights.slice(0, 15).map(insight => `- ${insight}`).join('\n')}
       sentimentData,
       topEntities: keyEntities.slice(0, 10),
       keyInsights: insights.slice(0, 10),
-    }
+    },
   };
 }
 
@@ -1196,19 +1314,29 @@ ${aiRecommendations
     const insights = [];
     for (const item of wlanData.filter((d) => d.content)) {
       // Summarization
-      const summaryResult = await aiAnalyzer.query("facebook/bart-large-cnn", item.content, { max_length: 50, min_length: 20 });
+      const summaryResult = await aiAnalyzer.query(
+        "facebook/bart-large-cnn",
+        item.content,
+        { max_length: 50, min_length: 20 }
+      );
       let summary = null;
       if (summaryResult.result) {
         summary = summaryResult.result[0]?.summary_text || null;
       } else {
-        summary = "AI summarization unavailable. Fallback: No summary generated.";
+        summary =
+          "AI summarization unavailable. Fallback: No summary generated.";
       }
 
       // Sentiment
-      const sentimentResult = await aiAnalyzer.query("cardiffnlp/twitter-roberta-base-sentiment", item.content);
+      const sentimentResult = await aiAnalyzer.query(
+        "cardiffnlp/twitter-roberta-base-sentiment",
+        item.content
+      );
       let sentiment = null;
       if (sentimentResult.result) {
-        const s = sentimentResult.result[0]?.find((x) => x.score > 0.3) || sentimentResult.result[0]?.[0];
+        const s =
+          sentimentResult.result[0]?.find((x) => x.score > 0.3) ||
+          sentimentResult.result[0]?.[0];
         if (s) {
           let confidence;
           if (s.score > 0.7) confidence = "HIGH";
@@ -1314,14 +1442,19 @@ ${aiRecommendations
 
   comprehensive_research: async (context) => {
     console.log("Starting comprehensive research...");
-    
+
     const researchData = await fetchComprehensiveResearch(context);
-    
+
     // Process RSS data
     const rssInsights = [];
-    for (const feed of researchData.rssData.filter(d => d.status === "success")) {
-      for (const item of feed.items.slice(0, 5)) { // Top 5 from each feed
-        const analysis = await aiAnalyzer.analyzeMarketTrends(item.title + " " + item.description);
+    for (const feed of researchData.rssData.filter(
+      (d) => d.status === "success"
+    )) {
+      for (const item of feed.items.slice(0, 5)) {
+        // Top 5 from each feed
+        const analysis = await aiAnalyzer.analyzeMarketTrends(
+          item.title + " " + item.description
+        );
         rssInsights.push({
           source: feed.feed,
           title: item.title,
@@ -1332,13 +1465,17 @@ ${aiRecommendations
         });
       }
     }
-    
+
     // Process API data
     const apiInsights = [];
-    for (const api of researchData.apiData.filter(d => d.status === "success")) {
+    for (const api of researchData.apiData.filter(
+      (d) => d.status === "success"
+    )) {
       if (api.api === "NewsAPI" && api.data.articles) {
         for (const article of api.data.articles.slice(0, 10)) {
-          const analysis = await aiAnalyzer.analyzeMarketTrends(article.title + " " + (article.description || ""));
+          const analysis = await aiAnalyzer.analyzeMarketTrends(
+            article.title + " " + (article.description || "")
+          );
           apiInsights.push({
             source: api.api,
             title: article.title,
@@ -1351,7 +1488,9 @@ ${aiRecommendations
         }
       } else if (api.api === "Reddit Search" && api.data.data?.children) {
         for (const post of api.data.data.children.slice(0, 10)) {
-          const analysis = await aiAnalyzer.analyzeMarketTrends(post.data.title + " " + (post.data.selftext || ""));
+          const analysis = await aiAnalyzer.analyzeMarketTrends(
+            post.data.title + " " + (post.data.selftext || "")
+          );
           apiInsights.push({
             source: api.api,
             title: post.data.title,
@@ -1364,10 +1503,12 @@ ${aiRecommendations
         }
       }
     }
-    
+
     // Process web data
     const webInsights = [];
-    for (const site of researchData.webData.filter(d => d.status === "success")) {
+    for (const site of researchData.webData.filter(
+      (d) => d.status === "success"
+    )) {
       const analysis = await aiAnalyzer.analyzeMarketTrends(site.content);
       webInsights.push({
         source: site.url,
@@ -1376,7 +1517,7 @@ ${aiRecommendations
         trends: analysis,
       });
     }
-    
+
     // Generate comprehensive research document
     const researchDocument = await generateResearchDocument({
       query: context,
@@ -1385,7 +1526,7 @@ ${aiRecommendations
       webInsights,
       timestamp: researchData.timestamp,
     });
-    
+
     return {
       researchData,
       insights: {
@@ -1395,11 +1536,16 @@ ${aiRecommendations
       },
       researchDocument,
       summary: {
-        totalSources: researchData.rssData.length + researchData.apiData.length + researchData.webData.length,
-        successfulSources: researchData.rssData.filter(d => d.status === "success").length + 
-                         researchData.apiData.filter(d => d.status === "success").length +
-                         researchData.webData.filter(d => d.status === "success").length,
-        totalInsights: rssInsights.length + apiInsights.length + webInsights.length,
+        totalSources:
+          researchData.rssData.length +
+          researchData.apiData.length +
+          researchData.webData.length,
+        successfulSources:
+          researchData.rssData.filter((d) => d.status === "success").length +
+          researchData.apiData.filter((d) => d.status === "success").length +
+          researchData.webData.filter((d) => d.status === "success").length,
+        totalInsights:
+          rssInsights.length + apiInsights.length + webInsights.length,
       },
       context,
     };
@@ -1411,44 +1557,71 @@ function analyzeMarketTrends(text) {
   // Enhanced trend analysis with weighted scoring
   const trends = {
     automation: {
-      count: (text.match(/automation|automated|workflow|orchestration/gi) || []).length,
+      count: (text.match(/automation|automated|workflow|orchestration/gi) || [])
+        .length,
       weight: 1.5,
-      context: extractContext(text, /automation|automated|workflow|orchestration/gi)
+      context: extractContext(
+        text,
+        /automation|automated|workflow|orchestration/gi
+      ),
     },
     ai: {
-      count: (text.match(/artificial intelligence|ai|machine learning|ml|deep learning|neural network/gi) || []).length,
+      count: (
+        text.match(
+          /artificial intelligence|ai|machine learning|ml|deep learning|neural network/gi
+        ) || []
+      ).length,
       weight: 2.0,
-      context: extractContext(text, /artificial intelligence|ai|machine learning|ml/gi)
+      context: extractContext(
+        text,
+        /artificial intelligence|ai|machine learning|ml/gi
+      ),
     },
     cloud: {
-      count: (text.match(/cloud|saas|platform|infrastructure|scalability/gi) || []).length,
+      count: (
+        text.match(/cloud|saas|platform|infrastructure|scalability/gi) || []
+      ).length,
       weight: 1.3,
-      context: extractContext(text, /cloud|saas|platform/gi)
+      context: extractContext(text, /cloud|saas|platform/gi),
     },
     security: {
-      count: (text.match(/security|compliance|gdpr|encryption|cybersecurity|threat/gi) || []).length,
+      count: (
+        text.match(
+          /security|compliance|gdpr|encryption|cybersecurity|threat/gi
+        ) || []
+      ).length,
       weight: 1.8,
-      context: extractContext(text, /security|compliance|gdpr/gi)
+      context: extractContext(text, /security|compliance|gdpr/gi),
     },
     growth: {
-      count: (text.match(/growth|scaling|expansion|adoption|market share/gi) || []).length,
+      count: (
+        text.match(/growth|scaling|expansion|adoption|market share/gi) || []
+      ).length,
       weight: 1.2,
-      context: extractContext(text, /growth|scaling|expansion/gi)
+      context: extractContext(text, /growth|scaling|expansion/gi),
     },
     innovation: {
-      count: (text.match(/innovation|disruptive|breakthrough|emerging|cutting.edge/gi) || []).length,
+      count: (
+        text.match(
+          /innovation|disruptive|breakthrough|emerging|cutting.edge/gi
+        ) || []
+      ).length,
       weight: 1.7,
-      context: extractContext(text, /innovation|disruptive|breakthrough/gi)
+      context: extractContext(text, /innovation|disruptive|breakthrough/gi),
     },
     integration: {
-      count: (text.match(/integration|api|connectivity|ecosystem|interoperability/gi) || []).length,
+      count: (
+        text.match(
+          /integration|api|connectivity|ecosystem|interoperability/gi
+        ) || []
+      ).length,
       weight: 1.4,
-      context: extractContext(text, /integration|api|connectivity/gi)
-    }
+      context: extractContext(text, /integration|api|connectivity/gi),
+    },
   };
 
   // Calculate weighted scores
-  Object.keys(trends).forEach(key => {
+  Object.keys(trends).forEach((key) => {
     trends[key].weightedScore = trends[key].count * trends[key].weight;
     trends[key].normalizedScore = Math.min(trends[key].weightedScore / 10, 1); // Normalize to 0-1
   });
@@ -1459,20 +1632,30 @@ function analyzeMarketTrends(text) {
   return {
     trends,
     marketSize: marketSizeIndicators,
-    totalWeightedScore: Object.values(trends).reduce((sum, t) => sum + t.weightedScore, 0),
+    totalWeightedScore: Object.values(trends).reduce(
+      (sum, t) => sum + t.weightedScore,
+      0
+    ),
     topTrends: Object.entries(trends)
-      .sort(([,a], [,b]) => b.weightedScore - a.weightedScore)
+      .sort(([, a], [, b]) => b.weightedScore - a.weightedScore)
       .slice(0, 3)
-      .map(([key, value]) => ({ trend: key, score: value.weightedScore, context: value.context })),
-    trendDiversity: Object.values(trends).filter(t => t.count > 0).length / Object.keys(trends).length,
-    momentumScore: calculateMomentumScore(trends)
+      .map(([key, value]) => ({
+        trend: key,
+        score: value.weightedScore,
+        context: value.context,
+      })),
+    trendDiversity:
+      Object.values(trends).filter((t) => t.count > 0).length /
+      Object.keys(trends).length,
+    momentumScore: calculateMomentumScore(trends),
   };
 }
 
 function extractContext(text, regex) {
   const matches = text.match(regex) || [];
   const contexts = [];
-  for (const match of matches.slice(0, 3)) { // Limit to 3 contexts per trend
+  for (const match of matches.slice(0, 3)) {
+    // Limit to 3 contexts per trend
     const index = text.indexOf(match);
     const start = Math.max(0, index - 50);
     const end = Math.min(text.length, index + match.length + 50);
@@ -1486,21 +1669,28 @@ function extractMarketSize(text) {
 
   // Enhanced market size extraction
   const patterns = [
-    { regex: /market\s*(?:size|value|worth)?\s*[:-]?\s*\$?[\d,]+/gi, multiplier: 1 },
+    {
+      regex: /market\s*(?:size|value|worth)?\s*[:-]?\s*\$?[\d,]+/gi,
+      multiplier: 1,
+    },
     { regex: /revenue\s*[:-]?\s*\$?[\d,]+/gi, multiplier: 1 },
-    { regex: /valuation\s*[:-]?\s*\$?[\d,]+/gi, multiplier: 1 }
+    { regex: /valuation\s*[:-]?\s*\$?[\d,]+/gi, multiplier: 1 },
   ];
 
-  patterns.forEach(pattern => {
+  patterns.forEach((pattern) => {
     const matches = text.match(pattern.regex) || [];
-    matches.forEach(match => {
+    matches.forEach((match) => {
       const parsed = parseMarketValue(match);
       if (parsed) {
         indicators.push({
           raw: match,
           value: parsed.value,
           unit: parsed.unit,
-          context: extractContext(text, new RegExp(match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'))[0] || match
+          context:
+            extractContext(
+              text,
+              new RegExp(match.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")
+            )[0] || match,
         });
       }
     });
@@ -1515,11 +1705,20 @@ function parseMarketValue(text) {
   const trillionMatch = text.match(/([\d,]+(?:\.\d+)?)\s*trillion/i);
 
   if (billionMatch) {
-    return { value: parseFloat(billionMatch[1].replace(/,/g, '')) * 1000000000, unit: 'billion' };
+    return {
+      value: parseFloat(billionMatch[1].replace(/,/g, "")) * 1000000000,
+      unit: "billion",
+    };
   } else if (millionMatch) {
-    return { value: parseFloat(millionMatch[1].replace(/,/g, '')) * 1000000, unit: 'million' };
+    return {
+      value: parseFloat(millionMatch[1].replace(/,/g, "")) * 1000000,
+      unit: "million",
+    };
   } else if (trillionMatch) {
-    return { value: parseFloat(trillionMatch[1].replace(/,/g, '')) * 1000000000000, unit: 'trillion' };
+    return {
+      value: parseFloat(trillionMatch[1].replace(/,/g, "")) * 1000000000000,
+      unit: "trillion",
+    };
   }
 
   return null;
@@ -1527,10 +1726,14 @@ function parseMarketValue(text) {
 
 function calculateMomentumScore(trends) {
   // Calculate momentum based on trend diversity and weighted scores
-  const diversityScore = Object.values(trends).filter(t => t.count > 0).length / Object.keys(trends).length;
-  const averageWeightedScore = Object.values(trends).reduce((sum, t) => sum + t.weightedScore, 0) / Object.keys(trends).length;
+  const diversityScore =
+    Object.values(trends).filter((t) => t.count > 0).length /
+    Object.keys(trends).length;
+  const averageWeightedScore =
+    Object.values(trends).reduce((sum, t) => sum + t.weightedScore, 0) /
+    Object.keys(trends).length;
 
-  return (diversityScore * 0.4) + (Math.min(averageWeightedScore / 5, 1) * 0.6);
+  return diversityScore * 0.4 + Math.min(averageWeightedScore / 5, 1) * 0.6;
 }
 
 function calculateCompetitivePosition(data) {
@@ -1547,22 +1750,25 @@ function calculateCompetitivePosition(data) {
             mentions: 0,
             sources: [],
             avgSentiment: 0,
-            marketPosition: 'unknown',
-            competitiveStrength: 0
+            marketPosition: "unknown",
+            competitiveStrength: 0,
           };
         }
         competitors[entity.name].mentions++;
         competitors[entity.name].sources.push(item.url);
 
         // Calculate competitive strength based on context
-        const strength = calculateCompetitiveStrength(item.content, entity.name);
+        const strength = calculateCompetitiveStrength(
+          item.content,
+          entity.name
+        );
         competitors[entity.name].competitiveStrength += strength;
       });
     }
   });
 
   // Process competitors with enhanced metrics
-  Object.values(competitors).forEach(comp => {
+  Object.values(competitors).forEach((comp) => {
     comp.uniqueSources = [...new Set(comp.sources)].length;
     comp.sourceDiversity = comp.uniqueSources / comp.sources.length;
     comp.competitiveStrength /= comp.mentions; // Average strength
@@ -1582,39 +1788,66 @@ function extractEntitiesWithScoring(text) {
   const companyPatterns = [
     /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:Inc|Corp|LLC|Ltd|GmbH|AG|PLC))?\b/g,
     /\b[A-Z]{2,}(?:\s+[A-Z][a-z]+)*\b/g,
-    /\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})*\b/g
+    /\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})*\b/g,
   ];
 
-  companyPatterns.forEach(pattern => {
+  companyPatterns.forEach((pattern) => {
     const matches = text.match(pattern) || [];
-    matches.forEach(match => {
+    matches.forEach((match) => {
       if (match.length > 3 && !isCommonWord(match)) {
         entities.push({
           name: match,
-          type: 'company',
-          confidence: calculateEntityConfidence(match, text)
+          type: "company",
+          confidence: calculateEntityConfidence(match, text),
         });
       }
     });
   });
 
-  return [...new Map(entities.map(item => [item.name, item])).values()];
+  return [...new Map(entities.map((item) => [item.name, item])).values()];
 }
 
 function isCommonWord(word) {
-  const commonWords = ['The', 'And', 'For', 'Are', 'But', 'Not', 'You', 'All', 'Can', 'Her', 'Was', 'One', 'Our', 'Had', 'By', 'Hot', 'But', 'Some', 'Very'];
+  const commonWords = [
+    "The",
+    "And",
+    "For",
+    "Are",
+    "But",
+    "Not",
+    "You",
+    "All",
+    "Can",
+    "Her",
+    "Was",
+    "One",
+    "Our",
+    "Had",
+    "By",
+    "Hot",
+    "But",
+    "Some",
+    "Very",
+  ];
   return commonWords.includes(word);
 }
 
 function calculateEntityConfidence(entity, text) {
   // Calculate confidence based on context and frequency
-  const frequency = (text.match(new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length;
-  const hasContext = /\b(?:company|corporation|startup|platform|solution|service)\b/i.test(text.substring(
-    Math.max(0, text.indexOf(entity) - 100),
-    text.indexOf(entity) + entity.length + 100
-  ));
+  const frequency = (
+    text.match(
+      new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi")
+    ) || []
+  ).length;
+  const hasContext =
+    /\b(?:company|corporation|startup|platform|solution|service)\b/i.test(
+      text.substring(
+        Math.max(0, text.indexOf(entity) - 100),
+        text.indexOf(entity) + entity.length + 100
+      )
+    );
 
-  return Math.min((frequency * 0.3) + (hasContext ? 0.7 : 0), 1);
+  return Math.min(frequency * 0.3 + (hasContext ? 0.7 : 0), 1);
 }
 
 function calculateCompetitiveStrength(text, company) {
@@ -1623,11 +1856,14 @@ function calculateCompetitiveStrength(text, company) {
     innovation: /\b(?:innovative|cutting.edge|breakthrough|disruptive)\b/gi,
     growth: /\b(?:growing|expansion|scaling|adoption)\b/gi,
     funding: /\b(?:funding|investment|series|valuation)\b/gi,
-    acquisition: /\b(?:acquired|acquisition|merger)\b/gi
+    acquisition: /\b(?:acquired|acquisition|merger)\b/gi,
   };
 
   let strength = 0;
-  const companyContext = extractContext(text, new RegExp(company.replace(/[.*+?^${}()|[\]\\]/g, '$&'), 'gi')).join(' ');
+  const companyContext = extractContext(
+    text,
+    new RegExp(company.replace(/[.*+?^${}()|[\]\\]/g, "$&"), "gi")
+  ).join(" ");
 
   Object.entries(strengthIndicators).forEach(([, pattern]) => {
     const matches = companyContext.match(pattern) || [];
@@ -1638,11 +1874,11 @@ function calculateCompetitiveStrength(text, company) {
 }
 
 function determineMarketPosition(competitor) {
-  if (competitor.competitiveStrength > 0.8) return 'market_leader';
-  if (competitor.competitiveStrength > 0.6) return 'strong_contender';
-  if (competitor.competitiveStrength > 0.4) return 'emerging_player';
-  if (competitor.competitiveStrength > 0.2) return 'niche_player';
-  return 'challenger';
+  if (competitor.competitiveStrength > 0.8) return "market_leader";
+  if (competitor.competitiveStrength > 0.6) return "strong_contender";
+  if (competitor.competitiveStrength > 0.4) return "emerging_player";
+  if (competitor.competitiveStrength > 0.2) return "niche_player";
+  return "challenger";
 }
 
 // Basic environment check endpoint (non-sensitive booleans only)
@@ -1667,7 +1903,7 @@ app.post("/mcp", async (req, res) => {
     return res.json({
       result: null,
       provider: "mcp-server",
-      message: `Unknown step: ${step}. Fallback: No output generated.`
+      message: `Unknown step: ${step}. Fallback: No output generated.`,
     });
   }
 
@@ -1688,7 +1924,7 @@ app.post("/mcp", async (req, res) => {
     res.json({
       result: null,
       provider: "mcp-server",
-      message: `Step ${step} failed. Fallback: No output generated.`
+      message: `Step ${step} failed. Fallback: No output generated.`,
     });
   }
 });
@@ -1696,7 +1932,6 @@ app.post("/mcp", async (req, res) => {
 app.get("/health", (req, res) => {
   res.json({ status: "healthy", timestamp: new Date().toISOString() });
 });
-
 
 if (require.main === module) {
   try {
@@ -1707,7 +1942,7 @@ if (require.main === module) {
       console.log(`Health check: http://localhost:${PORT}/health`);
     });
   } catch (err) {
-    console.error('SERVER STARTUP ERROR:', err.stack || err);
+    console.error("SERVER STARTUP ERROR:", err.stack || err);
     process.exit(1);
   }
 }

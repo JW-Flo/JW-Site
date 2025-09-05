@@ -15,27 +15,36 @@
           "type": "object",
           "required": ["userEmail", "sourceSystem"],
           "properties": {
-            "userEmail": {"type": "string", "format": "email"},
-            "sourceSystem": {"type": "string", "enum": ["hr", "activeDirectory", "office365", "manual"]},
+            "userEmail": { "type": "string", "format": "email" },
+            "sourceSystem": {
+              "type": "string",
+              "enum": ["hr", "activeDirectory", "office365", "manual"]
+            },
             "attributes": {
               "type": "object",
               "properties": {
-                "firstName": {"type": "string"},
-                "lastName": {"type": "string"},
-                "displayName": {"type": "string"},
-                "department": {"type": "string"},
-                "jobTitle": {"type": "string"},
-                "manager": {"type": "string", "format": "email"},
-                "phoneNumber": {"type": "string"},
-                "officeLocation": {"type": "string"},
-                "employeeId": {"type": "string"}
+                "firstName": { "type": "string" },
+                "lastName": { "type": "string" },
+                "displayName": { "type": "string" },
+                "department": { "type": "string" },
+                "jobTitle": { "type": "string" },
+                "manager": { "type": "string", "format": "email" },
+                "phoneNumber": { "type": "string" },
+                "officeLocation": { "type": "string" },
+                "employeeId": { "type": "string" }
               }
             },
             "syncTargets": {
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["activeDirectory", "office365", "slack", "zoom", "salesforce"]
+                "enum": [
+                  "activeDirectory",
+                  "office365",
+                  "slack",
+                  "zoom",
+                  "salesforce"
+                ]
               }
             }
           }
@@ -231,7 +240,13 @@
         ]
       },
       "order": 9,
-      "dependsOn": ["sync-active-directory", "sync-office365", "sync-slack", "sync-zoom", "sync-salesforce"]
+      "dependsOn": [
+        "sync-active-directory",
+        "sync-office365",
+        "sync-slack",
+        "sync-zoom",
+        "sync-salesforce"
+      ]
     },
     {
       "id": "log-sync-completion",
@@ -269,7 +284,14 @@
   },
   "metadata": {
     "estimatedDuration": "2-5 minutes",
-    "systems": ["activeDirectory", "office365", "slack", "zoom", "salesforce", "auditLog"],
+    "systems": [
+      "activeDirectory",
+      "office365",
+      "slack",
+      "zoom",
+      "salesforce",
+      "auditLog"
+    ],
     "tags": ["synchronization", "user-management", "profile-management"]
   }
 }

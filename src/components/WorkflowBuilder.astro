@@ -1,0 +1,187 @@
+---
+// Workflow Builder Component
+---
+<section class="max-w-6xl mx-auto mt-12 bg-slate-800/80 rounded-xl shadow-lg p-8">
+  <h1 class="text-3xl font-bold text-blue-300 mb-6">Advanced Workflow Builder</h1>
+  <p class="text-slate-300 mb-8">Create and manage complex workflows with drag-and-drop interface.</p>
+
+  <div id="workflow-builder" class="space-y-6">
+    <!-- Toolbar -->
+    <div class="flex justify-between items-center bg-slate-700/50 rounded-lg p-4">
+      <div class="flex space-x-4">
+        <button class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-semibold">+ Add Step</button>
+        <button class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded font-semibold">Save Workflow</button>
+        <button class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-semibold" id="load-workflow-btn">Load Workflow</button>
+      </div>
+      <div class="text-slate-400">Workflow: Untitled</div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="bg-slate-900/50 rounded-lg p-6 min-h-96 border-2 border-dashed border-slate-600">
+      <div class="text-center text-slate-500">
+        <p class="text-lg mb-2">Drag and drop workflow steps here</p>
+        <p class="text-sm">Start by adding your first step from the toolbar</p>
+      </div>
+      <!-- Workflow steps will be rendered here -->
+      <div id="workflow-canvas" class="space-y-4"></div>
+    </div>
+
+    <!-- Step Library -->
+    <div class="bg-slate-700/50 rounded-lg p-4">
+      <h3 class="text-lg font-semibold text-blue-300 mb-4">Available Steps</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-slate-800/80 p-3 rounded cursor-pointer hover:bg-slate-700/80 transition-colors" draggable="true">
+          <div class="text-center">
+            <div class="text-2xl mb-2">🔄</div>
+            <div class="text-sm font-medium">Action</div>
+          </div>
+        </div>
+        <div class="bg-slate-800/80 p-3 rounded cursor-pointer hover:bg-slate-700/80 transition-colors" draggable="true">
+          <div class="text-center">
+            <div class="text-2xl mb-2">⚡</div>
+            <div class="text-sm font-medium">Trigger</div>
+          </div>
+        </div>
+        <div class="bg-slate-800/80 p-3 rounded cursor-pointer hover:bg-slate-700/80 transition-colors" draggable="true">
+          <div class="text-center">
+            <div class="text-2xl mb-2">🔀</div>
+            <div class="text-sm font-medium">Condition</div>
+          </div>
+        </div>
+        <div class="bg-slate-800/80 p-3 rounded cursor-pointer hover:bg-slate-700/80 transition-colors" draggable="true">
+          <div class="text-center">
+            <div class="text-2xl mb-2">📧</div>
+            <div class="text-sm font-medium">Notification</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Workflow builder with drag-and-drop
+    let workflowSteps = [];
+    let draggedElement = null;
+
+    const canvas = document.getElementById('workflow-canvas');
+    const addStepBtn = document.querySelector('button:contains("+ Add Step")');
+    const saveBtn = document.querySelector('button:contains("Save Workflow")');
+    const loadBtn = document.getElementById('load-workflow-btn');
+    const stepLibrary = document.querySelectorAll('.cursor-pointer');
+
+    function renderWorkflow() {
+      canvas.innerHTML = '';
+      workflowSteps.forEach((step, index) => {
+        const stepEl = document.createElement('div');
+        stepEl.className = 'bg-slate-700/80 p-4 rounded-lg border border-slate-600 draggable';
+        stepEl.draggable = true;
+        stepEl.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <h4 class="font-semibold text-blue-300">${step.name}</h4>
+              <p class="text-sm text-slate-400">${step.type}</p>
+            </div>
+            <button class="text-red-400 hover:text-red-300" data-remove="${index}">×</button>
+          </div>
+        `;
+        canvas.appendChild(stepEl);
+      });
+      attachEventListeners();
+    }
+
+    function attachEventListeners() {
+      // Remove buttons
+      document.querySelectorAll('[data-remove]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = Number(btn.getAttribute('data-remove'));
+          workflowSteps.splice(index, 1);
+          renderWorkflow();
+        });
+      });
+
+      // Drag and drop for existing steps
+      document.querySelectorAll('.draggable').forEach(el => {
+        el.addEventListener('dragstart', (e) => {
+          draggedElement = e.target;
+        });
+      });
+    }
+
+    // Drag and drop from library
+    stepLibrary.forEach(step => {
+      step.addEventListener('dragstart', (e) => {
+        draggedElement = e.target;
+      });
+    });
+
+    canvas.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    canvas.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (draggedElement) {
+        const stepType = draggedElement.querySelector('.text-sm').textContent;
+        workflowSteps.push({
+          name: `${stepType} ${workflowSteps.length + 1}`,
+          type: stepType
+        });
+        renderWorkflow();
+        draggedElement = null;
+      }
+    });
+
+    // Add step button
+    addStepBtn.addEventListener('click', () => {
+      workflowSteps.push({
+        name: `Step ${workflowSteps.length + 1}`,
+        type: 'Action'
+      });
+      renderWorkflow();
+    });
+
+    // Save workflow
+    saveBtn.addEventListener('click', async () => {
+      const workflowData = {
+        name: 'Untitled Workflow',
+        steps: workflowSteps,
+        createdAt: new Date().toISOString()
+      };
+      try {
+        const response = await fetch('/api/workflows', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(workflowData)
+        });
+        if (response.ok) {
+          alert('Workflow saved successfully!');
+        } else {
+          alert('Failed to save workflow');
+        }
+      } catch (error) {
+        console.error('Error saving workflow:', error);
+        alert('Error saving workflow');
+      }
+    });
+
+    // Load workflow
+    loadBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/workflows');
+        const workflows = await response.json();
+        if (workflows.length > 0) {
+          workflowSteps = workflows[0].steps; // Load first workflow for demo
+          renderWorkflow();
+          alert('Workflow loaded!');
+        } else {
+          alert('No workflows found');
+        }
+      } catch (error) {
+        console.error('Error loading workflow:', error);
+        alert('Error loading workflow');
+      }
+    });
+
+    renderWorkflow();
+  </script>
+</section>
