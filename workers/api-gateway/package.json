@@ -1,0 +1,20 @@
+{
+  "name": "@atlasit/api-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250830.0",
+    "wrangler": "^4.33.1",
+    "typescript": "^5.9.2",
+    "eslint": "^9.34.0"
+  }
+}

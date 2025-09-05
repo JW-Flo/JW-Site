@@ -1,0 +1,52 @@
+---
+import { siteMeta, buildTitle } from '../data/siteMeta';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  url?: string; // full absolute URL of the page
+  image?: string; // absolute social sharing image
+  type?: string; // og:type override
+  noIndex?: boolean; // optionally prevent indexing
+}
+
+const props = Astro.props as Props;
+const canonicalBase = siteMeta.siteUrl.replace(/\/$/, '');
+// Build page canonical URL: use provided url or construct from Astro.url (path only when SSR build time)
+let pageUrl = props.url || (typeof Astro.url !== 'undefined' ? new URL(Astro.url.pathname, canonicalBase).toString() : canonicalBase);
+// Ensure no duplicate trailing slash except root
+if (pageUrl !== canonicalBase && /.+\/$/.test(pageUrl)) pageUrl = pageUrl.replace(/\/$/, '');
+const title = buildTitle(props.title || siteMeta.defaultTitle);
+const description = props.description || siteMeta.description;
+const ogType = props.type || 'website';
+const image = props.image || `${canonicalBase}/social-card.svg`;
+
+const ldJson = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: siteMeta.author,
+  jobTitle: 'Cybersecurity Engineer',
+  url: canonicalBase,
+  sameAs: siteMeta.sameAs,
+  seekingWork: true,
+  knowsAbout: ['Cloud Security', 'Detection Engineering', 'Threat Modeling', 'Security Automation']
+};
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={pageUrl} />
+<link rel="alternate" type="application/rss+xml" title={siteMeta.siteName + ' RSS'} href={canonicalBase + '/rss.xml'} />
+<link rel="alternate" type="application/feed+json" title={siteMeta.siteName + ' JSON Feed'} href={canonicalBase + '/feed.json'} />
+<meta property="og:site_name" content={siteMeta.siteName} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={pageUrl} />
+<meta property="og:image" content={image} />
+<meta name="twitter:card" content="summary_large_image" />
+{siteMeta.twitterHandle && siteMeta.twitterHandle.trim().length > 1 && <meta name="twitter:site" content={siteMeta.twitterHandle} />}
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+{props.noIndex && <meta name="robots" content="noindex,follow" />}
+<script type="application/ld+json">{JSON.stringify(ldJson)}</script>

@@ -1,0 +1,58 @@
+{
+  "name": "@atlasit/onboarding",
+  "version": "1.0.0",
+  "description": "AI-guided tenant onboarding service for AtlasIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "db:migrate": "wrangler d1 migrations apply atlasit-db --local",
+    "db:create": "wrangler d1 create atlasit-db"
+  },
+  "dependencies": {
+    "@atlasit/shared": "file:../shared",
+    "hono": "^4.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.22.0"
+  },
+  "name": "atlasit-onboarding",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-01-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "API_ALLOWED_KEYS": "",
+    "RATE_LIMIT_MAX_REQUESTS": "100",
+    "RATE_LIMIT_WINDOW_SECONDS": "60"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "atlasit-db",
+      "database_id": ""
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "ONBOARDING_CACHE",
+      "id": ""
+    },
+    {
+      "binding": "RATE_LIMIT",
+      "id": ""
+    }
+  ]
+}

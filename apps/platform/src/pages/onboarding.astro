@@ -1,0 +1,85 @@
+---
+import { LayoutShell, Input, Button } from '@atlasit/ui';
+
+const title = "Onboarding - AtlasIT";
+const content = `
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">Welcome to AtlasIT</h1>
+    <p class="text-gray-300 mb-8 text-center">Let's set up your IT automation platform. We'll guide you through the process.</p>
+
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Step 1: Basic Information</h2>
+        <form id="onboarding-form" class="space-y-4">
+          ${Input({
+            type: 'text',
+            placeholder: 'Tenant ID (unique identifier)',
+            name: 'tenantId',
+            required: true
+          })}
+          ${Input({
+            type: 'text',
+            placeholder: 'Company Name',
+            name: 'name',
+            required: true
+          })}
+          <select name="industry" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-800 text-white" required>
+            <option value="">Select Industry</option>
+            <option value="technology">Technology</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="finance">Finance</option>
+            <option value="retail">Retail</option>
+            <option value="manufacturing">Manufacturing</option>
+            <option value="education">Education</option>
+          </select>
+          ${Button({
+            children: 'Start Onboarding',
+            variant: 'primary',
+            size: 'lg'
+          })}
+        </form>
+      </div>
+
+      <div id="onboarding-result" class="hidden">
+        <h2 class="text-xl font-semibold mb-4">Onboarding Complete!</h2>
+        <div id="result-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+
+      try {
+        const response = await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          document.getElementById('onboarding-result').classList.remove('hidden');
+          document.getElementById('result-content').innerHTML = \`
+            <p class="text-green-400 mb-4">✅ Onboarding successful!</p>
+            <pre class="bg-gray-800 p-4 rounded text-sm overflow-x-auto">\${JSON.stringify(result, null, 2)}</pre>
+            <a href="/dashboard" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Go to Dashboard</a>
+          \`;
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        alert('Network error: ' + error.message);
+      }
+    });
+  </script>
+`;
+
+export const onboardingHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={onboardingHtml}></html>

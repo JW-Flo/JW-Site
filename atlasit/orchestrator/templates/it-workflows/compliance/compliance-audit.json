@@ -1,0 +1,346 @@
+{
+  "name": "Compliance Audit Workflow",
+  "description": "Perform compliance audits and generate reports for user access and data",
+  "category": "compliance",
+  "version": "1.0.0",
+  "triggers": ["schedule", "api", "webhook"],
+  "steps": [
+    {
+      "id": "validate-audit-request",
+      "type": "validation",
+      "name": "Validate Audit Request",
+      "description": "Validate audit request parameters",
+      "config": {
+        "schema": {
+          "type": "object",
+          "required": ["auditType", "scope"],
+          "properties": {
+            "auditType": {
+              "type": "string",
+              "enum": ["access-review", "data-retention", "permission-audit", "compliance-check"]
+            },
+            "scope": {
+              "type": "string",
+              "enum": ["all-users", "department", "system", "custom"]
+            },
+            "department": {"type": "string"},
+            "system": {"type": "string"},
+            "userFilter": {"type": "object"},
+            "complianceFramework": {
+              "type": "string",
+              "enum": ["SOX", "HIPAA", "GDPR", "PCI-DSS", "ISO27001"],
+              "default": "SOX"
+            },
+            "reportFormat": {
+              "type": "string",
+              "enum": ["json", "csv", "pdf", "html"],
+              "default": "json"
+            },
+            "notifyStakeholders": {"type": "boolean", "default": true}
+          }
+        }
+      },
+      "order": 1
+    },
+    {
+      "id": "gather-user-list",
+      "type": "http-request",
+      "name": "Gather User List",
+      "description": "Get list of users to audit based on scope",
+      "config": {
+        "method": "GET",
+        "url": "{{systems.userDirectory.baseUrl}}/users",
+        "headers": {
+          "Authorization": "{{auth.userDirectory.token}}"
+        },
+        "queryParams": {
+          "scope": "{{inputs.scope}}",
+          "department": "{{inputs.department}}",
+          "system": "{{inputs.system}}",
+          "filter": "{{inputs.userFilter}}"
+        }
+      },
+      "order": 2,
+      "dependsOn": ["validate-audit-request"]
+    },
+    {
+      "id": "audit-access-permissions",
+      "type": "parallel",
+      "name": "Audit Access Permissions",
+      "description": "Audit user access permissions across systems",
+      "config": {
+        "steps": [
+          {
+            "type": "http-request",
+            "config": {
+              "method": "GET",
+              "url": "{{systems.activeDirectory.baseUrl}}/users/{{user.email}}/permissions",
+              "headers": {
+                "Authorization": "{{auth.activeDirectory.token}}"
+              }
+            }
+          },
+          {
+            "type": "http-request",
+            "config": {
+              "method": "GET",
+              "url": "{{systems.office365.baseUrl}}/users/{{user.email}}/licenses",
+              "headers": {
+                "Authorization": "Bearer {{auth.office365.token}}"
+              }
+            }
+          },
+          {
+            "type": "http-request",
+            "config": {
+              "method": "GET",
+              "url": "{{systems.aws.baseUrl}}/iam/users/{{user.email}}/permissions",
+              "headers": {
+                "Authorization": "AWS4-HMAC-SHA256 {{auth.aws.signature}}"
+              }
+            }
+          }
+        ],
+        "foreach": "{{steps.gather-user-list.response.users}}",
+        "maxConcurrency": 5
+      },
+      "order": 3,
+      "dependsOn": ["gather-user-list"]
+    },
+    {
+      "id": "check-compliance-violations",
+      "type": "http-request",
+      "name": "Check Compliance Violations",
+      "description": "Check for compliance violations based on framework",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.complianceEngine.baseUrl}}/violations/check",
+        "headers": {
+          "Authorization": "{{auth.complianceEngine.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "framework": "{{inputs.complianceFramework}}",
+          "auditData": "{{steps.audit-access-permissions.response}}",
+          "userList": "{{steps.gather-user-list.response.users}}"
+        }
+      },
+      "order": 4,
+      "dependsOn": ["audit-access-permissions"]
+    },
+    {
+      "id": "audit-data-retention",
+      "type": "conditional",
+      "name": "Audit Data Retention",
+      "description": "Audit data retention compliance if required",
+      "config": {
+        "condition": "{{inputs.auditType}} === 'data-retention'",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.dataRetention.baseUrl}}/audit",
+            "headers": {
+              "Authorization": "{{auth.dataRetention.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "users": "{{steps.gather-user-list.response.users}}",
+              "framework": "{{inputs.complianceFramework}}",
+              "retentionPolicies": "{{compliancePolicies}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"dataRetentionAudit": "not-required"}
+          }
+        }
+      },
+      "order": 5,
+      "dependsOn": ["check-compliance-violations"]
+    },
+    {
+      "id": "generate-audit-report",
+      "type": "http-request",
+      "name": "Generate Audit Report",
+      "description": "Generate comprehensive audit report",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.reporting.baseUrl}}/reports/generate",
+        "headers": {
+          "Authorization": "{{auth.reporting.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "reportType": "compliance-audit",
+          "auditType": "{{inputs.auditType}}",
+          "framework": "{{inputs.complianceFramework}}",
+          "scope": "{{inputs.scope}}",
+          "data": {
+            "userList": "{{steps.gather-user-list.response.users}}",
+            "permissionsAudit": "{{steps.audit-access-permissions.response}}",
+            "violations": "{{steps.check-compliance-violations.response.violations}}",
+            "dataRetention": "{{steps.audit-data-retention.response}}"
+          },
+          "format": "{{inputs.reportFormat}}",
+          "timestamp": "{{currentTimestamp}}"
+        }
+      },
+      "order": 6,
+      "dependsOn": ["audit-data-retention"]
+    },
+    {
+      "id": "store-audit-results",
+      "type": "http-request",
+      "name": "Store Audit Results",
+      "description": "Store audit results in compliance database",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.complianceDb.baseUrl}}/audits",
+        "headers": {
+          "Authorization": "{{auth.complianceDb.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "auditId": "{{auditId}}",
+          "auditType": "{{inputs.auditType}}",
+          "framework": "{{inputs.complianceFramework}}",
+          "scope": "{{inputs.scope}}",
+          "results": "{{steps.generate-audit-report.response}}",
+          "violations": "{{steps.check-compliance-violations.response.violations}}",
+          "timestamp": "{{currentTimestamp}}",
+          "status": "completed"
+        }
+      },
+      "order": 7,
+      "dependsOn": ["generate-audit-report"]
+    },
+    {
+      "id": "create-remediation-tasks",
+      "type": "conditional",
+      "name": "Create Remediation Tasks",
+      "description": "Create tasks for remediation of compliance violations",
+      "config": {
+        "condition": "{{steps.check-compliance-violations.response.violations.length}} > 0",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.taskManager.baseUrl}}/tasks/bulk",
+            "headers": {
+              "Authorization": "{{auth.taskManager.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "tasks": "{{steps.check-compliance-violations.response.violations.map(v => ({ type: 'compliance-remediation', priority: v.severity, description: v.description, assignee: v.owner, dueDate: v.deadline, violationId: v.id }))}}",
+              "createdBy": "compliance-audit-workflow",
+              "auditId": "{{auditId}}"
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"remediationTasksCreated": 0}
+          }
+        }
+      },
+      "order": 8,
+      "dependsOn": ["store-audit-results"]
+    },
+    {
+      "id": "notify-stakeholders",
+      "type": "conditional",
+      "name": "Notify Stakeholders",
+      "description": "Send audit report to stakeholders",
+      "config": {
+        "condition": "{{inputs.notifyStakeholders}}",
+        "trueStep": {
+          "type": "http-request",
+          "config": {
+            "method": "POST",
+            "url": "{{systems.emailService.baseUrl}}/emails/send",
+            "headers": {
+              "Authorization": "{{auth.emailService.token}}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "to": "{{stakeholderEmails}}",
+              "template": "audit-report",
+              "attachments": [
+                {
+                  "filename": "audit-report-{{auditId}}.{{inputs.reportFormat}}",
+                  "content": "{{steps.generate-audit-report.response.content}}",
+                  "type": "application/{{inputs.reportFormat}}"
+                }
+              ],
+              "data": {
+                "auditType": "{{inputs.auditType}}",
+                "framework": "{{inputs.complianceFramework}}",
+                "scope": "{{inputs.scope}}",
+                "violationsCount": "{{steps.check-compliance-violations.response.violations.length}}",
+                "auditId": "{{auditId}}",
+                "timestamp": "{{currentTimestamp}}"
+              }
+            }
+          }
+        },
+        "falseStep": {
+          "type": "transform",
+          "config": {
+            "operation": "set",
+            "data": {"notificationsSent": false}
+          }
+        }
+      },
+      "order": 9,
+      "dependsOn": ["create-remediation-tasks"]
+    },
+    {
+      "id": "log-audit-completion",
+      "type": "http-request",
+      "name": "Log Audit Completion",
+      "description": "Log successful audit completion",
+      "config": {
+        "method": "POST",
+        "url": "{{systems.auditLog.baseUrl}}/events",
+        "headers": {
+          "Authorization": "{{auth.auditLog.token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "event": "compliance_audit_completed",
+          "auditId": "{{auditId}}",
+          "auditType": "{{inputs.auditType}}",
+          "framework": "{{inputs.complianceFramework}}",
+          "scope": "{{inputs.scope}}",
+          "usersAudited": "{{steps.gather-user-list.response.users.length}}",
+          "violationsFound": "{{steps.check-compliance-violations.response.violations.length}}",
+          "remediationTasksCreated": "{{steps.create-remediation-tasks.response.taskCount || 0}}",
+          "reportGenerated": true,
+          "timestamp": "{{currentTimestamp}}",
+          "status": "success"
+        }
+      },
+      "order": 10,
+      "dependsOn": ["notify-stakeholders"]
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 1,
+      "backoffMs": 10000
+    },
+    "continueOnFailure": true,
+    "partialSuccessThreshold": 0.8
+  },
+  "metadata": {
+    "estimatedDuration": "30-90 minutes",
+    "systems": ["userDirectory", "activeDirectory", "office365", "aws", "complianceEngine", "dataRetention", "reporting", "complianceDb", "taskManager", "emailService", "auditLog"],
+    "tags": ["compliance", "audit", "reporting", "governance"]
+  }
+}

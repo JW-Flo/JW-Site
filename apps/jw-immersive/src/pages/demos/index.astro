@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Cloudflare Demos" description="Interactive demonstrations of Cloudflare platform capabilities">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 bg-clip-text text-transparent">
+        Cloudflare Platform Demos
+      </h1>
+      <p class="text-xl text-slate-300 mb-4">
+        Interactive demonstrations of Cloudflare's edge computing capabilities
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Edge Computing Demo -->
+      <a href="/demos/edge-demo" class="group">
+        <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300 hover:scale-105">
+          <div class="text-4xl mb-4">⚡</div>
+          <h3 class="text-xl font-bold text-blue-400 mb-2 group-hover:text-blue-300">Edge Computing</h3>
+          <p class="text-slate-300 text-sm">Live demonstration of Cloudflare edge functions and global data fetching.</p>
+        </div>
+      </a>
+
+      <!-- Geographic Location Demo -->
+      <a href="/demos/geo-test" class="group">
+        <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-6 hover:border-green-400/50 transition-all duration-300 hover:scale-105">
+          <div class="text-4xl mb-4">🌍</div>
+          <h3 class="text-xl font-bold text-green-400 mb-2 group-hover:text-green-300">Geographic Data</h3>
+          <p class="text-slate-300 text-sm">View your location data as detected by Cloudflare's edge network.</p>
+        </div>
+      </a>
+
+      <!-- R2 Storage Demo -->
+      <a href="/demos/r2-demo" class="group">
+        <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-6 hover:border-purple-400/50 transition-all duration-300 hover:scale-105">
+          <div class="text-4xl mb-4">🗂️</div>
+          <h3 class="text-xl font-bold text-purple-400 mb-2 group-hover:text-purple-300">R2 Storage</h3>
+          <p class="text-slate-300 text-sm">Browse objects stored in Cloudflare R2 object storage buckets.</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="mt-12 bg-slate-800/30 backdrop-blur-sm border border-slate-600/50 rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-blue-400 mb-4">About These Demos</h2>
+      <p class="text-slate-300 mb-4">
+        These demonstrations showcase various Cloudflare platform capabilities including:
+      </p>
+      <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4">
+        <li><strong>Edge Computing:</strong> Functions running at Cloudflare's global edge network</li>
+        <li><strong>Geographic Intelligence:</strong> Location-based data and routing</li>
+        <li><strong>R2 Object Storage:</strong> Cloudflare's S3-compatible storage solution</li>
+        <li><strong>KV Storage:</strong> Key-value data storage for fast global access</li>
+      </ul>
+      <p class="text-slate-400 text-sm mt-4">
+        These demos are part of the AtlasIT platform integration, demonstrating enterprise-grade cloud infrastructure capabilities.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

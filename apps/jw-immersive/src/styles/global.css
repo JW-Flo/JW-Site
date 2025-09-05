@@ -1,0 +1,881 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 🎮 CLEAN PROFESSIONAL THEME VARIABLES */
+:root {
+  --color-primary: #3b82f6; /* professional blue */
+  --color-accent: #6366f1; /* indigo accent */
+  --color-success: #10b981; /* clean green */
+  --color-warning: #f59e0b; /* amber warning */
+  --color-danger: #ef4444; /* red danger */
+  --color-background: #0f172a; /* dark slate */
+  --color-surface: #1e293b;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-border: #475569;
+
+  /* Subtle accent colors */
+  --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+}
+
+/* 🎮 CLEAN PROFESSIONAL BODY STYLING */
+body {
+  @apply text-slate-100 font-sans antialiased;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  font-family: "Inter", system-ui, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Lock scrolling when game active or modal open */
+body.game-mode-scroll-lock,
+body.modal-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Subtle background texture (optional) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(
+      rgba(59, 130, 246, 0.02) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+/* 🎮 RETRO ARCADE COMPONENTS */
+
+/* Professional hover effects */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Security-themed accent effects */
+.security-accent {
+  position: relative;
+}
+
+.security-accent::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #3b82f6, #1e40af);
+  border-radius: 2px;
+}
+
+/* Professional button styles */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  @apply bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-6 py-3 rounded-lg transition-all duration-200;
+  border: 1px solid #475569;
+}
+
+.btn-secondary:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Professional card styling */
+.card {
+  @apply bg-slate-800 border border-slate-700 rounded-xl p-6 transition-all duration-200;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Status indicators */
+.status-indicator {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-active {
+  @apply bg-green-900/50 text-green-300 border border-green-700;
+}
+
+.status-pending {
+  @apply bg-yellow-900/50 text-yellow-300 border border-yellow-700;
+}
+
+.status-inactive {
+  @apply bg-slate-700 text-slate-400 border border-slate-600;
+}
+
+/* Professional animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Code blocks styling */
+code {
+  @apply bg-slate-800 px-2 py-1 rounded text-sm font-mono;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+
+pre {
+  @apply bg-slate-800 p-4 rounded-lg overflow-x-auto border border-slate-700;
+}
+
+pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Professional focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+/* Focus styles for links and buttons */
+a:focus,
+button:focus {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+}
+
+/* Security-themed loading animation */
+@keyframes securityScan {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.security-loading {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.4),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: securityScan 2s infinite;
+}
+
+/* Professional tooltip */
+.tooltip {
+  @apply relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  @apply absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-slate-200 text-sm rounded-lg opacity-0 pointer-events-none transition-opacity duration-200 whitespace-nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip:hover::after {
+  @apply opacity-100;
+}
+
+/* Professional navigation */
+.nav-link {
+  @apply text-slate-300 hover:text-blue-400 transition-colors duration-200 font-medium;
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-200;
+}
+
+.nav-link:hover::after {
+  @apply w-full;
+}
+
+/* Enhanced arcade trigger styling */
+.shadow-neon {
+  box-shadow: 0 0 20px rgba(0, 211, 255, 0.5), 0 0 40px rgba(255, 94, 215, 0.3);
+}
+
+/* Professional section headers */
+.section-header {
+  @apply text-2xl font-bold text-slate-100 mb-6;
+  position: relative;
+}
+
+.section-header::after {
+  content: "";
+  @apply absolute bottom-0 left-0 w-12 h-0.5 bg-blue-500;
+}
+
+/* Professional metrics display */
+.metric-card {
+  @apply bg-slate-800 border border-slate-700 rounded-lg p-4 text-center;
+}
+
+.metric-value {
+  @apply text-2xl font-bold text-blue-400 mb-1;
+}
+
+.metric-label {
+  @apply text-sm text-slate-400 uppercase;
+}
+
+/* Retro Arcade Styling */
+.retro-active {
+  background: linear-gradient(135deg, #000000 0%, #050505 100%) !important;
+  color: var(--neon-green) !important;
+}
+
+.retro-active * {
+  font-family: "Courier New", monospace !important;
+}
+
+.retro-active nav {
+  background: linear-gradient(90deg, #000000, #070707) !important;
+  border-bottom: 2px solid var(--neon-cyan) !important;
+}
+
+.retro-active nav a {
+  color: var(--neon-cyan) !important;
+}
+
+.retro-active nav a:hover {
+  color: var(--neon-yellow) !important;
+}
+
+.retro-active .card {
+  background: linear-gradient(135deg, #111111, #222222) !important;
+  border: 2px solid #00ff00 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.2) !important;
+}
+
+.retro-active h1,
+.retro-active h2,
+.retro-active h3 {
+  color: #00ff00 !important;
+  text-shadow: 0 0 10px #00ff00 !important;
+}
+
+.retro-active p {
+  color: #ffffff !important;
+  text-shadow: 0 0 3px #ffffff !important;
+}
+
+.retro-active footer {
+  background: linear-gradient(90deg, #000000, #111111, #000000) !important;
+  border-top: 3px solid #00ff00 !important;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3) !important;
+}
+
+.retro-active footer a {
+  color: #00ff00 !important;
+  text-shadow: 0 0 5px #00ff00 !important;
+}
+
+.retro-active footer a:hover {
+  color: #ffff00 !important;
+  text-shadow: 0 0 10px #ffff00 !important;
+}
+
+/* Override professional colors with neon when retro-active */
+.retro-active .text-slate-100 {
+  color: #00ff00 !important;
+}
+.retro-active .text-slate-300 {
+  color: #00ffff !important;
+}
+.retro-active .text-slate-400 {
+  color: #ff00ff !important;
+}
+.retro-active .bg-slate-900 {
+  background-color: #000000 !important;
+}
+.retro-active .bg-slate-800 {
+  background-color: #0a0a0a !important;
+}
+.retro-active .border-slate-700 {
+  border-color: #00ffff !important;
+}
+
+/* Retro scanlines effect */
+.retro-active::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 211, 255, 0.02) 2px,
+    rgba(0, 211, 255, 0.02) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Retro glow effects */
+.retro-glow {
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.5) !important;
+}
+
+.retro-glow:hover {
+  box-shadow: 0 0 30px rgba(0, 255, 0, 0.8) !important;
+}
+
+/* Neon glow effects for buttons and interactive elements */
+.hover-neon {
+  transition: all 0.3s ease;
+  box-shadow: 0 0 5px currentColor;
+}
+
+.hover-neon:hover {
+  box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  transform: scale(1.05);
+}
+
+.pulse-neon {
+  animation: pulse-neon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-neon {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(0, 211, 255, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(0, 211, 255, 0.12);
+  }
+}
+
+/* Text glow effects */
+.text-glow {
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+
+.game-mode .text-glow {
+  text-shadow: 0 0 12px currentColor, 0 0 18px currentColor;
+}
+
+/* Gradient text effects */
+.gradient-neon {
+  background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00, #ffff00);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Border glow effects */
+.border-neon {
+  border: 2px solid;
+  border-image: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00) 1;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.border-neon:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), 0 0 30px rgba(255, 0, 255, 0.3);
+}
+
+/* Background glow effects */
+.bg-neon {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 255, 255, 0.1),
+    rgba(255, 0, 255, 0.1)
+  );
+  box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.bg-neon:hover {
+  box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.2),
+    0 0 20px rgba(255, 0, 255, 0.1);
+}
+
+/* Scanlines effect for retro feel */
+.scanlines::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, 0.03) 2px,
+    rgba(0, 255, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* CRT flicker effect */
+.crt-flicker {
+  animation: crt-flicker 0.15s infinite linear alternate;
+}
+
+@keyframes crt-flicker {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.98;
+  }
+}
+
+/* Neon button styles */
+.btn-neon {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #071023;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+}
+
+.btn-neon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.12);
+}
+
+/* Neon input styles */
+.input-neon {
+  border: 2px solid #00ffff;
+  background: rgba(0, 0, 0, 0.8);
+  color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.input-neon:focus {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 30px rgba(0, 255, 255, 0.3);
+  border-color: #ff00ff;
+}
+
+/* Game mode enhancements */
+.game-mode .retro-glow {
+  box-shadow: 0 0 22px rgba(0, 211, 255, 0.6) !important;
+}
+
+.game-mode .hover-neon:hover {
+  box-shadow: 0 0 30px currentColor, 0 0 40px currentColor,
+    0 0 50px currentColor;
+  transform: scale(1.1);
+}
+
+.game-mode .pulse-neon {
+  animation: pulse-neon-game 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-neon-game {
+  0%,
+  100% {
+    box-shadow: 0 0 10px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 30px currentColor, 0 0 40px currentColor,
+      0 0 50px currentColor;
+  }
+}
+
+/* Enhanced scanlines during game mode */
+.game-mode .scanlines::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, 0.08) 2px,
+    rgba(0, 255, 0, 0.08) 4px
+  );
+}
+
+/* Game mode CRT effect */
+.game-mode .crt-flicker {
+  animation: crt-flicker-game 0.1s infinite linear alternate;
+}
+
+@keyframes crt-flicker-game {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+/* Navigation always clickable */
+nav {
+  position: relative;
+  z-index: 40 !important;
+}
+
+nav a {
+  position: relative;
+  z-index: 50 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure navigation is always above game canvas */
+.game-mode nav {
+  z-index: 100 !important;
+}
+
+.game-mode nav a {
+  z-index: 101 !important;
+}
+
+/* Prevent game canvas from blocking navigation */
+#game-canvas {
+  pointer-events: none !important;
+}
+
+.game-mode #game-canvas {
+  pointer-events: auto !important;
+}
+
+/* 
+  🔐 CSS CRYPTOGRAPHY PUZZLE 🔐
+  
+  Hidden in these CSS comments are clues to unlock the final easter egg!
+  
+  The key is: 42
+  The cipher is: XOR with 0x2A
+  The message is: "Congratulations! You've mastered cryptography!"
+  
+  Can you decode this hex string?
+  48657820737472696E673A203141203345203432203545203132
+  
+  Hint: Convert hex to ASCII, then XOR each byte with 42 (0x2A)
+  
+  If you solve this, you might find the ultimate easter egg...
+*/
+
+/* 
+  🎯 FINAL EASTER EGG ACTIVATION 🎯
+  
+  If you've solved all the cryptography challenges:
+  1. Caesar cipher ✓
+  2. Base64 decoding ✓  
+  3. SHA-256 hashing ✓
+  4. ROT13 cipher ✓
+  5. CSS hex puzzle ✓
+  6. HTML steganography ✓
+  
+  Then you deserve the ultimate reward!
+  
+  Try this in the console:
+  window.unlockUltimateEasterEgg()
+  
+  (This function doesn't exist yet... or does it? 😉)
+*/
+
+/* 🎮 ENHANCED RETRO ARCADE ANIMATIONS */
+@keyframes neonPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor,
+      0 0 15px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor,
+      0 0 30px currentColor;
+  }
+}
+
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(100px);
+  }
+}
+
+/* 🎮 RETRO ARCADE BUTTON STYLES */
+.retro-button {
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.retro-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.retro-button:hover::before {
+  left: 100%;
+}
+
+/* 🎮 RETRO PANEL EFFECTS */
+.retro-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.retro-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  animation: scanline 2s linear infinite;
+}
+
+/* 🎮 GLITCH EFFECT */
+.glitch {
+  position: relative;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch::before {
+  animation: glitch 0.3s infinite;
+  color: #ff00ff;
+  z-index: -1;
+}
+
+.glitch::after {
+  animation: glitch 0.3s infinite reverse;
+  color: #00ffff;
+  z-index: -2;
+}
+
+/* 🎮 UTILITY CLASSES */
+.blink {
+  animation: blink 1s infinite;
+}
+
+.animate-gridPulse {
+  animation: gridPulse 3s ease-in-out infinite;
+}
+
+/* 🎮 REFINED RETRO GRID BACKGROUND */
+.retro-grid-bg {
+  background-image: linear-gradient(
+      rgba(0, 217, 255, 0.03) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  position: relative;
+}
+
+.retro-grid-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 40%,
+    rgba(15, 23, 42, 0.8) 70%
+  );
+  pointer-events: none;
+}
+
+/* 🎮 REFINED RETRO TEXT EFFECTS */
+.retro-text-glow {
+  text-shadow: 0 0 10px currentColor;
+}
+
+.retro-text-glow-soft {
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+/* 🎮 TERMINAL CURSOR ANIMATION */
+.terminal-cursor {
+  animation: terminal-blink 1.2s infinite;
+}
+
+@keyframes terminal-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes gridPulse {
+  0%,
+  100% {
+    background-size: 50px 50px;
+    opacity: 0.6;
+  }
+  50% {
+    background-size: 52px 52px;
+    opacity: 0.8;
+  }
+}
+
+/* 🎮 Retro Arcade Trigger (restored styles) */
+.game-trigger-container {
+  position: fixed;
+  /* Moved from top to bottom to avoid covering navigation */
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 60; /* above canvas (30-35) and below leaderboard (40) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-trigger-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, #1e293b, #0f172a);
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(99, 102, 241, 0.25);
+}
+
+.game-trigger-button:hover,
+.game-trigger-button:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(59, 130, 246, 0.35);
+}
+
+/* When cookie consent banner is visible, lift the trigger above it using measured height */
+body.cookie-banner-visible .game-trigger-container {
+  bottom: calc(var(--cookie-banner-height, 0px) + 1rem);
+  transition: bottom 0.3s ease;
+}
+
+body.game-mode .game-trigger-button {
+  opacity: 0; /* hide trigger once active */
+  pointer-events: none;
+}

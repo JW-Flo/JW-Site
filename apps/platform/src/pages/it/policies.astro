@@ -1,0 +1,38 @@
+---
+import { LayoutShell, Button } from '@atlasit/ui';
+
+const title = "IT Policies - AtlasIT";
+const content = `
+  <h1 class="text-3xl font-bold mb-6">IT Policies</h1>
+  <div class="mb-6">
+    ${Button({ children: 'Create Policy', variant: 'primary' })}
+  </div>
+  <div class="bg-gray-800 rounded-lg overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-700">
+        <tr>
+          <th class="px-4 py-3 text-left">Name</th>
+          <th class="px-4 py-3 text-left">Type</th>
+          <th class="px-4 py-3 text-left">Status</th>
+          <th class="px-4 py-3 text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t border-gray-700">
+          <td class="px-4 py-3">Password Policy</td>
+          <td class="px-4 py-3">Security</td>
+          <td class="px-4 py-3"><span class="bg-green-600 text-white px-2 py-1 rounded text-sm">Active</span></td>
+          <td class="px-4 py-3">
+            ${Button({ children: 'Edit', variant: 'secondary', size: 'sm' })}
+            ${Button({ children: 'Execute', variant: 'primary', size: 'sm' })}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+`;
+
+export const policiesHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={policiesHtml}></html>

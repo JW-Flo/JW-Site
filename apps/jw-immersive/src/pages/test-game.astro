@@ -1,0 +1,176 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Game Test" description="Test the game functionality">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">Game Functionality Test</h1>
+    
+    <div class="space-y-6">
+      <div class="bg-slate-800/50 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-4">🎮 Test Game Trigger</h2>
+        <p class="mb-4">Look for the game trigger button in the bottom-right corner. Click it to start the game.</p>
+        <div id="game-trigger-test" class="text-green-400"></div>
+      </div>
+
+      <div class="bg-slate-800/50 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-4">📊 Test Score Submission</h2>
+        <button id="test-score-btn" class="bg-blue-600 px-4 py-2 rounded">
+          Submit Test Score (150 points)
+        </button>
+        <div id="score-test-result" class="mt-4 text-yellow-400"></div>
+      </div>
+
+      <div class="bg-slate-800/50 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-4">📝 Test Guestbook Access</h2>
+        <button id="test-guestbook-btn" class="bg-green-600 px-4 py-2 rounded">
+          Test Guestbook Requirement
+        </button>
+        <div id="guestbook-test-result" class="mt-4 text-yellow-400"></div>
+      </div>
+
+      <div class="bg-slate-800/50 p-6 rounded-lg">
+        <h2 class="text-2xl font-bold mb-4">🏆 Current Leaderboard</h2>
+        <button id="load-leaderboard-btn" class="bg-purple-600 px-4 py-2 rounded">
+          Load Leaderboard
+        </button>
+        <div id="leaderboard-result" class="mt-4 text-yellow-400"></div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Test game trigger detection
+  function checkGameTrigger() {
+    const trigger = document.getElementById('game-trigger');
+    const result = document.getElementById('game-trigger-test');
+    if (trigger) {
+      result.textContent = '✅ Game trigger found and visible';
+      result.className = 'text-green-400';
+    } else {
+      result.textContent = '❌ Game trigger not found';
+      result.className = 'text-red-400';
+    }
+  }
+
+  // Test score submission
+  async function testScoreSubmission() {
+    const btn = document.getElementById('test-score-btn');
+    const result = document.getElementById('score-test-result');
+    
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    result.textContent = 'Testing score submission...';
+    
+    try {
+      const response = await fetch('/functions/workflows/game-score-processor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'asteroids',
+          score: 150,
+          playerName: 'TestUser' + Date.now(),
+          sessionId: 'test-' + Date.now()
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        result.innerHTML = '✅ Score submitted successfully!<br>' + 
+          'Best score: ' + data.playerStats.bestScore + '<br>' +
+          'Leaderboard position: ' + (data.isHighScore ? 'Made it!' : 'Not in top 10');
+        result.className = 'mt-4 text-green-400';
+      } else {
+        result.textContent = '❌ Score submission failed: ' + data.error;
+        result.className = 'mt-4 text-red-400';
+      }
+    } catch (error) {
+      result.textContent = '❌ Network error: ' + error.message;
+      result.className = 'mt-4 text-red-400';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit Test Score (150 points)';
+    }
+  }
+
+  // Test guestbook requirement
+  async function testGuestbookRequirement() {
+    const btn = document.getElementById('test-guestbook-btn');
+    const result = document.getElementById('guestbook-test-result');
+    
+    btn.disabled = true;
+    btn.textContent = 'Testing...';
+    result.textContent = 'Testing guestbook requirements...';
+    
+    try {
+      // First test without valid score
+      const response1 = await fetch('/api/guestbook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'NoScoreUser',
+          message: 'Test without score',
+          turnstileToken: 'test'
+        })
+      });
+      
+      const data1 = await response1.json();
+      
+      if (response1.status === 403 && data1.reason && data1.reason.includes('game scores')) {
+        result.innerHTML = '✅ Score requirement working!<br>' +
+          'Users without 100+ points are blocked: ' + data1.reason;
+        result.className = 'mt-4 text-green-400';
+      } else {
+        result.textContent = '❌ Score requirement not working properly';
+        result.className = 'mt-4 text-red-400';
+      }
+    } catch (error) {
+      result.textContent = '❌ Test error: ' + error.message;
+      result.className = 'mt-4 text-red-400';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Test Guestbook Requirement';
+    }
+  }
+
+  // Load leaderboard
+  async function loadLeaderboard() {
+    const btn = document.getElementById('load-leaderboard-btn');
+    const result = document.getElementById('leaderboard-result');
+    
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+    
+    try {
+      const response = await fetch('/functions/workflows/game-score-processor');
+      const data = await response.json();
+      
+      if (response.ok) {
+        result.innerHTML = '✅ API Status: ' + data.status + '<br>' +
+          'Endpoint working: ' + data.message;
+        result.className = 'mt-4 text-green-400';
+      } else {
+        result.textContent = '❌ API not responding properly';
+        result.className = 'mt-4 text-red-400';
+      }
+    } catch (error) {
+      result.textContent = '❌ Error: ' + error.message;
+      result.className = 'mt-4 text-red-400';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Load Leaderboard';
+    }
+  }
+
+  // Initialize tests
+  document.addEventListener('DOMContentLoaded', function() {
+    checkGameTrigger();
+    
+    document.getElementById('test-score-btn').addEventListener('click', testScoreSubmission);
+    document.getElementById('test-guestbook-btn').addEventListener('click', testGuestbookRequirement);
+    document.getElementById('load-leaderboard-btn').addEventListener('click', loadLeaderboard);
+  });
+</script>
+</BaseLayout>

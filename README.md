@@ -1,4 +1,44 @@
-# Personal Site – Joe Whittle
+# AtlasIT Platform - JW Immersive Experience
+
+This is the JW immersive experience component of the AtlasIT platform monorepo. It serves as a personal portfolio and interactive showcase for Joe Whittle's cybersecurity engineering work, now integrated under the AtlasIT brand.
+
+---
+**Strategic Alignment:**
+This platform and all planning, architecture, and feature development are rigorously aligned with authoritative market research and industry analysis. For full context, see:
+
+- [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) — Professional market intelligence, competitive analysis, and strategic recommendations (IDC, Gartner, 6sense, etc.)
+- [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md) — Small business IT automation market sizing, competitive gaps, and platform feature recommendations
+
+All roadmap decisions, architectural choices, and feature prioritization are referenced to these reports. Please consult them for rationale, data, and ongoing alignment.
+---
+
+**Primary Domain:** atlasit.pro  
+**Branding:** See monorepo root for generated logo options and taglines.  
+**Migration Guide:** See `/docs/# AtlasIT Platform Consolidation & Migra.md`
+
+## Monorepo Context
+
+This app is part of the AtlasIT monorepo:
+
+- Root: `/Users/jw/Projects/JW-Site/` (monorepo root)
+- This app: `apps/jw-immersive/`
+- Shared packages: `packages/ui/`, `packages/content/`
+- Other apps: `apps/platform/`, `apps/marketing/`
+
+To run this app in the monorepo:
+```bash
+cd apps/jw-immersive
+npm run dev
+```
+
+For full monorepo development:
+```bash
+npm run dev  # from root
+```
+
+---
+
+# Original JW-Site Documentation
 
 Cybersecurity engineering portfolio + human journey context, now served via Cloudflare Pages Worker (Astro SSR) with selective edge APIs (guestbook, consent, waitlist, geo, security scanner) and hardened security headers.
 
@@ -183,6 +223,20 @@ On exhaustion: HTTP 429 with the same headers and JSON body.
 
 ---
 
+
+## AI Model Configuration (HuggingFace & Together.ai)
+
+**Together.ai Free Model (as of Sep 2025):**
+
+- The MCP server uses Together.ai's free-tier model: `meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` for summarization, sentiment, and fallback AI tasks.
+- If you encounter errors, check Together.ai's [model list](https://www.together.ai/models) for updates.
+- Set your `TOGETHER_API_KEY` in `.env` for free-tier access (~1M tokens/month).
+
+**HuggingFace:**
+- Default summarization model: `facebook/bart-large-cnn` (can be changed in code for reliability)
+- Set your `HF_API_KEY` in `.env` for higher rate limits (optional, but recommended).
+
+---
 ## Environment Variables & Secrets
 
 | Name | Type | Purpose | Notes |
@@ -239,6 +293,11 @@ If the variables are absent the page shows a non-intrusive notice instead of a p
 ## Architecture Reference
 
 See `ARCHITECTURE.md` for diagrams (ASCII + Mermaid), data flow, and future enhancement backlog. That document is the authoritative source for component relationships.
+
+---
+**Research Reference:**
+All architectural decisions and future enhancements are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for justification and strategic context.
+---
 
 ---
 
@@ -359,8 +418,8 @@ Core concepts:
 File:
 
 - `public/arcadeHints.js` exports:
- 	- `getArcadeHint()` – returns a `{ text, segment }` object or `null` if no new hint is available.
- 	- `incrementSecretProgress(n = 1)` – increments an internal counter (future unlock triggers / meta puzzles).
+  - `getArcadeHint()` – returns a `{ text, segment }` object or `null` if no new hint is available.
+  - `incrementSecretProgress(n = 1)` – increments an internal counter (future unlock triggers / meta puzzles).
 
 Menu Integration:
 
@@ -701,3 +760,38 @@ Keep namespace small; avoid adding user-identifiable data.
 ### Extensibility
 
 Future analytics dashboards can query aggregated counts without exposing personal data. Any schema expansion must go through updated consent documentation before deployment.
+
+## Project Structure
+
+```text
+atlasit/
+├── 📚 docs/                    # Comprehensive documentation
+│   ├── api-documentation.md    # Complete API reference
+│   ├── architecture.md         # System architecture
+│   ├── deployment-guide.md     # Production deployment
+│   └── developer-guide.md      # Development guidelines
+├── 🎯 onboarding/              # AI-guided tenant setup (IMPLEMENTED)
+│   ├── src/pages/api/onboarding/  # Onboarding API endpoints
+│   │   ├── index.ts            # POST /api/onboarding
+│   │   ├── questions.ts        # GET /api/onboarding/questions
+│   │   └── [tenantId].ts       # GET /api/onboarding/:tenantId
+├── 🏪 marketplace/             # App store & integrations
+├── 🔐 auth/                    # Authentication service
+├── 🎭 orchestrator/            # Event orchestration (MCP)
+├── 🌐 api-manager/             # API gateway & routing
+├── 📱 applications/            # SaaS integrations
+├── 🏗️ terraform/               # Infrastructure as code
+├── 🎨 ui/                      # React dashboard
+├── 🔧 shared/                  # Shared utilities
+├── jw-site/                    # JW personal/marketing site (CONSOLIDATED)
+│   ├── src/                    # Main site source
+│   │   ├── pages/
+│   │   │   ├── demos/          # Cloudflare platform demos
+│   │   │   ├── api/            # AtlasIT API endpoints
+│   │   │   └── ...             # Standard pages
+│   ├── public/                 # Static assets
+│   ├── functions/              # Cloudflare functions
+│   ├── workflows/              # Workflow definitions
+│   └── package.json            # Dependencies and scripts
+└── 📜 scripts/                 # Build & deployment scripts
+```

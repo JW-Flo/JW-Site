@@ -1,0 +1,535 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "name": "Enterprise User Onboarding",
+    "description": "Complete user onboarding workflow with multi-system integration, approvals, and notifications",
+    "author": "AtlasWeave",
+    "tags": ["onboarding", "user-management", "enterprise", "automation"],
+    "created": "2025-01-15T10:00:00Z",
+    "modified": "2025-01-15T10:00:00Z",
+    "schema": "https://atlasit.com/schemas/flowweave/v1.0.0"
+  },
+  "config": {
+    "timeout": 3600000,
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffMs": 5000
+    },
+    "concurrency": 5,
+    "environment": {
+      "production": true,
+      "notificationLevel": "detailed",
+      "auditEnabled": true
+    }
+  },
+  "resources": [
+    {
+      "id": "hr-system",
+      "type": "system",
+      "name": "HR Management System",
+      "config": {
+        "baseUrl": "{{systems.hr.apiUrl}}",
+        "version": "v2"
+      },
+      "schema": {
+        "type": "object",
+        "properties": {
+          "employeeId": { "type": "string" },
+          "department": { "type": "string" },
+          "manager": { "type": "string" },
+          "startDate": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    {
+      "id": "user-data",
+      "type": "data",
+      "name": "User Profile Data",
+      "config": {
+        "source": "hr-system",
+        "fields": ["employeeId", "displayName", "email", "department", "manager"]
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "hr-new-hire",
+      "type": "event",
+      "name": "New Hire Event",
+      "config": {
+        "source": "hr-system",
+        "event": "employee.created",
+        "filter": {
+          "status": "active",
+          "employmentType": "full-time"
+        }
+      },
+      "conditions": [
+        {
+          "type": "existence",
+          "left": {
+            "type": "resource",
+            "value": "user-data.employeeId"
+          }
+        }
+      ],
+      "enabled": true
+    },
+    {
+      "id": "manual-trigger",
+      "type": "manual",
+      "name": "Manual Onboarding Trigger",
+      "config": {
+        "form": {
+          "fields": [
+            {
+              "name": "employeeId",
+              "type": "string",
+              "required": true,
+              "label": "Employee ID"
+            },
+            {
+              "name": "email",
+              "type": "email",
+              "required": true,
+              "label": "Email Address"
+            }
+          ]
+        }
+      },
+      "enabled": true
+    }
+  ],
+  "flows": [
+    {
+      "id": "user-onboarding-main",
+      "name": "Main User Onboarding Flow",
+      "description": "Orchestrates the complete user onboarding process",
+      "trigger": "hr-new-hire",
+      "steps": [
+        {
+          "id": "fetch-user-data",
+          "name": "Fetch User Data from HR",
+          "type": "action",
+          "config": {
+            "componentId": "data-transformer",
+            "transformation": "map",
+            "mapping": {
+              "userPrincipalName": "email",
+              "displayName": "displayName",
+              "department": "department",
+              "manager": "manager"
+            }
+          },
+          "inputs": {
+            "data": {
+              "type": "resource",
+              "value": "user-data"
+            },
+            "config": {
+              "type": "literal",
+              "value": {
+                "transformation": "map",
+                "mapping": {
+                  "userPrincipalName": "email",
+                  "displayName": "displayName",
+                  "department": "department",
+                  "manager": "manager"
+                }
+              }
+            }
+          },
+          "outputs": {
+            "transformedData": {
+              "type": "variable",
+              "path": "userProfile"
+            }
+          }
+        },
+        {
+          "id": "check-duplicate-user",
+          "name": "Check for Duplicate User",
+          "type": "condition",
+          "config": {
+            "condition": {
+              "type": "expression",
+              "left": {
+                "type": "expression",
+                "value": "userProfile.employeeId && !variables.existingUser"
+              }
+            }
+          },
+          "inputs": {
+            "condition": {
+              "type": "literal",
+              "value": {
+                "type": "expression",
+                "left": {
+                  "type": "expression",
+                  "value": "userProfile.employeeId && !variables.existingUser"
+                }
+              }
+            }
+          },
+          "onSuccess": ["create-ad-user", "create-o365-account"],
+          "onFailure": ["send-duplicate-notification"]
+        },
+        {
+          "id": "create-ad-user",
+          "name": "Create Active Directory User",
+          "type": "action",
+          "config": {
+            "componentId": "ad-user-management",
+            "action": "create"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "create"
+            },
+            "userData": {
+              "type": "variable",
+              "value": "userProfile"
+            }
+          },
+          "outputs": {
+            "success": {
+              "type": "variable",
+              "path": "adUserCreated"
+            },
+            "userId": {
+              "type": "variable",
+              "path": "adUserId"
+            }
+          },
+          "onFailure": ["rollback-onboarding"]
+        },
+        {
+          "id": "create-o365-account",
+          "name": "Create Office 365 Account",
+          "type": "action",
+          "config": {
+            "componentId": "o365-license-management",
+            "action": "assign"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "assign"
+            },
+            "userId": {
+              "type": "variable",
+              "value": "adUserId"
+            },
+            "licenseData": {
+              "type": "literal",
+              "value": {
+                "licenseSku": "ENTERPRISEPACK",
+                "location": "US"
+              }
+            }
+          },
+          "outputs": {
+            "success": {
+              "type": "variable",
+              "path": "o365AccountCreated"
+            }
+          },
+          "onFailure": ["rollback-onboarding"]
+        },
+        {
+          "id": "invite-to-slack",
+          "name": "Invite User to Slack",
+          "type": "action",
+          "config": {
+            "componentId": "slack-user-management",
+            "action": "invite"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "invite"
+            },
+            "userData": {
+              "type": "variable",
+              "value": "userProfile"
+            }
+          },
+          "outputs": {
+            "success": {
+              "type": "variable",
+              "path": "slackInvited"
+            }
+          }
+        },
+        {
+          "id": "setup-aws-access",
+          "name": "Setup AWS IAM Access",
+          "type": "action",
+          "config": {
+            "componentId": "aws-iam-management",
+            "action": "create"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "create"
+            },
+            "userData": {
+              "type": "literal",
+              "value": {
+                "userName": "{{userProfile.email}}",
+                "policies": ["ReadOnlyAccess"],
+                "groups": ["Developers"]
+              }
+            }
+          },
+          "outputs": {
+            "success": {
+              "type": "variable",
+              "path": "awsAccessCreated"
+            }
+          }
+        },
+        {
+          "id": "request-manager-approval",
+          "name": "Request Manager Approval",
+          "type": "action",
+          "config": {
+            "componentId": "approval-workflow",
+            "approvalType": "any",
+            "timeout": 604800000
+          },
+          "inputs": {
+            "requestData": {
+              "type": "literal",
+              "value": {
+                "requestType": "user-onboarding",
+                "requester": "HR System",
+                "description": "New employee onboarding approval"
+              }
+            },
+            "approvalConfig": {
+              "type": "literal",
+              "value": {
+                "reviewers": ["{{userProfile.manager}}"],
+                "approvalType": "any",
+                "timeout": 604800000
+              }
+            }
+          },
+          "outputs": {
+            "approved": {
+              "type": "variable",
+              "path": "managerApproved"
+            }
+          },
+          "onFailure": ["send-rejection-notification"]
+        },
+        {
+          "id": "send-welcome-notification",
+          "name": "Send Welcome Notification",
+          "type": "action",
+          "config": {
+            "componentId": "notification-sender",
+            "channel": "email"
+          },
+          "inputs": {
+            "notificationData": {
+              "type": "literal",
+              "value": {
+                "channel": "email",
+                "recipients": ["{{userProfile.email}}"],
+                "subject": "Welcome to the Company!",
+                "message": "Welcome {{userProfile.displayName}}! Your accounts have been set up and you should receive access credentials shortly.",
+                "priority": "normal"
+              }
+            }
+          }
+        },
+        {
+          "id": "log-onboarding-complete",
+          "name": "Log Onboarding Completion",
+          "type": "transform",
+          "config": {
+            "transformation": "template",
+            "template": "User {{userProfile.displayName}} ({{userProfile.employeeId}}) onboarding completed at {{new Date().toISOString()}}"
+          },
+          "inputs": {
+            "data": {
+              "type": "variable",
+              "value": "userProfile"
+            },
+            "config": {
+              "type": "literal",
+              "value": {
+                "transformation": "template",
+                "template": "User {{userProfile.displayName}} ({{userProfile.employeeId}}) onboarding completed at {{new Date().toISOString()}}"
+              }
+            }
+          },
+          "outputs": {
+            "result": {
+              "type": "variable",
+              "path": "completionLog"
+            }
+          }
+        },
+        {
+          "id": "send-duplicate-notification",
+          "name": "Send Duplicate User Notification",
+          "type": "action",
+          "config": {
+            "componentId": "notification-sender",
+            "channel": "email"
+          },
+          "inputs": {
+            "notificationData": {
+              "type": "literal",
+              "value": {
+                "channel": "email",
+                "recipients": ["hr@company.com"],
+                "subject": "Duplicate User Detected",
+                "message": "A duplicate user was detected during onboarding: {{userProfile.email}}",
+                "priority": "high"
+              }
+            }
+          }
+        },
+        {
+          "id": "rollback-onboarding",
+          "name": "Rollback Failed Onboarding",
+          "type": "parallel",
+          "config": {
+            "steps": ["rollback-ad-user", "rollback-o365-account", "rollback-slack-invite"]
+          }
+        },
+        {
+          "id": "rollback-ad-user",
+          "name": "Rollback AD User Creation",
+          "type": "action",
+          "config": {
+            "componentId": "ad-user-management",
+            "action": "delete"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "delete"
+            },
+            "userData": {
+              "type": "variable",
+              "value": "userProfile"
+            }
+          }
+        },
+        {
+          "id": "rollback-o365-account",
+          "name": "Rollback O365 Account",
+          "type": "action",
+          "config": {
+            "componentId": "o365-license-management",
+            "action": "remove"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "remove"
+            },
+            "userId": {
+              "type": "variable",
+              "value": "adUserId"
+            },
+            "licenseData": {
+              "type": "literal",
+              "value": {
+                "licenseSku": "ENTERPRISEPACK"
+              }
+            }
+          }
+        },
+        {
+          "id": "rollback-slack-invite",
+          "name": "Rollback Slack Invite",
+          "type": "action",
+          "config": {
+            "componentId": "slack-user-management",
+            "action": "deactivate"
+          },
+          "inputs": {
+            "action": {
+              "type": "literal",
+              "value": "deactivate"
+            },
+            "userData": {
+              "type": "variable",
+              "value": "userProfile"
+            }
+          }
+        },
+        {
+          "id": "send-rejection-notification",
+          "name": "Send Rejection Notification",
+          "type": "action",
+          "config": {
+            "componentId": "notification-sender",
+            "channel": "email"
+          },
+          "inputs": {
+            "notificationData": {
+              "type": "literal",
+              "value": {
+                "channel": "email",
+                "recipients": ["hr@company.com", "{{userProfile.manager}}"],
+                "subject": "User Onboarding Rejected",
+                "message": "The onboarding request for {{userProfile.displayName}} was not approved.",
+                "priority": "high"
+              }
+            }
+          }
+        }
+      ],
+      "variables": {
+        "existingUser": false,
+        "onboardingStartTime": "{{new Date().toISOString()}}",
+        "environment": "{{config.environment}}"
+      },
+      "outputs": {
+        "onboardingComplete": "{{variables.adUserCreated && variables.o365AccountCreated && variables.managerApproved}}",
+        "userId": "{{variables.adUserId}}",
+        "completionTime": "{{new Date().toISOString()}}",
+        "summary": {
+          "adCreated": "{{variables.adUserCreated}}",
+          "o365Created": "{{variables.o365AccountCreated}}",
+          "slackInvited": "{{variables.slackInvited}}",
+          "awsAccessCreated": "{{variables.awsAccessCreated}}",
+          "managerApproved": "{{variables.managerApproved}}"
+        }
+      }
+    }
+  ],
+  "errorHandlers": [
+    {
+      "id": "general-error-handler",
+      "pattern": ".*",
+      "action": "notify",
+      "config": {
+        "notification": {
+          "channel": "email",
+          "recipients": ["it-support@company.com"],
+          "subject": "Onboarding Flow Error",
+          "message": "An error occurred during user onboarding: {{error.message}}"
+        }
+      }
+    },
+    {
+      "id": "auth-error-handler",
+      "pattern": "AUTH-.*",
+      "action": "retry",
+      "config": {
+        "maxRetries": 2,
+        "delayMs": 30000
+      }
+    }
+  ]
+}

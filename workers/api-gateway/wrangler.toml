@@ -1,0 +1,15 @@
+name = "atlasit-api-gateway"
+main = "src/index.ts"
+compatibility_date = "2025-08-29"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+JWT_SECRET = "dev-secret-change-in-prod"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "atlasit-db"
+database_id = "your-d1-id-here"
+
+[build]
+command = "npm run build"

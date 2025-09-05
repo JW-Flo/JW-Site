@@ -1,0 +1,5 @@
+Contact: mailto:security@yourdomain.tld
+Preferred-Languages: en
+Canonical: https://yourdomain.tld/.well-known/security.txt
+Policy: https://yourdomain.tld/security-policy
+Hiring: https://yourdomain.tld/careers

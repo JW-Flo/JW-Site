@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Edge Computing Demo" description="Demonstration of Cloudflare edge computing capabilities">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 bg-clip-text text-transparent">
+        Edge Computing Demo
+      </h1>
+      <p class="text-xl text-slate-300 mb-4">
+        Live demonstration of Cloudflare edge functions and capabilities
+      </p>
+    </div>
+
+    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-blue-400 mb-6">Live Edge Function Calls</h2>
+      <p class="text-slate-300 mb-6">Below are live calls hitting edge functions deployed on Cloudflare Workers.</p>
+      
+      <div class="space-y-6" id="demo">
+        <div class="text-center text-slate-400 py-8">
+          Loading demo data...
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  async function fetchJSON(path){
+    const r = await fetch(path); return r.json();
+  }
+  (async () => {
+    try {
+      const geo = await fetchJSON('/api/geo');
+      const visits = await fetchJSON('/api/visits');
+      const r2 = await fetchJSON('/api/r2/list');
+      document.getElementById('demo').innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+            <h3 class="text-green-400 font-semibold mb-2">🌍 Geographic Data</h3>
+            <pre class="text-xs bg-slate-900/50 p-3 rounded overflow-auto text-green-300">${JSON.stringify(geo,null,2)}</pre>
+          </div>
+          <div class="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+            <h3 class="text-blue-400 font-semibold mb-2">📊 Visit Counter (KV)</h3>
+            <pre class="text-xs bg-slate-900/50 p-3 rounded overflow-auto text-blue-300">${JSON.stringify(visits,null,2)}</pre>
+          </div>
+          <div class="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+            <h3 class="text-purple-400 font-semibold mb-2">🗂️ R2 Storage List</h3>
+            <pre class="text-xs bg-slate-900/50 p-3 rounded overflow-auto text-purple-300">${JSON.stringify(r2,null,2)}</pre>
+          </div>
+        </div>
+      `;
+    } catch (error) {
+      document.getElementById('demo').innerHTML = `
+        <div class="text-center text-red-400 py-8">
+          Error loading demo data. Please check the console for details.
+        </div>
+      `;
+      console.error('Demo loading error:', error);
+    }
+  })();
+</script>

@@ -1,0 +1,147 @@
+---
+import { LayoutShell, Input, Button } from '@atlasit/ui';
+
+const title = "Register - AtlasIT";
+const content = `
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="max-w-md w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center space-x-3 mb-6">
+          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <span class="text-white font-bold text-xl">AI</span>
+          </div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+        <h2 class="text-2xl font-semibold text-slate-100 mb-2">Create Your Account</h2>
+        <p class="text-slate-400">Join AtlasIT for enterprise IT automation</p>
+      </div>
+      
+      <!-- Registration Form -->
+      <div class="glass-effect p-8 rounded-2xl border border-slate-700/50 shadow-2xl">
+        <form class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Company Name</label>
+            ${Input({
+              type: 'text',
+              placeholder: 'Enter your company name',
+              name: 'company',
+              required: true
+            })}
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+            ${Input({
+              type: 'email',
+              placeholder: 'Enter your email',
+              name: 'email',
+              required: true
+            })}
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+            ${Input({
+              type: 'password',
+              placeholder: 'Create a password',
+              name: 'password',
+              required: true
+            })}
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+            ${Input({
+              type: 'password',
+              placeholder: 'Confirm your password',
+              name: 'confirmPassword',
+              required: true
+            })}
+          </div>
+          
+          <div class="flex items-center">
+            <input type="checkbox" class="w-4 h-4 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2" required>
+            <span class="ml-2 text-sm text-slate-400">
+              I agree to the <a href="#" class="text-blue-400 hover:text-blue-300">Terms of Service</a> and <a href="#" class="text-blue-400 hover:text-blue-300">Privacy Policy</a>
+            </span>
+          </div>
+          
+          ${Button({
+            children: 'Create Account',
+            variant: 'primary',
+            size: 'lg'
+          })}
+        </form>
+        
+        <div class="mt-6 text-center">
+          <p class="text-slate-400">
+            Already have an account? 
+            <a href="/login" class="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200">Sign in</a>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Benefits -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="text-center">
+          <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <p class="text-xs text-slate-400">Enterprise Security</p>
+        </div>
+        <div class="text-center">
+          <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <p class="text-xs text-slate-400">Automation</p>
+        </div>
+        <div class="text-center">
+          <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <p class="text-xs text-slate-400">Compliance</p>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+export const registerHtml = LayoutShell({ title, children: content });
+---
+
+<html lang="en" set:html={registerHtml}></html>
+
+<script>
+    document.querySelector('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const company = e.target.company.value;
+      const email = e.target.email.value;
+      const password = e.target.password.value;
+      const confirmPassword = e.target.confirmPassword.value;
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+
+      if (company && email && password) {
+        localStorage.setItem('atlasit_user', JSON.stringify({ company, email, loggedIn: true }));
+        window.location.href = '/dashboard';
+      } else {
+        alert('Please fill all fields');
+      }
+    });
+
+    // Check if already logged in
+    const user = localStorage.getItem('atlasit_user');
+    if (user) {
+      window.location.href = '/dashboard';
+    }
+  </script>

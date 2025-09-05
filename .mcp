@@ -1,0 +1,67 @@
+# .mcp
+version: 1
+server:
+  name: AtlasIT-MCP
+  endpoint: http://localhost:5050/mcp
+  description: >
+    Model Context Protocol server for orchestrating market, product, and competitor research
+    using both WLAN (web/online) and local repo context to inform AtlasIT platform and product development.
+
+roles:
+  - researcher
+  - analyst
+  - reviewer
+
+protocol:
+  steps:
+    - context_ingestion
+    - wlan_market_scan
+    - wlan_competitor_scan
+    - wlan_pricing_scan
+    - persona_research
+    - repo_feature_mapping
+    - repo_code_analysis
+    - feature_value_validation
+    - pricing_packaging_analysis
+    - feedback_loop
+    - synthesis_recommendations
+
+data_sources:
+  wlan:
+    - https://www.gartner.com/
+    - https://www.crunchbase.com/
+    - https://www.g2.com/
+    - https://www.capterra.com/
+    - https://www.producthunt.com/
+    - https://news.ycombinator.com/
+    - https://www.reddit.com/r/sysadmin/
+    - https://www.reddit.com/r/ITManagers/
+    - https://www.linkedin.com/
+    - https://www.google.com/search?q=it+automation+platforms
+  repo:
+    - ./docs/
+    - ./README.md
+    - ./migrations/
+    - ./apps/
+    - ./packages/
+    - ./workers/
+    - ./infra/
+    - ./scripts/
+
+outputs:
+  - ./docs/MarketProductValidationReport.md
+  - ./docs/CompetitorMatrix.md
+  - ./docs/PricingAnalysis.md
+  - ./docs/UserPersonaProfiles.md
+  - ./docs/FeatureMapping.md
+
+usage:
+  - "Grok Agent or any MCP-compatible tool can POST a protocol step to the endpoint."
+  - "MCP server will aggregate WLAN and repo data, synthesize findings, and write reports to outputs."
+  - "Human reviewers validate and approve before roadmap changes."
+
+# Example POST payload for a protocol step:
+# {
+#   "step": "wlan_market_scan",
+#   "context": "AtlasIT IT Automation module"
+# }

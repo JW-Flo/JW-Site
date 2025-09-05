@@ -1,0 +1,499 @@
+---
+// IP Tracker Component - Shows user's IP, location, and security info
+---
+
+<div id="ip-tracker" class="fixed bottom-6 left-6 bg-slate-800/90 backdrop-blur-sm border border-slate-600 hover:border-blue-500 text-slate-200 px-4 py-3 rounded-xl font-mono text-sm cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-blue-500/30 z-40 group max-w-xs">
+  <div class="flex items-center space-x-2 mb-2">
+    <span class="text-lg">🌐</span>
+    <div class="font-semibold text-blue-400">Network Info</div>
+  </div>
+  
+  <!-- Loading State -->
+  <div id="ip-loading" class="space-y-1">
+    <div class="flex items-center space-x-2">
+      <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+      <span class="text-xs text-slate-400">Detecting IP...</span>
+    </div>
+  </div>
+  
+  <!-- IP Information Display -->
+  <div id="ip-info" class="space-y-1 hidden">
+    <div class="flex items-center space-x-2">
+      <span class="text-green-400">📍</span>
+      <span id="ip-address" class="font-bold text-green-400">Loading...</span>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+      <span class="text-blue-400">🏙️</span>
+      <span id="ip-location" class="text-xs text-slate-300">Location...</span>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+      <span id="security-icon">🔒</span>
+      <span id="security-status" class="text-xs font-medium">Analyzing...</span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <span class="text-purple-400">⚡</span>
+      <span id="performance-info" class="text-xs text-slate-300">Performance...</span>
+    </div>
+    
+    <div class="text-xs text-slate-400 pt-1 border-t border-slate-600">
+      Click to expand details
+    </div>
+  </div>
+      <span id="security-icon" class="text-yellow-400">🔒</span>
+      <span id="security-status" class="text-xs text-slate-300">Checking security...</span>
+    </div>
+    
+    <div class="flex items-center space-x-2">
+      <span class="text-purple-400">🏢</span>
+      <span id="isp-info" class="text-xs text-slate-300">ISP...</span>
+    </div>
+  </div>
+  
+  <!-- Error State -->
+  <div id="ip-error" class="space-y-1 hidden">
+    <div class="flex items-center space-x-2">
+      <span class="text-red-400">⚠️</span>
+      <span class="text-xs text-red-400">Unable to detect IP</span>
+    </div>
+    <div class="text-xs text-slate-400">Check your connection</div>
+  </div>
+  
+  <!-- Expandable Details -->
+  <div id="ip-details" class="mt-3 pt-3 border-t border-slate-600 space-y-1 hidden">
+    <div class="text-xs text-slate-400 space-y-1">
+      <div>Protocol: <span id="protocol-info" class="text-blue-400">IPv4</span></div>
+      <div>Type: <span id="connection-type" class="text-green-400">Unknown</span></div>
+      <div>VPN: <span id="vpn-status" class="text-yellow-400">Unknown</span></div>
+      <div>Proxy: <span id="proxy-status" class="text-yellow-400">Unknown</span></div>
+    </div>
+  </div>
+  
+  <div class="text-xs text-slate-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+    Click for details
+  </div>
+</div>
+
+<style>
+  #ip-tracker {
+    animation: slideInLeft 0.5s ease-out;
+  }
+  
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .security-secure {
+    color: #10b981 !important;
+  }
+  
+  .security-warning {
+    color: #f59e0b !important;
+  }
+  
+  .security-danger {
+    color: #ef4444 !important;
+  }
+</style>
+
+<script>
+  class IPTracker {
+    constructor() {
+      this.ipData = null;
+      this.expanded = false;
+      this.init();
+    }
+
+    async init() {
+      const tracker = document.getElementById('ip-tracker');
+      const loading = document.getElementById('ip-loading');
+      const info = document.getElementById('ip-info');
+      const error = document.getElementById('ip-error');
+      const details = document.getElementById('ip-details');
+
+      if (!tracker) return;
+
+      // Click handler for expansion
+      tracker.addEventListener('click', () => {
+        this.toggleDetails();
+      });
+
+      try {
+        // Fetch IP information from multiple sources for reliability
+        await this.fetchIPInfo();
+        
+        if (this.ipData) {
+          this.displayIPInfo();
+          loading.classList.add('hidden');
+          info.classList.remove('hidden');
+        } else {
+          throw new Error('No IP data received');
+        }
+      } catch (err) {
+        console.warn('IP tracking failed:', err);
+        loading.classList.add('hidden');
+        error.classList.remove('hidden');
+      }
+    }
+
+    async fetchIPInfo() {
+      // Try multiple IP detection services for reliability
+      const services = [
+        {
+          name: 'Internal API',
+          url: '/api/ip-info',
+          parser: (data) => ({
+            ip: data.ip,
+            city: data.location?.city || 'Unknown',
+            region: data.location?.region || '',
+            country: data.location?.country || 'Unknown',
+            isp: data.network?.asn || 'Unknown',
+            timezone: data.location?.timezone || '',
+            vpn: data.privacy?.vpnDetected || false,
+            proxy: data.privacy?.proxyDetected || false,
+            secure: data.secure || false,
+            protocol: data.protocol || 'HTTP',
+            userAgent: data.userAgent || '',
+            source: 'Internal API',
+            type: this.getConnectionType(data.ip)
+          })
+        },
+        {
+          name: 'IPApi.co Enhanced',
+          url: 'https://ipapi.co/json/',
+          parser: (data) => ({
+            ip: data.ip,
+            city: data.city,
+            region: data.region_code,
+            country: data.country_name,
+            isp: data.org,
+            timezone: data.timezone,
+            vpn: data.proxy || false,
+            proxy: data.proxy || false,
+            secure: location.protocol === 'https:',
+            type: this.getConnectionType(data.ip),
+            source: 'IPApi.co',
+            lat: data.latitude,
+            lon: data.longitude,
+            postal: data.postal,
+            asn: data.asn,
+            currency: data.currency,
+            calling_code: data.calling_code
+          })
+        },
+        {
+          name: 'IPify',
+          url: 'https://api.ipify.org?format=json',
+          parser: async (data) => {
+            // Simple IP only service as fallback
+            return {
+              ip: data.ip,
+              city: 'Unknown',
+              region: '',
+              country: 'Unknown',
+              isp: 'Unknown',
+              secure: location.protocol === 'https:',
+              type: this.getConnectionType(data.ip)
+            };
+          }
+        }
+      ];
+
+      for (const service of services) {
+        try {
+          console.log(`Trying IP service: ${service.name}`);
+          const startTime = performance.now();
+          const response = await fetch(service.url);
+          const endTime = performance.now();
+          const data = await response.json();
+          
+          this.ipData = await service.parser(data);
+          this.ipData.responseTime = Math.round(endTime - startTime);
+          
+          // Add performance metrics
+          await this.addPerformanceMetrics();
+          
+          console.log(`✅ ${service.name} successful:`, this.ipData);
+          return;
+        } catch (err) {
+          console.warn(`❌ ${service.name} failed:`, err);
+          continue;
+        }
+      }
+
+      // Ultimate fallback: try to get basic info from browser
+      this.ipData = {
+        ip: 'Hidden/Private',
+        city: 'Unknown',
+        country: 'Unknown',
+        isp: 'Unknown',
+        secure: true, // Default to secure for fallback
+        type: 'Unknown'
+      };
+    }
+
+    async addPerformanceMetrics() {
+      // Add connection performance data
+      if (typeof navigator !== 'undefined' && (navigator as any).connection) {
+        this.ipData.connection = {
+          effectiveType: (navigator as any).connection.effectiveType,
+          downlink: (navigator as any).connection.downlink,
+          rtt: (navigator as any).connection.rtt,
+          saveData: (navigator as any).connection.saveData
+        };
+      }
+
+      // Test DNS resolution time
+      try {
+        const dnsStart = performance.now();
+        await fetch('https://1.1.1.1/dns-query?name=example.com&type=A', {
+          method: 'HEAD',
+          mode: 'no-cors'
+        });
+        const dnsEnd = performance.now();
+        this.ipData.dnsResponseTime = Math.round(dnsEnd - dnsStart);
+      } catch (err) {
+        this.ipData.dnsResponseTime = 'Unknown';
+      }
+
+      // Enhanced security analysis
+      this.ipData.securityScore = this.calculateSecurityScore();
+    }
+
+    calculateSecurityScore() {
+      let score = 0;
+      let maxScore = 100;
+
+      // HTTPS usage (30 points)
+      if (this.ipData.secure) score += 30;
+
+      // No VPN/Proxy detected (20 points)
+      if (!this.ipData.vpn && !this.ipData.proxy) score += 20;
+
+      // Fast DNS resolution (20 points)
+      if (this.ipData.dnsResponseTime < 50) score += 20;
+      else if (this.ipData.dnsResponseTime < 100) score += 15;
+      else if (this.ipData.dnsResponseTime < 200) score += 10;
+
+      // Good connection quality (15 points)
+      if (this.ipData.connection?.effectiveType === '4g') score += 15;
+      else if (this.ipData.connection?.effectiveType === '3g') score += 10;
+      else if (this.ipData.connection?.effectiveType) score += 5;
+
+      // Valid IP type (15 points)
+      if (this.ipData.type === 'IPv6') score += 15;
+      else if (this.ipData.type === 'IPv4') score += 10;
+
+      return Math.min(score, maxScore);
+    }
+
+    getConnectionType(ip) {
+      if (!ip) return 'Unknown';
+      
+      // Basic IPv4/IPv6 detection
+      if (ip.includes(':')) return 'IPv6';
+      if (ip.includes('.')) return 'IPv4';
+      return 'Unknown';
+    }
+
+    displayIPInfo() {
+      const elements = {
+        ip: document.getElementById('ip-address'),
+        location: document.getElementById('ip-location'),
+        security: document.getElementById('security-status'),
+        securityIcon: document.getElementById('security-icon'),
+        isp: document.getElementById('isp-info'),
+        protocol: document.getElementById('protocol-info'),
+        connectionType: document.getElementById('connection-type'),
+        vpnStatus: document.getElementById('vpn-status'),
+        proxyStatus: document.getElementById('proxy-status')
+      };
+
+      if (!this.ipData) return;
+
+      // Display basic info
+      if (elements.ip) elements.ip.textContent = this.ipData.ip;
+      
+      if (elements.location) {
+        const location = [this.ipData.city, this.ipData.region, this.ipData.country]
+          .filter(Boolean)
+          .join(', ') || 'Unknown Location';
+        elements.location.textContent = location;
+      }
+
+      if (elements.isp) {
+        elements.isp.textContent = this.ipData.isp || 'Unknown ISP';
+      }
+
+      // Enhanced security assessment with score
+      this.assessSecurityWithScore(elements);
+      
+      // Update performance metrics
+      this.updatePerformanceDisplay();
+      
+      // Detailed info
+      if (elements.protocol) elements.protocol.textContent = this.ipData.type || 'Unknown';
+      if (elements.connectionType) elements.connectionType.textContent = this.getDetailedConnectionType();
+      if (elements.vpnStatus) elements.vpnStatus.textContent = this.ipData.vpn ? 'Detected' : 'Not detected';
+      if (elements.proxyStatus) elements.proxyStatus.textContent = this.ipData.proxy ? 'Detected' : 'Not detected';
+    }
+
+    assessSecurity(elements) {
+      const isHTTPS = location.protocol === 'https:';
+      const hasVPN = this.ipData.vpn;
+      const hasProxy = this.ipData.proxy;
+      const isLocalIP = this.isLocalIP(this.ipData.ip);
+      const isSecureFromAPI = this.ipData.secure;
+      
+      let securityLevel = 'secure';
+      let securityText = 'Secure Connection';
+      let securityIcon = '🔒';
+
+      // Security assessment logic
+      if (!isHTTPS && !isSecureFromAPI) {
+        securityLevel = 'danger';
+        securityText = 'Insecure (HTTP)';
+        securityIcon = '🔓';
+      } else if (isLocalIP) {
+        securityLevel = 'warning';
+        securityText = 'Local Network';
+        securityIcon = '🏠';
+      } else if (hasVPN) {
+        securityLevel = 'secure';
+        securityText = 'VPN Protected';
+        securityIcon = '🛡️';
+      } else if (hasProxy) {
+        securityLevel = 'warning';
+        securityText = 'Proxy Detected';
+        securityIcon = '🔄';
+      } else if (isHTTPS || isSecureFromAPI) {
+        securityLevel = 'secure';
+        securityText = 'HTTPS Encrypted';
+        securityIcon = '🔒';
+      }
+
+      // Additional security checks
+      const hasDoH = this.checkDNSOverHTTPS();
+      if (hasDoH && securityLevel === 'secure') {
+        securityText = 'Enhanced Security';
+        securityIcon = '🛡️';
+      }
+
+      if (elements.security) {
+        elements.security.textContent = securityText;
+        elements.security.className = `text-xs security-${securityLevel}`;
+      }
+      
+      if (elements.securityIcon) {
+        elements.securityIcon.textContent = securityIcon;
+      }
+    }
+
+    isLocalIP(ip) {
+      if (!ip || ip === 'Hidden/Unknown') return false;
+      
+      const localRanges = [
+        /^192\.168\./,
+        /^10\./,
+        /^172\.(1[6-9]|2\d|3[01])\./,
+        /^127\./,
+        /^localhost$/i
+      ];
+      
+      return localRanges.some(range => range.test(ip));
+    }
+
+    getDetailedConnectionType() {
+      if (typeof navigator === 'undefined') return 'Unknown';
+      
+      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      
+      if (connection) {
+        const type = connection.effectiveType || connection.type || 'Unknown';
+        const downlink = connection.downlink ? `${connection.downlink}Mbps` : '';
+        return downlink ? `${type} (${downlink})` : type;
+      }
+      
+      return 'Unknown';
+    }
+
+    checkDNSOverHTTPS() {
+      // Simple heuristic - check if we're on a modern browser with likely DoH support
+      try {
+        return 'DNS' in window || navigator.userAgent.includes('Firefox') || navigator.userAgent.includes('Chrome');
+      } catch {
+        return false;
+      }
+    }
+
+    assessSecurityWithScore(elements) {
+      const score = this.ipData.securityScore || 0;
+      let statusText, statusClass, iconText;
+      
+      if (score >= 80) {
+        statusText = 'Excellent';
+        statusClass = 'security-secure';
+        iconText = '🛡️';
+      } else if (score >= 60) {
+        statusText = 'Good';
+        statusClass = 'security-warning';
+        iconText = '⚡';
+      } else if (score >= 40) {
+        statusText = 'Fair';
+        statusClass = 'security-warning';
+        iconText = '⚠️';
+      } else {
+        statusText = 'Poor';
+        statusClass = 'security-danger';
+        iconText = '🚨';
+      }
+      
+      if (elements.security) {
+        elements.security.textContent = `${iconText} ${statusText} (${score}/100)`;
+        elements.security.className = `font-medium ${statusClass}`;
+      }
+      
+      if (elements.securityIcon) {
+        elements.securityIcon.textContent = iconText;
+      }
+    }
+
+    updatePerformanceDisplay() {
+      // Update any performance-related UI elements
+      const perfElement = document.getElementById('performance-info');
+      if (perfElement && this.ipData.responseTime) {
+        perfElement.textContent = `API: ${this.ipData.responseTime}ms`;
+        if (this.ipData.dnsResponseTime !== 'Unknown') {
+          perfElement.textContent += ` | DNS: ${this.ipData.dnsResponseTime}ms`;
+        }
+      }
+    }
+
+    toggleDetails() {
+      const details = document.getElementById('ip-details');
+      if (!details) return;
+
+      this.expanded = !this.expanded;
+      
+      if (this.expanded) {
+        details.classList.remove('hidden');
+      } else {
+        details.classList.add('hidden');
+      }
+    }
+  }
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    new IPTracker();
+  });
+</script>

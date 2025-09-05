@@ -1,0 +1,41 @@
+name = "atlasit-orchestrator"
+main = "dist/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+# Environment variables
+[vars]
+API_ALLOWED_KEYS = "your-api-key-here"
+RATE_LIMIT_MAX_REQUESTS = "100"
+RATE_LIMIT_WINDOW_SECONDS = "60"
+
+# Cloudflare D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "atlasit-orchestrator"
+database_id = "your-database-id-here"
+
+# Cloudflare KV Namespaces
+[[kv_namespaces]]
+binding = "WORKFLOW_CACHE"
+id = "your-workflow-cache-id-here"
+preview_id = "your-workflow-cache-preview-id-here"
+
+[[kv_namespaces]]
+binding = "EXECUTION_LOGS"
+id = "your-execution-logs-id-here"
+preview_id = "your-execution-logs-preview-id-here"
+
+# AI binding for MCP orchestration
+[ai]
+binding = "AI"
+
+# Environment-specific overrides
+[env.production]
+vars = { API_ALLOWED_KEYS = "prod-api-key-here" }
+
+[env.staging]
+vars = { API_ALLOWED_KEYS = "staging-api-key-here" }

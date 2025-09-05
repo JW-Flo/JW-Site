@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+        }
+        canvas {
+            border: 1px solid #fff;
+            background: #000;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Game System Test</h1>
+    <canvas id="game-canvas" width="800" height="600"></canvas>
+    
+    <div id="controls">
+        <button onclick="testGameManager()">Test Game Manager</button>
+        <button onclick="testAsteroids()">Test Asteroids</button>
+        <button onclick="testGameOverlay()">Test Game Overlay</button>
+        <button onclick="testImports()">Test All Imports</button>
+    </div>
+    
+    <div id="status">
+        <p>Status: Ready to test</p>
+        <div id="log"></div>
+    </div>
+
+    <script type="module">
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const statusElement = document.getElementById('status');
+        const logElement = document.getElementById('log');
+        
+        function log(message) {
+            console.log(message);
+            logElement.innerHTML += `<p>${message}</p>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function updateStatus(message) {
+            statusElement.querySelector('p').textContent = `Status: ${message}`;
+        }
+
+        // Test Game Manager
+        window.testGameManager = async function() {
+            try {
+                log('Testing GameManager import...');
+                const { GameManager } = await import('./public/GameManager.js');
+                log('✅ GameManager imported successfully');
+                
+                // Create a simple overlay mock
+                const mockOverlay = {
+                    canvas: canvas,
+                    updateLeaderboard: () => log('Mock leaderboard updated'),
+                    showMessage: (msg) => log(`Mock message: ${msg}`)
+                };
+                
+                const gameManager = new GameManager(mockOverlay);
+                log('✅ GameManager instantiated successfully');
+                updateStatus('GameManager test passed');
+            } catch (error) {
+                log(`❌ GameManager test failed: ${error.message}`);
+                updateStatus('GameManager test failed');
+            }
+        };
+
+        // Test Asteroids Game
+        window.testAsteroids = async function() {
+            try {
+                log('Testing AsteroidsGame import...');
+                const { AsteroidsGame } = await import('./public/games/AsteroidsGame.js');
+                log('✅ AsteroidsGame imported successfully');
+                
+                const mockGameManager = {
+                    playSound: () => {},
+                    saveScore: () => {},
+                    returnToMenu: () => {}
+                };
+                
+                const game = new AsteroidsGame(canvas, mockGameManager);
+                log('✅ AsteroidsGame instantiated successfully');
+                updateStatus('AsteroidsGame test passed');
+            } catch (error) {
+                log(`❌ AsteroidsGame test failed: ${error.message}`);
+                updateStatus('AsteroidsGame test failed');
+            }
+        };
+
+        // Test Game Overlay
+        window.testGameOverlay = async function() {
+            try {
+                log('Testing GameOverlay import...');
+                const { GameOverlay } = await import('./public/GameOverlay.js');
+                log('✅ GameOverlay imported successfully');
+                
+                const overlay = new GameOverlay(canvas);
+                log('✅ GameOverlay instantiated successfully');
+                updateStatus('GameOverlay test passed');
+            } catch (error) {
+                log(`❌ GameOverlay test failed: ${error.message}`);
+                updateStatus('GameOverlay test failed');
+            }
+        };
+
+        // Test all imports
+        window.testImports = async function() {
+            log('🔄 Testing all game system imports...');
+            updateStatus('Running comprehensive tests...');
+            
+            const tests = [
+                { name: 'GameManager', path: './public/GameManager.js', export: 'GameManager' },
+                { name: 'GameOverlay', path: './public/GameOverlay.js', export: 'GameOverlay' },
+                { name: 'AsteroidsGame', path: './public/games/AsteroidsGame.js', export: 'AsteroidsGame' },
+                { name: 'MenuGame', path: './public/games/MenuGame.js', export: 'MenuGame' },
+                { name: 'PacManGame', path: './public/games/PacManGame.js', export: 'PacManGame' },
+                { name: 'SpaceInvadersGame', path: './public/games/SpaceInvadersGame.js', export: 'SpaceInvadersGame' },
+                { name: 'TetrisGame', path: './public/games/TetrisGame.js', export: 'TetrisGame' }
+            ];
+            
+            let passed = 0;
+            let failed = 0;
+            
+            for (const test of tests) {
+                try {
+                    const module = await import(test.path);
+                    if (module[test.export]) {
+                        log(`✅ ${test.name}: Import successful, export found`);
+                        passed++;
+                    } else {
+                        log(`⚠️ ${test.name}: Import successful, but export '${test.export}' not found. Available: ${Object.keys(module).join(', ')}`);
+                        failed++;
+                    }
+                } catch (error) {
+                    log(`❌ ${test.name}: Import failed - ${error.message}`);
+                    failed++;
+                }
+            }
+            
+            log(`\n📊 Test Results: ${passed} passed, ${failed} failed`);
+            updateStatus(`Tests complete: ${passed}/${tests.length} passed`);
+            
+            if (failed === 0) {
+                log('🎉 All game system components are working correctly!');
+            } else {
+                log('⚠️ Some components have issues. Check the logs above.');
+            }
+        };
+
+        // Draw a simple background
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#333';
+        ctx.font = '24px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎮 Game Test Canvas', canvas.width/2, canvas.height/2);
+        ctx.font = '16px monospace';
+        ctx.fillText('Use the buttons below to test game components', canvas.width/2, canvas.height/2 + 40);
+        
+        log('Game test environment loaded. Canvas ready.');
+    </script>
+</body>
+</html>

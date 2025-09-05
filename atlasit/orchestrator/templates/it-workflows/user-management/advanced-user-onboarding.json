@@ -1,0 +1,345 @@
+{
+  "name": "Advanced User Onboarding Workflow",
+  "description": "Okta-style workflow with cards, IFTTT operators, and IdP resources",
+  "category": "user-management",
+  "version": "2.0.0",
+  "metadata": {
+    "author": "AtlasIT",
+    "tags": ["onboarding", "identity", "automation"],
+    "estimatedDuration": "15 minutes",
+    "complexity": "high"
+  },
+  "resources": {
+    "idp": {
+      "users": "{{idp.users}}",
+      "groups": "{{idp.groups}}",
+      "policies": "{{idp.policies}}",
+      "applications": "{{idp.applications}}"
+    },
+    "connectors": {
+      "activeDirectory": "{{connectors.activeDirectory}}",
+      "office365": "{{connectors.office365}}",
+      "slack": "{{connectors.slack}}",
+      "aws": "{{connectors.aws}}"
+    }
+  },
+  "cards": [
+    {
+      "id": "trigger-card",
+      "type": "trigger",
+      "name": "New User Request",
+      "icon": "user-plus",
+      "position": { "x": 50, "y": 50 },
+      "config": {
+        "triggerType": "webhook",
+        "schema": {
+          "type": "object",
+          "required": ["email", "firstName", "lastName"],
+          "properties": {
+            "email": { "type": "string", "format": "email" },
+            "firstName": { "type": "string" },
+            "lastName": { "type": "string" },
+            "department": { "type": "string" },
+            "managerEmail": { "type": "string", "format": "email" }
+          }
+        }
+      },
+      "outputs": {
+        "userData": "{{card.trigger-card.output}}"
+      }
+    },
+    {
+      "id": "validation-card",
+      "type": "condition",
+      "name": "Validate & Enrich Data",
+      "icon": "check-circle",
+      "position": { "x": 250, "y": 50 },
+      "config": {
+        "operator": "AND",
+        "conditions": [
+          {
+            "type": "schema-validation",
+            "field": "userData",
+            "schema": "user-profile-v1"
+          },
+          {
+            "type": "idp-lookup",
+            "resource": "users",
+            "field": "managerEmail",
+            "operator": "exists"
+          }
+        ]
+      },
+      "inputs": {
+        "userData": "{{card.trigger-card.output}}"
+      },
+      "outputs": {
+        "isValid": "{{card.validation-card.isValid}}",
+        "enrichedData": "{{card.validation-card.enrichedData}}",
+        "errors": "{{card.validation-card.errors}}"
+      }
+    },
+    {
+      "id": "ifttt-router",
+      "type": "ifttt",
+      "name": "Route by Department",
+      "icon": "route",
+      "position": { "x": 450, "y": 50 },
+      "config": {
+        "if": "{{card.validation-card.isValid}} === true",
+        "then": {
+          "routes": [
+            {
+              "condition": "{{card.validation-card.enrichedData.department}} === 'Engineering'",
+              "action": "route-to-engineering-path"
+            },
+            {
+              "condition": "{{card.validation-card.enrichedData.department}} === 'Sales'",
+              "action": "route-to-sales-path"
+            },
+            {
+              "condition": "{{card.validation-card.enrichedData.department}} === 'HR'",
+              "action": "route-to-hr-path"
+            }
+          ],
+          "default": "route-to-general-path"
+        },
+        "else": {
+          "action": "send-validation-error"
+        }
+      },
+      "inputs": {
+        "isValid": "{{card.validation-card.isValid}}",
+        "userData": "{{card.validation-card.enrichedData}}"
+      }
+    },
+    {
+      "id": "engineering-path",
+      "type": "flow",
+      "name": "Engineering Onboarding",
+      "icon": "code",
+      "position": { "x": 650, "y": 0 },
+      "config": {
+        "steps": [
+          {
+            "id": "create-ad-account",
+            "type": "connector-action",
+            "name": "Create AD Account",
+            "connector": "activeDirectory",
+            "action": "create-user",
+            "parameters": {
+              "email": "{{flow.input.userData.email}}",
+              "firstName": "{{flow.input.userData.firstName}}",
+              "lastName": "{{flow.input.userData.lastName}}",
+              "department": "{{flow.input.userData.department}}",
+              "groups": ["Engineering", "Developers"]
+            }
+          },
+          {
+            "id": "setup-office365",
+            "type": "connector-action",
+            "name": "Setup Office 365",
+            "connector": "office365",
+            "action": "create-user",
+            "parameters": {
+              "email": "{{flow.input.userData.email}}",
+              "firstName": "{{flow.input.userData.firstName}}",
+              "lastName": "{{flow.input.userData.lastName}}",
+              "licenses": ["E3", "Teams"]
+            }
+          },
+          {
+            "id": "invite-to-slack",
+            "type": "connector-action",
+            "name": "Invite to Slack",
+            "connector": "slack",
+            "action": "invite-user",
+            "parameters": {
+              "email": "{{flow.input.userData.email}}",
+              "channels": ["engineering", "dev-team"]
+            }
+          }
+        ]
+      },
+      "connections": {
+        "input": "{{ifttt-router.engineering-route}}",
+        "output": "{{engineering-path.complete}}"
+      }
+    },
+    {
+      "id": "sales-path",
+      "type": "flow",
+      "name": "Sales Onboarding",
+      "icon": "trending-up",
+      "position": { "x": 650, "y": 100 },
+      "config": {
+        "steps": [
+          {
+            "id": "create-ad-account",
+            "type": "connector-action",
+            "name": "Create AD Account",
+            "connector": "activeDirectory",
+            "action": "create-user",
+            "parameters": {
+              "email": "{{flow.input.userData.email}}",
+              "firstName": "{{flow.input.userData.firstName}}",
+              "lastName": "{{flow.input.userData.lastName}}",
+              "department": "{{flow.input.userData.department}}",
+              "groups": ["Sales", "CRM-Users"]
+            }
+          },
+          {
+            "id": "setup-office365",
+            "type": "connector-action",
+            "name": "Setup Office 365",
+            "connector": "office365",
+            "action": "create-user",
+            "parameters": {
+              "email": "{{flow.input.userData.email}}",
+              "firstName": "{{flow.input.userData.firstName}}",
+              "lastName": "{{flow.input.userData.lastName}}",
+              "licenses": ["E1", "Teams"]
+            }
+          }
+        ]
+      },
+      "connections": {
+        "input": "{{ifttt-router.sales-route}}",
+        "output": "{{sales-path.complete}}"
+      }
+    },
+    {
+      "id": "error-handler",
+      "type": "error",
+      "name": "Handle Errors",
+      "icon": "alert-triangle",
+      "position": { "x": 250, "y": 200 },
+      "config": {
+        "errorTypes": ["validation", "connector", "timeout"],
+        "actions": [
+          {
+            "type": "notification",
+            "template": "user-onboarding-failed",
+            "recipients": ["{{card.trigger-card.output.managerEmail}}", "it-support@company.com"]
+          },
+          {
+            "type": "log",
+            "level": "error",
+            "message": "User onboarding failed: {{error.message}}"
+          }
+        ]
+      },
+      "connections": {
+        "input": "{{validation-card.errors}}"
+      }
+    },
+    {
+      "id": "completion-notifier",
+      "type": "notification",
+      "name": "Send Completion Notice",
+      "icon": "mail",
+      "position": { "x": 850, "y": 50 },
+      "config": {
+        "type": "email",
+        "template": "onboarding-complete",
+        "recipients": [
+          "{{flow.input.userData.email}}",
+          "{{flow.input.userData.managerEmail}}"
+        ],
+        "variables": {
+          "userName": "{{flow.input.userData.firstName}} {{flow.input.userData.lastName}}",
+          "department": "{{flow.input.userData.department}}",
+          "startDate": "{{flow.input.userData.startDate}}"
+        }
+      },
+      "connections": {
+        "input": ["{{engineering-path.complete}}", "{{sales-path.complete}}", "{{hr-path.complete}}", "{{general-path.complete}}"]
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": "trigger-card",
+      "to": "validation-card",
+      "type": "data"
+    },
+    {
+      "from": "validation-card",
+      "to": "ifttt-router",
+      "type": "conditional"
+    },
+    {
+      "from": "ifttt-router",
+      "to": "engineering-path",
+      "condition": "department === 'Engineering'",
+      "type": "flow"
+    },
+    {
+      "from": "ifttt-router",
+      "to": "sales-path",
+      "condition": "department === 'Sales'",
+      "type": "flow"
+    },
+    {
+      "from": "validation-card",
+      "to": "error-handler",
+      "condition": "isValid === false",
+      "type": "error"
+    },
+    {
+      "from": "engineering-path",
+      "to": "completion-notifier",
+      "type": "success"
+    },
+    {
+      "from": "sales-path",
+      "to": "completion-notifier",
+      "type": "success"
+    }
+  ],
+  "variables": {
+    "global": {
+      "companyDomain": "acme.com",
+      "defaultGroups": ["All Employees"],
+      "notificationTemplates": {
+        "onboarding-complete": "Welcome {{userName}}! Your account is ready.",
+        "onboarding-failed": "Failed to onboard {{userName}}: {{error.message}}"
+      }
+    },
+    "flow": {
+      "userData": null,
+      "accountIds": {},
+      "errors": []
+    }
+  },
+  "errorHandling": {
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffMs": 1000,
+      "exponential": true
+    },
+    "circuitBreaker": {
+      "failureThreshold": 5,
+      "recoveryTimeoutMs": 60000
+    },
+    "fallbackActions": {
+      "connector-failure": "log-and-continue",
+      "validation-failure": "send-notification"
+    }
+  },
+  "monitoring": {
+    "metrics": [
+      "execution-time",
+      "success-rate",
+      "error-rate",
+      "step-completion"
+    ],
+    "alerts": [
+      {
+        "condition": "error-rate > 0.1",
+        "action": "notify-admin",
+        "severity": "high"
+      }
+    ]
+  }
+}

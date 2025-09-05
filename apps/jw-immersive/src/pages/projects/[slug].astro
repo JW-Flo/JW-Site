@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import projects from '../../data/projects.json';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return projects.map(p => ({ params: { slug: p.slug }, props: { project: p } }));
+}
+const { project } = Astro.props;
+---
+<BaseLayout title={project.name} description={project.description}>
+  <h1 class="text-2xl font-semibold mb-2">{project.name}</h1>
+  <p class="mb-4">{project.description}</p>
+  <ul class="text-sm space-y-1 mb-4">
+    <li><strong>Status:</strong> {project.status}</li>
+    <li><strong>GitHub:</strong> <a class="underline" href={project.github}>{project.github}</a></li>
+    <li><strong>Live:</strong> <a class="underline" href={project.live}>{project.live}</a></li>
+    <li><strong>Tags:</strong> {project.tags.join(', ')}</li>
+  </ul>
+  <p class="text-xs opacity-70">Project data is static; update src/data/projects.json to modify.</p>
+</BaseLayout>
