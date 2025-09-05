@@ -1,4 +1,4 @@
-const { handlers } = require('./handlers');
+const { handlers } = require("./handlers");
 
 function setupRoutes(app) {
   // Add logging middleware
@@ -7,12 +7,12 @@ function setupRoutes(app) {
     next();
   });
 
-  app.get('/health', (req, res) => {
-    console.log('Health endpoint called');
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+  app.get("/health", (req, res) => {
+    console.log("Health endpoint called");
+    res.json({ status: "healthy", timestamp: new Date().toISOString() });
   });
 
-  app.post('/mcp', async (req, res) => {
+  app.post("/mcp", async (req, res) => {
     const { step, context, ...accumulatedData } = req.body;
     console.log(`MCP endpoint called - Processing step: ${step}`);
 
@@ -20,14 +20,16 @@ function setupRoutes(app) {
       return res.json({
         result: null,
         provider: "mcp-server",
-        message: `Unknown step: ${step}. Available steps: ${Object.keys(handlers).join(', ')}`
+        message: `Unknown step: ${step}. Available steps: ${Object.keys(
+          handlers
+        ).join(", ")}`,
       });
     }
 
     try {
       const result = await handlers[step](context, accumulatedData);
       console.log(`Step ${step} completed successfully`);
-      
+
       // Remove any error fields from result if present
       if (result && typeof result === "object" && "error" in result) {
         const cleanResult = { ...result };
@@ -43,15 +45,15 @@ function setupRoutes(app) {
         result: null,
         provider: "mcp-server",
         message: `Step ${step} failed. Fallback: No output generated.`,
-        error: err.message
+        error: err.message,
       });
     }
   });
-  
+
   // Catch-all error handler
   app.use((err, req, res) => {
-    console.error('Error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error:", err);
+    res.status(500).json({ error: "Internal server error" });
   });
 }
 

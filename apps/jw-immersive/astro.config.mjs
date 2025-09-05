@@ -9,7 +9,7 @@ const SITE_URL = process.env.SITE_URL || "https://atlasit.pro";
 export default defineConfig({
   // Canonical site URL used by Astro for absolute links & sitemap
   site: SITE_URL,
-  base: '/team/jw/immersive', // Path-based routing for immersive experience
+  base: "/team/jw/immersive", // Path-based routing for immersive experience
   output: "server", // Enable server-side rendering for API routes
   adapter: cloudflare({
     platformProxy: {

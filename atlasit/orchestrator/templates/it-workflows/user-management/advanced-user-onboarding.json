@@ -220,7 +220,10 @@
           {
             "type": "notification",
             "template": "user-onboarding-failed",
-            "recipients": ["{{card.trigger-card.output.managerEmail}}", "it-support@company.com"]
+            "recipients": [
+              "{{card.trigger-card.output.managerEmail}}",
+              "it-support@company.com"
+            ]
           },
           {
             "type": "log",
@@ -253,7 +256,12 @@
         }
       },
       "connections": {
-        "input": ["{{engineering-path.complete}}", "{{sales-path.complete}}", "{{hr-path.complete}}", "{{general-path.complete}}"]
+        "input": [
+          "{{engineering-path.complete}}",
+          "{{sales-path.complete}}",
+          "{{hr-path.complete}}",
+          "{{general-path.complete}}"
+        ]
       }
     }
   ],

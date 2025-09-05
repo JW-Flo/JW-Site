@@ -15,21 +15,35 @@
           "type": "object",
           "required": ["userEmail", "action", "resource"],
           "properties": {
-            "userEmail": {"type": "string", "format": "email"},
-            "action": {"type": "string", "enum": ["grant", "revoke", "modify"]},
-            "resource": {"type": "string"},
-            "resourceType": {"type": "string", "enum": ["group", "role", "permission", "license", "application"]},
+            "userEmail": { "type": "string", "format": "email" },
+            "action": {
+              "type": "string",
+              "enum": ["grant", "revoke", "modify"]
+            },
+            "resource": { "type": "string" },
+            "resourceType": {
+              "type": "string",
+              "enum": ["group", "role", "permission", "license", "application"]
+            },
             "systems": {
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": ["activeDirectory", "office365", "aws", "gcp", "azure", "okta", "jumpcloud"]
+                "enum": [
+                  "activeDirectory",
+                  "office365",
+                  "aws",
+                  "gcp",
+                  "azure",
+                  "okta",
+                  "jumpcloud"
+                ]
               }
             },
-            "justification": {"type": "string", "minLength": 10},
-            "requestedBy": {"type": "string", "format": "email"},
-            "effectiveDate": {"type": "string", "format": "date"},
-            "expirationDate": {"type": "string", "format": "date"}
+            "justification": { "type": "string", "minLength": 10 },
+            "requestedBy": { "type": "string", "format": "email" },
+            "effectiveDate": { "type": "string", "format": "date" },
+            "expirationDate": { "type": "string", "format": "date" }
           }
         }
       },
@@ -89,7 +103,7 @@
           "type": "transform",
           "config": {
             "operation": "set",
-            "data": {"approved": true, "autoApproved": true}
+            "data": { "approved": true, "autoApproved": true }
           }
         }
       },
@@ -309,7 +323,17 @@
         }
       },
       "order": 14,
-      "dependsOn": ["grant-ad-group-membership", "revoke-ad-group-membership", "grant-office365-license", "revoke-office365-license", "grant-aws-iam-role", "revoke-aws-iam-role", "grant-okta-group-membership", "revoke-okta-group-membership", "update-gcp-iam-policy"]
+      "dependsOn": [
+        "grant-ad-group-membership",
+        "revoke-ad-group-membership",
+        "grant-office365-license",
+        "revoke-office365-license",
+        "grant-aws-iam-role",
+        "revoke-aws-iam-role",
+        "grant-okta-group-membership",
+        "revoke-okta-group-membership",
+        "update-gcp-iam-policy"
+      ]
     },
     {
       "id": "send-notification",
@@ -360,7 +384,17 @@
   },
   "metadata": {
     "estimatedDuration": "5-15 minutes",
-    "systems": ["activeDirectory", "office365", "aws", "gcp", "okta", "governance", "approvalWorkflow", "auditLog", "emailService"],
+    "systems": [
+      "activeDirectory",
+      "office365",
+      "aws",
+      "gcp",
+      "okta",
+      "governance",
+      "approvalWorkflow",
+      "auditLog",
+      "emailService"
+    ],
     "tags": ["access-control", "permissions", "governance", "compliance"]
   }
 }

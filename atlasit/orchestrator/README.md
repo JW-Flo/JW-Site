@@ -16,6 +16,7 @@ The Orchestrator Service is the central MCP-based workflow orchestration system 
 ## Architecture
 
 The service is built with:
+
 - **Hono**: Lightweight web framework for Cloudflare Workers
 - **TypeScript**: Full type safety and modern JavaScript features
 - **Zod**: Runtime type validation for API requests
@@ -26,9 +27,11 @@ The service is built with:
 ## API Endpoints
 
 ### Health Check
+
 - `GET /health` - Service health status
 
 ### Workflows
+
 - `POST /api/workflows` - Create a new workflow
 - `GET /api/workflows` - List workflows with optional filtering
 - `GET /api/workflows/:id` - Get specific workflow
@@ -36,6 +39,7 @@ The service is built with:
 - `DELETE /api/workflows/:id` - Delete workflow
 
 ### Executions
+
 - `POST /api/executions` - Execute a workflow
 - `GET /api/executions` - List executions with optional filtering
 - `GET /api/executions/:id` - Get specific execution
@@ -44,11 +48,13 @@ The service is built with:
 ## Setup
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Build the Service**
+
    ```bash
    npm run build
    ```
@@ -63,6 +69,7 @@ The service is built with:
      - `migrations/002_create_executions_table.sql`
 
 5. **Deploy**
+
    ```bash
    npx wrangler deploy
    ```
@@ -70,6 +77,7 @@ The service is built with:
 ## Development
 
 ### Local Development
+
 ```bash
 # Install dependencies
 npm install
@@ -82,6 +90,7 @@ npx wrangler dev
 ```
 
 ### Testing
+
 ```bash
 # Run tests
 npm test
@@ -93,6 +102,7 @@ npm run test:coverage
 ## Configuration
 
 ### Environment Variables
+
 - `API_ALLOWED_KEYS`: Comma-separated list of valid API keys
 - `RATE_LIMIT_MAX_REQUESTS`: Maximum requests per window (default: 100)
 - `RATE_LIMIT_WINDOW_SECONDS`: Rate limit window in seconds (default: 60)
@@ -100,6 +110,7 @@ npm run test:coverage
 ### Database Schema
 
 #### Workflows Table
+
 ```sql
 CREATE TABLE workflows (
   id TEXT PRIMARY KEY,
@@ -115,6 +126,7 @@ CREATE TABLE workflows (
 ```
 
 #### Executions Table
+
 ```sql
 CREATE TABLE executions (
   id TEXT PRIMARY KEY,
@@ -169,6 +181,7 @@ Workflows are defined as JSON objects with the following structure:
 ## Error Handling
 
 The service uses consistent error codes:
+
 - `WORKFLOW-001`: Missing required fields
 - `WORKFLOW-002`: Workflow not found
 - `WORKFLOW-003`: Invalid workflow data

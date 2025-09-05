@@ -61,16 +61,19 @@ The FlowWeave format is the heart of AtlasWeave, providing a declarative way to 
 AtlasWeave features a rich component library with pre-built components for common IT operations:
 
 #### Identity & Access Management
+
 - **AD User Management**: Create, update, disable Active Directory accounts
 - **O365 License Management**: Assign/remove Office 365 licenses
 - **AWS IAM Management**: Configure AWS user permissions
 - **Slack User Management**: Manage Slack workspace access
 
 #### Communication & Collaboration
+
 - **Notification Sender**: Multi-channel notifications (email, Slack, Teams)
 - **Approval Workflow**: Configurable approval processes with escalation
 
 #### Data Processing
+
 - **Data Transformer**: Map, filter, aggregate data between systems
 - **Expression Engine**: Advanced conditional logic and data manipulation
 
@@ -86,27 +89,35 @@ The NexusCanvas provides a drag-and-drop interface for workflow creation:
 ## Key Differentiators
 
 ### 1. Proprietary FlowWeave Format
+
 Unlike Okta's closed workflow format, FlowWeave is:
+
 - **Open and Extensible**: JSON-based with clear schema definitions
 - **Version Controlled**: Semantic versioning with migration support
 - **Template-Based**: Reusable workflow templates with variable substitution
 
 ### 2. Dynamic Component Architecture
+
 Components in AtlasWeave are:
+
 - **Programmable**: Full TypeScript/JavaScript execution environment
 - **Composable**: Components can be combined in complex ways
 - **Versioned**: Independent component versioning and updates
 - **Testable**: Built-in testing frameworks for component validation
 
 ### 3. Advanced Expression Engine
+
 The expression engine provides:
+
 - **Full JavaScript Support**: Execute complex business logic
 - **Template Variables**: Dynamic value substitution with `{{variable.path}}`
 - **Conditional Logic**: Advanced if-then-else with nested conditions
 - **Data Transformation**: Built-in map, filter, reduce operations
 
 ### 4. Enterprise Integration
+
 AtlasWeave integrates deeply with enterprise systems:
+
 - **Multi-System Orchestration**: Coordinate actions across dozens of systems
 - **Transactional Semantics**: ACID-like guarantees for multi-step operations
 - **Error Recovery**: Sophisticated retry and rollback mechanisms
@@ -115,6 +126,7 @@ AtlasWeave integrates deeply with enterprise systems:
 ## Use Cases
 
 ### 1. User Lifecycle Management
+
 ```json
 {
   "name": "Complete User Onboarding",
@@ -130,6 +142,7 @@ AtlasWeave integrates deeply with enterprise systems:
 ```
 
 ### 2. Access Control Automation
+
 ```json
 {
   "name": "Department Transfer",
@@ -144,6 +157,7 @@ AtlasWeave integrates deeply with enterprise systems:
 ```
 
 ### 3. Compliance & Auditing
+
 ```json
 {
   "name": "Access Review Process",
@@ -190,11 +204,13 @@ flowweave convert-canvas design.json workflow.json
 ## Getting Started
 
 ### 1. Install AtlasWeave
+
 ```bash
 npm install @atlasit/orchestrator
 ```
 
 ### 2. Register Components
+
 ```typescript
 import { registerBuiltInComponents } from '@atlasit/orchestrator';
 
@@ -202,6 +218,7 @@ registerBuiltInComponents();
 ```
 
 ### 3. Create Your First Workflow
+
 ```typescript
 import { flowWeaveRuntime } from '@atlasit/orchestrator';
 
@@ -213,7 +230,9 @@ const result = await flowWeaveRuntime.executeFlow(workflow);
 ```
 
 ### 4. Design Visually
+
 Use the NexusCanvas designer to create workflows without code:
+
 - Drag components onto the canvas
 - Connect them with data flows
 - Configure properties visually
@@ -222,24 +241,28 @@ Use the NexusCanvas designer to create workflows without code:
 ## Future Roadmap
 
 ### Phase 1: Core Platform (Current)
+
 - ✅ FlowWeave format specification
 - ✅ Component library with 10+ components
 - ✅ Basic execution engine
 - ✅ CLI tools
 
 ### Phase 2: Advanced Features (Q2 2025)
+
 - 🔄 Visual NexusCanvas designer
 - 📊 Workflow analytics and monitoring
 - 🔐 Advanced security and RBAC
 - 📈 Performance optimization
 
 ### Phase 3: Enterprise Scale (Q3 2025)
+
 - 🏢 Multi-tenant architecture
 - 📋 Compliance and audit frameworks
 - 🔗 Advanced system integrations
 - 🤖 AI-powered workflow optimization
 
 ### Phase 4: Ecosystem (Q4 2025)
+
 - 🛠️ Component marketplace
 - 📚 Template library
 - 🔌 Third-party integrations

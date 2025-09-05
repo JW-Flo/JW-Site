@@ -5,18 +5,22 @@ class ResearchDocumentGenerator {
       market_analysis: this.generateMarketAnalysis.bind(this),
       competitive_landscape: this.generateCompetitiveLandscape.bind(this),
       technology_assessment: this.generateTechnologyAssessment.bind(this),
-      full_report: this.generateFullReport.bind(this)
+      full_report: this.generateFullReport.bind(this),
     };
   }
 
   async generateDocument(type, data, options = {}) {
     const generator = this.templates[type];
     if (!generator) {
-      throw new Error(`Unknown document type: ${type}. Available types: ${Object.keys(this.templates).join(', ')}`);
+      throw new Error(
+        `Unknown document type: ${type}. Available types: ${Object.keys(
+          this.templates
+        ).join(", ")}`
+      );
     }
 
     const document = await generator(data, options);
-    
+
     return {
       ...document,
       metadata: {
@@ -24,31 +28,31 @@ class ResearchDocumentGenerator {
         generatedAt: new Date().toISOString(),
         wordCount: this.countWords(document.content),
         sources: data.sources?.length || 0,
-        version: '1.0'
-      }
+        version: "1.0",
+      },
     };
   }
 
   countWords(text) {
-    return text.split(/\s+/).filter(word => word.length > 0).length;
+    return text.split(/\s+/).filter((word) => word.length > 0).length;
   }
 
   formatDate(date = new Date()) {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   }
 
   generateExecutiveSummary(data, options = {}) {
     const { topic, sources = [], analysis = {} } = data;
-    
+
     const content = `
 # Executive Summary: ${topic}
 
 **Report Date:** ${this.formatDate()}
-**Research Scope:** ${options.scope || 'Comprehensive Market Analysis'}
+**Research Scope:** ${options.scope || "Comprehensive Market Analysis"}
 
 ## Key Findings
 
@@ -68,20 +72,27 @@ ${this.generateRiskAssessment(analysis)}
 
 ---
 
-*This executive summary is based on ${sources.length} sources and current market data as of ${this.formatDate()}.*
+*This executive summary is based on ${
+      sources.length
+    } sources and current market data as of ${this.formatDate()}.*
     `.trim();
 
     return {
       title: `Executive Summary: ${topic}`,
       content,
-      format: 'markdown',
-      sections: ['key_findings', 'recommendations', 'market_overview', 'risk_assessment']
+      format: "markdown",
+      sections: [
+        "key_findings",
+        "recommendations",
+        "market_overview",
+        "risk_assessment",
+      ],
     };
   }
 
   generateMarketAnalysis(data) {
     const { topic, sources = [], analysis = {} } = data;
-    
+
     const content = `
 # Market Analysis Report: ${topic}
 
@@ -128,14 +139,21 @@ This analysis is based on:
     return {
       title: `Market Analysis: ${topic}`,
       content,
-      format: 'markdown',
-      sections: ['market_sizing', 'segments', 'drivers', 'challenges', 'outlook', 'sources']
+      format: "markdown",
+      sections: [
+        "market_sizing",
+        "segments",
+        "drivers",
+        "challenges",
+        "outlook",
+        "sources",
+      ],
     };
   }
 
   generateCompetitiveLandscape(data) {
     const { topic, sources = [] } = data;
-    
+
     const content = `
 # Competitive Landscape Analysis: ${topic}
 
@@ -175,20 +193,28 @@ ${this.generateCompetitiveIntelligence(sources)}
 
 ---
 
-*Competitive analysis based on ${sources.length} industry sources and market intelligence.*
+*Competitive analysis based on ${
+      sources.length
+    } industry sources and market intelligence.*
     `.trim();
 
     return {
       title: `Competitive Landscape: ${topic}`,
       content,
-      format: 'markdown',
-      sections: ['leaders', 'emerging_players', 'positioning', 'differentiation', 'partnerships']
+      format: "markdown",
+      sections: [
+        "leaders",
+        "emerging_players",
+        "positioning",
+        "differentiation",
+        "partnerships",
+      ],
     };
   }
 
   generateTechnologyAssessment(data) {
     const { topic, sources = [] } = data;
-    
+
     const content = `
 # Technology Assessment Report: ${topic}
 
@@ -228,20 +254,28 @@ ${this.generateTechnicalRecommendations(sources)}
 
 ---
 
-*Technology assessment based on current industry standards and ${sources.length} technical sources.*
+*Technology assessment based on current industry standards and ${
+      sources.length
+    } technical sources.*
     `.trim();
 
     return {
       title: `Technology Assessment: ${topic}`,
       content,
-      format: 'markdown',
-      sections: ['overview', 'capabilities', 'trends', 'maturity', 'implementation']
+      format: "markdown",
+      sections: [
+        "overview",
+        "capabilities",
+        "trends",
+        "maturity",
+        "implementation",
+      ],
     };
   }
 
   generateFullReport(data) {
     const { topic, sources = [], analysis = {} } = data;
-    
+
     const content = `
 # Comprehensive Research Report: ${topic}
 
@@ -337,14 +371,18 @@ ${this.generateSourceDocumentation(sources)}
 ## Appendices
 
 ### Methodology
-- **Data Collection:** Web scraping and content extraction from ${sources.length} sources
+- **Data Collection:** Web scraping and content extraction from ${
+      sources.length
+    } sources
 - **Analysis Framework:** Multi-dimensional content analysis with sentiment scoring
 - **Validation:** Cross-source verification and consistency checking
 - **Generated:** ${this.formatDate()} via automated research pipeline
 
 ### Data Quality Metrics
 - **Source Coverage:** ${sources.length} unique sources
-- **Content Volume:** ${sources.reduce((total, source) => total + (source.wordCount || 0), 0).toLocaleString()} words analyzed
+- **Content Volume:** ${sources
+      .reduce((total, source) => total + (source.wordCount || 0), 0)
+      .toLocaleString()} words analyzed
 - **Analysis Depth:** Multi-layer semantic and sentiment analysis
 - **Confidence Level:** Based on source diversity and content correlation
 
@@ -356,45 +394,61 @@ ${this.generateSourceDocumentation(sources)}
     return {
       title: `Comprehensive Report: ${topic}`,
       content,
-      format: 'markdown',
-      sections: ['executive_summary', 'market_analysis', 'competitive_landscape', 'technology_assessment', 'strategic_insights', 'detailed_findings', 'source_documentation']
+      format: "markdown",
+      sections: [
+        "executive_summary",
+        "market_analysis",
+        "competitive_landscape",
+        "technology_assessment",
+        "strategic_insights",
+        "detailed_findings",
+        "source_documentation",
+      ],
     };
   }
 
   // Content generation helper methods
   generateKeyFindings(analysis, sources) {
     const findings = [];
-    
+
     if (analysis.marketSize) {
       findings.push(`• **Market Size:** ${analysis.marketSize}`);
     }
-    
+
     if (analysis.growthRate) {
       findings.push(`• **Growth Rate:** ${analysis.growthRate}`);
     }
-    
+
     if (analysis.keyTrends) {
-      findings.push(`• **Key Trends:** ${analysis.keyTrends.join(', ')}`);
+      findings.push(`• **Key Trends:** ${analysis.keyTrends.join(", ")}`);
     }
-    
+
     if (sources.length > 0) {
-      const sentiments = sources.map(s => s.sentiment?.label).filter(Boolean);
-      const positiveSentiment = sentiments.filter(s => s === 'POSITIVE').length;
+      const sentiments = sources.map((s) => s.sentiment?.label).filter(Boolean);
+      const positiveSentiment = sentiments.filter(
+        (s) => s === "POSITIVE"
+      ).length;
       const totalSentiments = sentiments.length;
-      
+
       if (totalSentiments > 0) {
-        const positivePercentage = Math.round((positiveSentiment / totalSentiments) * 100);
-        findings.push(`• **Market Sentiment:** ${positivePercentage}% positive across analyzed sources`);
+        const positivePercentage = Math.round(
+          (positiveSentiment / totalSentiments) * 100
+        );
+        findings.push(
+          `• **Market Sentiment:** ${positivePercentage}% positive across analyzed sources`
+        );
       }
     }
-    
+
     if (findings.length === 0) {
-      findings.push('• Comprehensive analysis reveals significant market opportunities');
-      findings.push('• Industry shows strong indicators for continued growth');
-      findings.push('• Multiple sources confirm positive market dynamics');
+      findings.push(
+        "• Comprehensive analysis reveals significant market opportunities"
+      );
+      findings.push("• Industry shows strong indicators for continued growth");
+      findings.push("• Multiple sources confirm positive market dynamics");
     }
-    
-    return findings.join('\n');
+
+    return findings.join("\n");
   }
 
   generateRecommendations(analysis, topic) {
@@ -409,19 +463,31 @@ ${this.generateSourceDocumentation(sources)}
 
   generateMarketOverview(analysis, sources) {
     const overview = [];
-    
+
     if (sources.length > 0) {
-      overview.push(`Based on analysis of ${sources.length} industry sources, the market demonstrates:`);
-      overview.push('');
-      overview.push('• **Strong fundamentals** with consistent growth indicators');
-      overview.push('• **Diverse player ecosystem** ranging from established leaders to innovative startups');
-      overview.push('• **Technology convergence** driving new opportunities and business models');
-      overview.push('• **Regulatory evolution** creating both challenges and standardization benefits');
+      overview.push(
+        `Based on analysis of ${sources.length} industry sources, the market demonstrates:`
+      );
+      overview.push("");
+      overview.push(
+        "• **Strong fundamentals** with consistent growth indicators"
+      );
+      overview.push(
+        "• **Diverse player ecosystem** ranging from established leaders to innovative startups"
+      );
+      overview.push(
+        "• **Technology convergence** driving new opportunities and business models"
+      );
+      overview.push(
+        "• **Regulatory evolution** creating both challenges and standardization benefits"
+      );
     } else {
-      overview.push('Market analysis indicates strong growth potential with expanding opportunities across multiple segments.');
+      overview.push(
+        "Market analysis indicates strong growth potential with expanding opportunities across multiple segments."
+      );
     }
-    
-    return overview.join('\n');
+
+    return overview.join("\n");
   }
 
   generateRiskAssessment() {
@@ -442,9 +508,13 @@ ${this.generateSourceDocumentation(sources)}
 
   generateMarketSizing(analysis, sources) {
     if (analysis.marketSize) {
-      return `Current market size estimated at **${analysis.marketSize}** with projected growth of **${analysis.growthRate || 'strong double-digit percentages'}** annually.`;
+      return `Current market size estimated at **${
+        analysis.marketSize
+      }** with projected growth of **${
+        analysis.growthRate || "strong double-digit percentages"
+      }** annually.`;
     }
-    
+
     return `Market analysis based on ${sources.length} sources indicates substantial market opportunity with positive growth indicators across multiple segments.`;
   }
 
@@ -463,17 +533,25 @@ Each segment demonstrates unique growth characteristics with enterprise solution
 
   generateGrowthDrivers(analysis, sources) {
     const drivers = [
-      '• **Digital Transformation:** Accelerating enterprise adoption of digital solutions',
-      '• **Cost Optimization:** Growing focus on operational efficiency and cost reduction',
-      '• **Scalability Requirements:** Increasing demand for scalable, flexible solutions',
-      '• **Competitive Pressure:** Market dynamics driving innovation and adoption'
+      "• **Digital Transformation:** Accelerating enterprise adoption of digital solutions",
+      "• **Cost Optimization:** Growing focus on operational efficiency and cost reduction",
+      "• **Scalability Requirements:** Increasing demand for scalable, flexible solutions",
+      "• **Competitive Pressure:** Market dynamics driving innovation and adoption",
     ];
-    
-    if (sources.some(s => s.content?.includes('AI') || s.content?.includes('artificial intelligence'))) {
-      drivers.unshift('• **AI Integration:** Growing integration of artificial intelligence capabilities');
+
+    if (
+      sources.some(
+        (s) =>
+          s.content?.includes("AI") ||
+          s.content?.includes("artificial intelligence")
+      )
+    ) {
+      drivers.unshift(
+        "• **AI Integration:** Growing integration of artificial intelligence capabilities"
+      );
     }
-    
-    return drivers.join('\n');
+
+    return drivers.join("\n");
   }
 
   generateMarketChallenges() {
@@ -509,20 +587,25 @@ The market outlook remains **strongly positive** with multiple growth catalysts 
 
   generateSourceAnalysis(sources) {
     if (sources.length === 0) {
-      return 'No sources available for detailed analysis.';
+      return "No sources available for detailed analysis.";
     }
-    
+
     const analysis = sources.map((source, index) => {
       return `
 ### Source ${index + 1}: ${source.title}
 - **URL:** ${source.url}
 - **Content Volume:** ${source.wordCount || 0} words
-- **Key Insights:** ${source.snippet || 'Content analysis reveals relevant market intelligence'}
-- **Sentiment:** ${source.sentiment?.label || 'Neutral'} (${source.sentiment?.score || 0.5})
+- **Key Insights:** ${
+        source.snippet ||
+        "Content analysis reveals relevant market intelligence"
+      }
+- **Sentiment:** ${source.sentiment?.label || "Neutral"} (${
+        source.sentiment?.score || 0.5
+      })
       `.trim();
     });
-    
-    return analysis.join('\n\n');
+
+    return analysis.join("\n\n");
   }
 
   // Additional helper methods for competitive landscape
@@ -718,7 +801,7 @@ The market outlook remains **strongly positive** with multiple growth catalysts 
 
   generateDetailedFindings(sources, analysis) {
     if (sources.length === 0) {
-      return 'No detailed source data available for analysis.';
+      return "No detailed source data available for analysis.";
     }
 
     const findings = sources.map((source, index) => {
@@ -726,55 +809,70 @@ The market outlook remains **strongly positive** with multiple growth catalysts 
 ### Finding ${index + 1}: ${source.title}
 
 **Source:** ${source.url}  
-**Analysis Date:** ${source.extractedAt || 'N/A'}  
+**Analysis Date:** ${source.extractedAt || "N/A"}  
 **Content Volume:** ${source.wordCount || 0} words
 
 **Key Content Insights:**
-${source.snippet || 'Comprehensive content analysis reveals relevant market intelligence and industry insights.'}
+${
+  source.snippet ||
+  "Comprehensive content analysis reveals relevant market intelligence and industry insights."
+}
 
-**Sentiment Analysis:** ${source.sentiment?.label || 'Neutral'} (confidence: ${Math.round((source.sentiment?.score || 0.5) * 100)}%)
+**Sentiment Analysis:** ${
+        source.sentiment?.label || "Neutral"
+      } (confidence: ${Math.round((source.sentiment?.score || 0.5) * 100)}%)
 
-**Strategic Relevance:** This source provides ${this.getStrategicRelevance(source)} insights for market understanding and strategic planning.
+**Strategic Relevance:** This source provides ${this.getStrategicRelevance(
+        source
+      )} insights for market understanding and strategic planning.
       `.trim();
     });
 
-    return findings.join('\n\n');
+    return findings.join("\n\n");
   }
 
   getStrategicRelevance(source) {
-    const content = (source.content || source.snippet || '').toLowerCase();
-    
-    if (content.includes('market') || content.includes('industry')) return 'market intelligence';
-    if (content.includes('technology') || content.includes('innovation')) return 'technology assessment';
-    if (content.includes('competitive') || content.includes('competition')) return 'competitive analysis';
-    if (content.includes('financial') || content.includes('revenue')) return 'financial performance';
-    
-    return 'general strategic';
+    const content = (source.content || source.snippet || "").toLowerCase();
+
+    if (content.includes("market") || content.includes("industry"))
+      return "market intelligence";
+    if (content.includes("technology") || content.includes("innovation"))
+      return "technology assessment";
+    if (content.includes("competitive") || content.includes("competition"))
+      return "competitive analysis";
+    if (content.includes("financial") || content.includes("revenue"))
+      return "financial performance";
+
+    return "general strategic";
   }
 
   generateSourceDocumentation(sources) {
     if (sources.length === 0) {
-      return 'No sources documented for this analysis.';
+      return "No sources documented for this analysis.";
     }
 
     const documentation = [
       `## Source Summary\n`,
       `**Total Sources:** ${sources.length}`,
-      `**Content Volume:** ${sources.reduce((total, source) => total + (source.wordCount || 0), 0).toLocaleString()} words`,
+      `**Content Volume:** ${sources
+        .reduce((total, source) => total + (source.wordCount || 0), 0)
+        .toLocaleString()} words`,
       `**Source Types:** Web content, industry publications, market research`,
       `**Analysis Date:** ${this.formatDate()}\n`,
-      `## Individual Source Details\n`
+      `## Individual Source Details\n`,
     ];
 
     sources.forEach((source, index) => {
       documentation.push(`**${index + 1}.** [${source.title}](${source.url})`);
       documentation.push(`   - Content: ${source.wordCount || 0} words`);
-      documentation.push(`   - Sentiment: ${source.sentiment?.label || 'Neutral'}`);
-      documentation.push(`   - Extracted: ${source.extractedAt || 'N/A'}`);
-      documentation.push('');
+      documentation.push(
+        `   - Sentiment: ${source.sentiment?.label || "Neutral"}`
+      );
+      documentation.push(`   - Extracted: ${source.extractedAt || "N/A"}`);
+      documentation.push("");
     });
 
-    return documentation.join('\n');
+    return documentation.join("\n");
   }
 }
 

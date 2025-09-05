@@ -47,7 +47,13 @@
       "name": "User Profile Data",
       "config": {
         "source": "hr-system",
-        "fields": ["employeeId", "displayName", "email", "department", "manager"]
+        "fields": [
+          "employeeId",
+          "displayName",
+          "email",
+          "department",
+          "manager"
+        ]
       }
     }
   ],
@@ -401,7 +407,11 @@
           "name": "Rollback Failed Onboarding",
           "type": "parallel",
           "config": {
-            "steps": ["rollback-ad-user", "rollback-o365-account", "rollback-slack-invite"]
+            "steps": [
+              "rollback-ad-user",
+              "rollback-o365-account",
+              "rollback-slack-invite"
+            ]
           }
         },
         {

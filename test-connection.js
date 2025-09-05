@@ -1,27 +1,27 @@
-const http = require('http');
+const http = require("http");
 
 const options = {
-  hostname: 'localhost',
+  hostname: "localhost",
   port: 5050,
-  path: '/health',
-  method: 'GET'
+  path: "/health",
+  method: "GET",
 };
 
 const req = http.request(options, (res) => {
   console.log(`Status: ${res.statusCode}`);
   console.log(`Headers:`, res.headers);
 
-  res.on('data', (chunk) => {
+  res.on("data", (chunk) => {
     console.log(`Body: ${chunk}`);
   });
 
-  res.on('end', () => {
-    console.log('Request completed');
+  res.on("end", () => {
+    console.log("Request completed");
     process.exit(0);
   });
 });
 
-req.on('error', (e) => {
+req.on("error", (e) => {
   console.error(`Problem with request: ${e.message}`);
   process.exit(1);
 });

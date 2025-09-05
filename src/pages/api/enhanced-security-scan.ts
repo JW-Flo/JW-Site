@@ -70,7 +70,7 @@ const MAX_URL_LENGTH = 2048; // Prevent abuse via extremely long URLs
 // We still read any build-time injected value (import.meta.env) but prefer runtime so tests
 // can supply a key without rebuilding. If neither present, superAdminMode will return a
 // configuration error instead of silently allowing elevation.
-const BUILD_SUPER_ADMIN_KEY = (import.meta as any).env?.SUPER_ADMIN_KEY || '';
+const BUILD_SUPER_ADMIN_KEY = process.env.SUPER_ADMIN_KEY || '';
 
 export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
   const reqId = Math.random().toString(36).slice(2,10);

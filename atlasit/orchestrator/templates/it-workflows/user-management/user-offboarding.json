@@ -15,11 +15,14 @@
           "type": "object",
           "required": ["email", "terminationDate"],
           "properties": {
-            "email": {"type": "string", "format": "email"},
-            "terminationDate": {"type": "string", "format": "date"},
-            "reason": {"type": "string", "enum": ["voluntary", "involuntary", "retirement", "transfer"]},
-            "immediate": {"type": "boolean", "default": false},
-            "transferAccess": {"type": "boolean", "default": false}
+            "email": { "type": "string", "format": "email" },
+            "terminationDate": { "type": "string", "format": "date" },
+            "reason": {
+              "type": "string",
+              "enum": ["voluntary", "involuntary", "retirement", "transfer"]
+            },
+            "immediate": { "type": "boolean", "default": false },
+            "transferAccess": { "type": "boolean", "default": false }
           }
         }
       },
@@ -241,7 +244,14 @@
           "event": "user_offboarding_completed",
           "userEmail": "{{inputs.email}}",
           "timestamp": "{{currentTimestamp}}",
-          "systems": ["office365", "licenses", "slack", "activeDirectory", "apiManager", "hrSystem"],
+          "systems": [
+            "office365",
+            "licenses",
+            "slack",
+            "activeDirectory",
+            "apiManager",
+            "hrSystem"
+          ],
           "status": "success",
           "dataArchived": "{{!inputs.transferAccess}}",
           "terminationReason": "{{inputs.reason}}"
@@ -266,7 +276,18 @@
   },
   "metadata": {
     "estimatedDuration": "10-15 minutes",
-    "systems": ["office365", "licenseManager", "slack", "activeDirectory", "dataTransfer", "archiveService", "apiManager", "hrSystem", "emailService", "auditLog"],
+    "systems": [
+      "office365",
+      "licenseManager",
+      "slack",
+      "activeDirectory",
+      "dataTransfer",
+      "archiveService",
+      "apiManager",
+      "hrSystem",
+      "emailService",
+      "auditLog"
+    ],
     "tags": ["offboarding", "user-management", "compliance", "data-retention"]
   }
 }
