@@ -1,0 +1,175 @@
+---
+// Team Management Component
+---
+<section class="max-w-3xl mx-auto mt-12 bg-slate-800/80 rounded-xl shadow-lg p-8">
+  <h1 class="text-3xl font-bold text-blue-300 mb-6">Team Management</h1>
+  <p class="text-slate-300 mb-8">Manage your team members, assign roles, and control access.</p>
+  <div id="team-management">
+    <table id="team-table" class="w-full text-left mb-8">
+      <thead>
+        <tr class="border-b border-slate-700">
+          <th class="py-2 px-3 text-slate-400 font-semibold">Name</th>
+          <th class="py-2 px-3 text-slate-400 font-semibold">Email</th>
+          <th class="py-2 px-3 text-slate-400 font-semibold">Role</th>
+          <th class="py-2 px-3 text-slate-400 font-semibold">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="team-tbody">
+        <!-- Team members will be rendered here by JS -->
+      </tbody>
+    </table>
+    <button class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded font-semibold shadow transition-all" id="add-member-btn">+ Add Member</button>
+    <!-- Modal for add/edit -->
+    <div id="member-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+      <div class="bg-slate-900 rounded-xl shadow-xl p-8 w-full max-w-md">
+        <h2 id="modal-title" class="text-xl font-bold text-blue-300 mb-4">Add Member</h2>
+        <form id="member-form" class="space-y-4">
+          <input type="hidden" id="member-id" />
+          <div>
+            <label class="block text-slate-300 mb-1">Name</label>
+            <input id="member-name" type="text" class="w-full px-3 py-2 rounded bg-slate-800 text-slate-100 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Full Name" required />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Email</label>
+            <input id="member-email" type="email" class="w-full px-3 py-2 rounded bg-slate-800 text-slate-100 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email Address" required />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Role</label>
+            <select id="member-role" class="w-full px-3 py-2 rounded bg-slate-800 text-slate-100 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="Admin">Admin</option>
+              <option value="Member">Member</option>
+              <option value="Viewer">Viewer</option>
+            </select>
+          </div>
+          <div class="flex justify-end space-x-2 pt-2">
+            <button type="button" id="cancel-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded">Cancel</button>
+            <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-semibold">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    let team = [];
+    let editingId = null;
+
+    const tbody = document.getElementById('team-tbody');
+    const modal = document.getElementById('member-modal');
+    const addBtn = document.getElementById('add-member-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const form = document.getElementById('member-form');
+    const modalTitle = document.getElementById('modal-title');
+    const idInput = document.getElementById('member-id');
+    const nameInput = document.getElementById('member-name');
+    const emailInput = document.getElementById('member-email');
+    const roleInput = document.getElementById('member-role');
+
+    async function fetchTeam() {
+      const res = await fetch('/api/team');
+      team = await res.json();
+      renderTeam();
+    }
+
+    function renderTeam() {
+      tbody.innerHTML = '';
+      for (const member of team) {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-slate-700 hover:bg-slate-700/30';
+        tr.innerHTML = `
+          <td class="py-2 px-3">${member.name}</td>
+          <td class="py-2 px-3">${member.email}</td>
+          <td class="py-2 px-3">
+            <span class="inline-block ${member.role === 'Admin' ? 'bg-blue-700/60 text-blue-200' : member.role === 'Member' ? 'bg-green-700/60 text-green-200' : 'bg-slate-700/60 text-slate-200'} px-2 py-1 rounded text-xs">${member.role}</span>
+          </td>
+          <td class="py-2 px-3 space-x-2">
+            <button class="bg-slate-700 hover:bg-blue-700 text-blue-200 px-3 py-1 rounded text-xs font-medium" data-edit="${member.id}">Edit</button>
+            <button class="bg-slate-700 hover:bg-red-700 text-red-200 px-3 py-1 rounded text-xs font-medium" data-remove="${member.id}">Remove</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      // Attach event listeners for edit/remove
+      tbody.querySelectorAll('button[data-edit]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const id = Number(btn.getAttribute('data-edit'));
+          openModal('edit', id);
+        });
+      });
+      tbody.querySelectorAll('button[data-remove]').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          const id = Number(btn.getAttribute('data-remove'));
+          await fetch('/api/team', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          await fetchTeam();
+        });
+      });
+    }
+
+    async function openModal(mode, id = null) {
+      modal.classList.remove('hidden');
+      if (mode === 'edit') {
+        modalTitle.textContent = 'Edit Member';
+        const member = team.find(m => m.id === id);
+        if (member) {
+          editingId = id;
+          idInput.value = member.id;
+          nameInput.value = member.name;
+          emailInput.value = member.email;
+          roleInput.value = member.role;
+        }
+      } else {
+        modalTitle.textContent = 'Add Member';
+        editingId = null;
+        idInput.value = '';
+        nameInput.value = '';
+        emailInput.value = '';
+        roleInput.value = 'Member';
+      }
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      form.reset();
+      editingId = null;
+    }
+
+    addBtn.addEventListener('click', () => openModal('add'));
+    cancelBtn.addEventListener('click', closeModal);
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const role = roleInput.value;
+      if (!name || !email) return;
+      if (editingId) {
+        // Edit existing
+        await fetch('/api/team', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: Number(editingId), name, email, role })
+        });
+      } else {
+        // Add new
+        await fetch('/api/team', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, role })
+        });
+      }
+      await fetchTeam();
+      closeModal();
+    });
+
+    // Close modal on background click
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal();
+    });
+
+    fetchTeam();
+  </script>
+</section>
