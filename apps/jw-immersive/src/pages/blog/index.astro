@@ -1,28 +1,75 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogSearch from '../../components/BlogSearch.astro';
+
 const modules = import.meta.glob('./*.mdx', { eager: true });
-interface Frontmatter { title: string; pubDate: string; description?: string; }
+
+interface Frontmatter {
+  title: string;
+  pubDate: string;
+  description?: string;
+  tags?: string[];
+}
+
 const posts = Object.entries(modules).map(([path, mod]: any) => {
   const frontmatter: Frontmatter = mod.frontmatter;
+  const content = mod.rawContent || '';
+
+  // Calculate reading time (average 200 words per minute)
+  const wordCount = content.split(/\s+/).length;
+  const readingTime = Math.ceil(wordCount / 200);
+
   return {
     slug: path.replace('./','').replace(/\.mdx$/, ''),
     title: frontmatter.title,
     date: frontmatter.pubDate,
-    excerpt: frontmatter.description || ''
+    excerpt: frontmatter.description || '',
+    tags: frontmatter.tags || [],
+    readingTime
   };
 }).sort((a,b) => (a.date < b.date ? 1 : -1));
 ---
+
 <BaseLayout title="Blog | Joe Whittle" description="Writing on security engineering, telemetry and applied resilience">
   <h1 class="text-3xl font-bold mb-8">Writing</h1>
-  <ul class="space-y-6">
-    {posts.map(p => (
-      <li>
-        <a href={`/blog/${p.slug}`} class="group block">
-          <h2 class="font-semibold text-xl group-hover:text-brand">{p.title}</h2>
-          <p class="text-xs uppercase tracking-wide text-slate-400">{p.date}</p>
-          <p class="text-sm text-slate-300 mt-1">{p.excerpt}</p>
-        </a>
-      </li>
-    ))}
-  </ul>
+
+  <BlogSearch posts={posts} />
+
+  <!-- Fallback for no JavaScript -->
+  <noscript>
+    <div class="space-y-6">
+      {posts.map(p => (
+        <article class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <a href={`/blog/${p.slug}`} class="block group">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+              <h2 class="font-bold text-xl group-hover:text-blue-400 transition-colors duration-200 leading-tight">{p.title}</h2>
+              {p.readingTime && (
+                <div class="flex items-center gap-2 text-xs text-slate-400 bg-slate-700/50 px-3 py-1 rounded-full">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  {p.readingTime} min read
+                </div>
+              )}
+            </div>
+            <p class="text-xs uppercase tracking-wider text-slate-500 mb-3 font-medium">{p.date}</p>
+            {p.tags && p.tags.length > 0 && (
+              <div class="flex flex-wrap gap-2 mb-4">
+                {p.tags.map(tag => (
+                  <span class="px-3 py-1 text-xs bg-blue-600/20 text-blue-300 rounded-full border border-blue-500/30">{tag}</span>
+                ))}
+              </div>
+            )}
+            <p class="text-slate-300 leading-relaxed mb-4">{p.excerpt}</p>
+            <div class="flex items-center text-blue-400 font-medium">
+              <span>Read more</span>
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  </noscript>
 </BaseLayout>

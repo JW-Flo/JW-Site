@@ -70,9 +70,10 @@ const MAX_URL_LENGTH = 2048; // Prevent abuse via extremely long URLs
 // We still read any build-time injected value (import.meta.env) but prefer runtime so tests
 // can supply a key without rebuilding. If neither present, superAdminMode will return a
 // configuration error instead of silently allowing elevation.
-const BUILD_SUPER_ADMIN_KEY = (import.meta as any).env?.SUPER_ADMIN_KEY || '';
+const BUILD_SUPER_ADMIN_KEY = process.env.SUPER_ADMIN_KEY || '';
 
-export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
+export const POST: APIRoute = async (context) => {
+  const { request, locals } = context;
   const reqId = Math.random().toString(36).slice(2,10);
   const logBase = (phase: string, data?: any) => {
     try { console.log(`[scan ${reqId}] ${phase}`, data ? JSON.stringify(data).slice(0,800) : ''); } catch { /* ignore logging errors */ }
@@ -94,7 +95,29 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
     }
 
     // Basic rate limiting keyed by client IP (falls back to 'unknown')
-    const rateKey = clientAddress || request.headers.get('x-forwarded-for') || 'unknown';
+    let rateKey: string;
+    try {
+      // Try to access clientAddress from context - this may fail in development mode
+      const clientAddress = (context as any).clientAddress;
+      if (clientAddress) {
+        rateKey = clientAddress;
+      } else {
+        // Try various headers that might contain the client IP
+        rateKey = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                 request.headers.get('cf-connecting-ip') ||
+                 request.headers.get('x-real-ip') ||
+                 request.headers.get('x-client-ip') ||
+                 'unknown';
+      }
+    } catch (e) {
+      // If clientAddress access throws an error (like StaticClientAddressNotAvailable), use fallback
+      console.warn('clientAddress access failed, using fallback for rate limiting', e);
+      rateKey = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+               request.headers.get('cf-connecting-ip') ||
+               request.headers.get('x-real-ip') ||
+               request.headers.get('x-client-ip') ||
+               'unknown';
+    }
     phase = 'rateLimit';
     const { allowed, remaining, resetTime } = strictRateLimit.check(`scan:${rateKey}`);
     if (!allowed) {
@@ -1758,7 +1781,7 @@ async function scanAPISecurity(url: string, superAdminMode: boolean): Promise<En
       category: 'API Security',
       title: 'API Security Analysis Complete',
       description: 'Comprehensive API security assessment completed.',
-      recommendation: 'Implement proper API authentication, rate limiting, and input validation.',
+      recommendation: ' Implement proper API authentication, rate limiting, and input validation.',
       businessImpact: 'Secure APIs protect sensitive data and prevent unauthorized access.',
       consultingOpportunity: 'API security architecture and implementation services can enhance protection.'
     });
@@ -1961,10 +1984,10 @@ async function analyzeCDNInfrastructure(url: string): Promise<EnhancedFinding[]>
           severity: 'excellent',
           category: 'CDN Infrastructure',
           title: 'CDN Protection Detected',
-          description: 'Content Delivery Network (CDN) is in use, providing performance and security benefits.',
-          recommendation: 'Ensure CDN security features are properly configured.',
-          businessImpact: 'CDN usage improves performance and provides DDoS protection.',
-          consultingOpportunity: 'CDN optimization and security configuration services can maximize benefits.'
+          description: 'Cloudflare CDN and security services are active.',
+          recommendation: 'Optimize Cloudflare security settings for maximum protection.',
+          businessImpact: 'Cloudflare provides DDoS protection and performance benefits.',
+          consultingOpportunity: 'Cloudflare optimization and security configuration services available.'
         });
         break;
       }

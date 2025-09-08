@@ -15,6 +15,22 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
+    // Disable clientAddress in development to avoid StaticClientAddressNotAvailable error
+    ...(process.env.NODE_ENV === "development" && {
+      runtime: {
+        mode: "local",
+      },
+    }),
   }),
   integrations: [tailwind(), mdx(), sitemap()],
+
+  // Performance optimizations
+  compressHTML: true,
+  build: {
+    inlineStylesheets: "auto",
+  },
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "viewport",
+  },
 });

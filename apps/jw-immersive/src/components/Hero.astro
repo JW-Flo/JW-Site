@@ -8,8 +8,12 @@
   <div class="relative z-10 max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4">
     <!-- Profile Image -->
     <div class="flex-shrink-0 flex flex-col items-center md:items-start">
-      <img src="/profile-placeholder.jpg" alt="Joe Whittle" class="w-40 h-40 rounded-full shadow-lg border-4 border-blue-400/40 object-cover mb-4 animate-fade-in" loading="eager" />
-      <span class="block text-sm text-slate-400 mt-2 md:ml-2">Cybersecurity Engineer</span>
+      <div class="relative inline-block">
+        <img src="/profile-placeholder.jpg" alt="Joe Whittle - Cybersecurity Engineer & AtlasIT Founder" class="w-48 h-48 md:w-56 md:h-56 rounded-full shadow-2xl border-4 border-blue-400/60 object-cover mb-4 animate-fade-in hover:scale-105 transition-transform duration-300" loading="eager" />
+        <!-- Professional glow effect -->
+        <div class="absolute inset-0 rounded-full bg-blue-400/20 blur-xl -z-10 animate-pulse"></div>
+      </div>
+      <span class="block text-sm text-slate-400 mt-2 md:ml-2">Cybersecurity Engineer & Founder</span>
     </div>
     <!-- Hero Content -->
     <div class="flex-1 text-center md:text-left">

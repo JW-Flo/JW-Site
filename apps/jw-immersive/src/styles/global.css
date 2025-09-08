@@ -6,28 +6,41 @@
 
 /* 🎮 CLEAN PROFESSIONAL THEME VARIABLES */
 :root {
-  --color-primary: #3b82f6; /* professional blue */
-  --color-accent: #6366f1; /* indigo accent */
-  --color-success: #10b981; /* clean green */
-  --color-warning: #f59e0b; /* amber warning */
-  --color-danger: #ef4444; /* red danger */
-  --color-background: #0f172a; /* dark slate */
+  /* Base colors - will be overridden by theme */
+  --color-background: #0f172a;
   --color-surface: #1e293b;
   --color-text: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-border: #475569;
 
-  /* Subtle accent colors */
-  --accent-blue: #3b82f6;
-  --accent-purple: #8b5cf6;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
+  /* Accent colors */
+  --color-primary: #3b82f6;
+  --color-accent: #6366f1;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* Interactive states */
+  --color-hover: #1e40af;
+  --color-focus: #60a5fa;
+  --color-active: #2563eb;
+
+  /* Special colors */
+  --color-neon-cyan: #00d3ff;
+  --color-neon-green: #00ff00;
+  --color-neon-yellow: #ffff00;
+  --color-neon-pink: #ff5ed7;
 }
 
 /* 🎮 CLEAN PROFESSIONAL BODY STYLING */
 body {
   @apply text-slate-100 font-sans antialiased;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-background) 0%,
+    var(--color-surface) 50%,
+    var(--color-background) 100%
+  );
   font-family: "Inter", system-ui, sans-serif;
   position: relative;
   overflow-x: hidden;
@@ -90,33 +103,42 @@ body::before {
 
 /* Professional button styles */
 .btn-primary {
-  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  @apply font-medium px-6 py-3 rounded-lg transition-all duration-200;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .btn-primary:hover {
+  background-color: var(--color-hover);
+  border-color: var(--color-hover);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  @apply bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium px-6 py-3 rounded-lg transition-all duration-200;
-  border: 1px solid #475569;
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+  @apply font-medium px-6 py-3 rounded-lg transition-all duration-200;
 }
 
 .btn-secondary:hover {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
 /* Professional card styling */
 .card {
-  @apply bg-slate-800 border border-slate-700 rounded-xl p-6 transition-all duration-200;
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  @apply rounded-xl p-6 transition-all duration-200;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
-  border-color: #3b82f6;
+  border-color: var(--color-primary);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 }
 

@@ -1,8 +1,11 @@
 ---
 import SEO from '../components/SEO.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import ReadingProgress from '../components/ReadingProgress.astro';
 import { loadFlags, projectClientFlags } from '../config/flags';
-// import IPTracker from '../components/IPTracker.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogSearch from '../../components/BlogSearch.astro';
 import '../styles/global.css';
 export interface Props { title?: string; description?: string; url?: string; noIndex?: boolean; }
 const { title, description, url, noIndex } = Astro.props as Props;
@@ -16,10 +19,25 @@ const clientFlags = projectClientFlags(serverFlags);
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#3b82f6" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="AtlasIT Platform" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="AtlasIT" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- PWA Links -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
     <SEO {title} {description} {url} noIndex={noIndex} />
   </head>
   <body class="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100">
@@ -64,7 +82,6 @@ const clientFlags = projectClientFlags(serverFlags);
       </div>
     
     <!-- Leaderboard removed (hidden for now to prevent nav overlap & simplify UI). Preserve commented block for potential future clue panel. -->
-    {/**
     <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-6 opacity-0 transition-all duration-500 z-40 max-w-sm shadow-2xl shadow-slate-900/50">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-blue-400 font-bold text-lg flex items-center">
@@ -76,41 +93,51 @@ const clientFlags = projectClientFlags(serverFlags);
         <!-- Leaderboard entries will be populated by JavaScript -->
       </div>
     </div>
-    */}
     
     <!-- Compact Dynamic Navigation -->
     <nav class="bg-slate-900/95 backdrop-blur-sm border-b border-slate-600 px-4 md:px-8 py-3 relative z-40 shadow-lg shadow-slate-900/50">
       <div class="flex justify-between items-center max-w-7xl mx-auto">
         <a href="/" class="text-cyan-400 hover:text-green-400 transition-colors duration-200 font-bold text-lg tracking-wide">Joe Whittle</a>
-        <div class="hidden md:flex space-x-6 relative z-50">
-          <a href="/projects" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Projects</a>
-          <a href="/workflows" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Workflows</a>
-          <a href="/demos" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Demos</a>
-          <a href="/about" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">About</a>
-          <a href="/resume" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Resume</a>
-          <a href="/guestbook" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Guestbook</a>
-          <a href="/contact" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Contact</a>
-
-
+        <div class="flex items-center space-x-4">
+          <div class="hidden md:flex space-x-6 relative z-50">
+            <a href="/projects" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Projects</a>
+            <a href="/workflows" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Workflows</a>
+            <a href="/demos" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Demos</a>
+            <a href="/arcade" class="flex items-center gap-1 text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">
+              🎮 <span class="hidden md:inline">Arcade</span>
+            </a>
+            <a href="/about" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">About</a>
+            <a href="/resume" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Resume</a>
+            <a href="/guestbook" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Guestbook</a>
+            <a href="/contact" class="text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-1 rounded-md hover:bg-slate-800/50 text-sm">Contact</a>
+          </div>
+          <!-- Theme Toggle -->
+          <ThemeToggle class="ml-2" />
+          <!-- Mobile menu button -->
+          <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-blue-400 ml-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
         </div>
-        <!-- Mobile menu button -->
-        <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-blue-400">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
       </div>
       <!-- Mobile menu -->
       <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 space-y-2">
         <a href="/projects" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Projects</a>
         <a href="/workflows" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Workflows</a>
         <a href="/demos" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Demos</a>
+        <a href="/arcade" class="flex items-center gap-1 text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">
+          🎮 Arcade
+        </a>
         <a href="/about" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">About</a>
         <a href="/resume" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Resume</a>
         <a href="/guestbook" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Guestbook</a>
         <a href="/contact" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Contact</a>
-  <a href="/enhanced-security-scanner" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Scanner</a>
-
+        <a href="/enhanced-security-scanner" class="block text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-link px-2 py-2 rounded-md hover:bg-slate-800/50 text-sm">Scanner</a>
+        <!-- Mobile Theme Toggle -->
+        <div class="px-2 py-2">
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
     <main class="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
@@ -140,5 +167,35 @@ const clientFlags = projectClientFlags(serverFlags);
     
     <!-- Cookie Consent -->
     <CookieConsent />
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('[SW] Registered successfully:', registration.scope);
+
+              // Handle service worker updates
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      // New content is available, notify user
+                      if (confirm('New content is available! Reload to get the latest version?')) {
+                        window.location.reload();
+                      }
+                    }
+                  });
+                }
+              });
+            })
+            .catch(error => {
+              console.log('[SW] Registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
