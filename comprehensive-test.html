@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Arcade Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+        .test-section {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+        .warning { color: #f59e0b; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Comprehensive Arcade Button Test</h1>
+
+    <div class="test-section">
+        <h2>1. DOM Elements Test</h2>
+        <div id="dom-test"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. JavaScript Loading Test</h2>
+        <div id="js-test"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Event Binding Test</h2>
+        <div id="event-test"></div>
+        <button id="manual-click-test">Manual Click Test</button>
+    </div>
+
+    <div class="test-section">
+        <h2>4. GameOverlay Import Test</h2>
+        <div id="import-test"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Canvas State Test</h2>
+        <div id="canvas-test"></div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="game-canvas" style="position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: 0; transition: opacity 1s; cursor: pointer; background: rgba(0,0,0,0.8);"></canvas>
+
+    <!-- Arcade Button -->
+    <div class="game-trigger-container" style="position: fixed; bottom: 1rem; right: 1rem; z-index: 60;">
+        <button id="game-trigger" class="game-trigger-button" aria-label="Launch Retro Arcade" title="Click to play retro games!" style="width: 48px; height: 48px; border-radius: 9999px; background: radial-gradient(circle at 30% 30%, #1e293b, #0f172a); border: 2px solid #3b82f6; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(59, 130, 246, 0.4), 0 0 20px rgba(99, 102, 241, 0.25);">
+            🎮
+        </button>
+    </div>
+
+    <!-- Load JavaScript files -->
+    <script type="module" src="http://localhost:4321/retro-arcade.js"></script>
+    <script type="module" src="http://localhost:4321/GameOverlay.js"></script>
+
+    <script type="module">
+        // Comprehensive test suite
+        const tests = {
+            dom: document.getElementById('dom-test'),
+            js: document.getElementById('js-test'),
+            event: document.getElementById('event-test'),
+            import: document.getElementById('import-test'),
+            canvas: document.getElementById('canvas-test')
+        };
+
+        function log(message, type = 'info', section = 'dom') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            tests[section].appendChild(div);
+        }
+
+        // Test 1: DOM Elements
+        function testDOM() {
+            log('Testing DOM elements...', 'info', 'dom');
+
+            const gameTrigger = document.getElementById('game-trigger');
+            const canvas = document.getElementById('game-canvas');
+
+            if (gameTrigger) {
+                log('✅ Arcade button found', 'success', 'dom');
+                log(`Button tagName: ${gameTrigger.tagName}`, 'info', 'dom');
+                log(`Button id: ${gameTrigger.id}`, 'info', 'dom');
+            } else {
+                log('❌ Arcade button not found', 'error', 'dom');
+            }
+
+            if (canvas) {
+                log('✅ Game canvas found', 'success', 'dom');
+                log(`Canvas opacity: ${window.getComputedStyle(canvas).opacity}`, 'info', 'dom');
+            } else {
+                log('❌ Game canvas not found', 'error', 'dom');
+            }
+        }
+
+        // Test 2: JavaScript Loading
+        function testJS() {
+            log('Testing JavaScript loading...', 'info', 'js');
+
+            // Check if RetroArcade is initialized
+            setTimeout(() => {
+                if (window.retroArcade) {
+                    log('✅ RetroArcade instance found', 'success', 'js');
+                    log(`RetroArcade isActive: ${window.retroArcade.isActive}`, 'info', 'js');
+                } else {
+                    log('❌ RetroArcade instance not found', 'error', 'js');
+                }
+            }, 1000);
+        }
+
+        // Test 3: Event Binding
+        function testEvents() {
+            log('Testing event binding...', 'info', 'event');
+
+            const gameTrigger = document.getElementById('game-trigger');
+            if (!gameTrigger) {
+                log('❌ Cannot test events - button not found', 'error', 'event');
+                return;
+            }
+
+            // Add our own event listener
+            gameTrigger.addEventListener('click', function(e) {
+                log('🎯 Our test listener triggered!', 'success', 'event');
+                log(`Event type: ${e.type}`, 'info', 'event');
+            });
+
+            // Manual click test
+            document.getElementById('manual-click-test').addEventListener('click', function() {
+                log('🖱️ Manual click test triggered', 'info', 'event');
+                gameTrigger.click();
+            });
+
+            log('✅ Event listeners added', 'success', 'event');
+        }
+
+        // Test 4: GameOverlay Import
+        async function testImport() {
+            log('Testing GameOverlay import...', 'info', 'import');
+
+            try {
+                const { GameOverlay } = await import('http://localhost:4321/GameOverlay.js');
+                log('✅ GameOverlay imported successfully', 'success', 'import');
+
+                const canvas = document.getElementById('game-canvas');
+                if (canvas) {
+                    new GameOverlay(canvas);
+                    log('✅ GameOverlay instance created', 'success', 'import');
+                }
+            } catch (error) {
+                log(`❌ GameOverlay import failed: ${error.message}`, 'error', 'import');
+            }
+        }
+
+        // Test 5: Canvas State Monitoring
+        function testCanvas() {
+            log('Monitoring canvas state...', 'info', 'canvas');
+
+            const canvas = document.getElementById('game-canvas');
+            if (!canvas) {
+                log('❌ Cannot monitor canvas - not found', 'error', 'canvas');
+                return;
+            }
+
+            // Monitor canvas changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const opacity = window.getComputedStyle(canvas).opacity;
+                        const pointerEvents = window.getComputedStyle(canvas).pointerEvents;
+                        log(`Canvas updated - opacity: ${opacity}, pointer-events: ${pointerEvents}`, 'info', 'canvas');
+                    }
+                });
+            });
+
+            observer.observe(canvas, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+
+            log('✅ Canvas monitoring started', 'success', 'canvas');
+        }
+
+        // Run all tests
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Starting comprehensive test suite...', 'info', 'dom');
+
+            testDOM();
+            testJS();
+            testEvents();
+            testImport();
+            testCanvas();
+
+            log('✅ All tests initialized', 'success', 'dom');
+        });
+
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            log(`🚨 JavaScript error: ${e.error.message}`, 'error', 'js');
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            log(`🚨 Unhandled promise rejection: ${e.reason}`, 'error', 'js');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+---
+// Theme Toggle Component
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button
+  id="theme-toggle"
+  class={`theme-toggle ${className || ''}`}
+  aria-label="Toggle theme"
+  title="Toggle between light and dark themes"
+>
+  <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="moon-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<style>
+  .theme-toggle {
+    @apply p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 transition-all duration-200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    @apply border-blue-500 shadow-lg;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  }
+
+  .theme-toggle svg {
+    @apply transition-all duration-300;
+  }
+
+  /* Light theme adjustments */
+  :global(.theme-light) .theme-toggle {
+    @apply bg-gray-100 hover:bg-gray-200 border-gray-300;
+  }
+
+  :global(.theme-light) .theme-toggle:hover {
+    @apply border-blue-500;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+  }
+</style>
+
+<script>
+  import { themes, defaultTheme, type ThemeName } from '../config/theme';
+
+  class ThemeManager {
+    private currentTheme: ThemeName;
+    private toggleButton: HTMLElement | null = null;
+    private sunIcon: SVGElement | null = null;
+    private moonIcon: SVGElement | null = null;
+
+    constructor() {
+      this.currentTheme = this.getStoredTheme();
+      this.init();
+    }
+
+    private init() {
+      this.toggleButton = document.getElementById('theme-toggle');
+      if (this.toggleButton) {
+        this.sunIcon = this.toggleButton.querySelector('.sun-icon') as SVGElement;
+        this.moonIcon = this.toggleButton.querySelector('.moon-icon') as SVGElement;
+
+        this.toggleButton.addEventListener('click', () => this.toggleTheme());
+      }
+
+      this.applyTheme();
+      this.updateToggleButton();
+    }
+
+    private getStoredTheme(): ThemeName {
+      const stored = localStorage.getItem('theme') as ThemeName;
+      if (stored && stored in themes) {
+        return stored;
+      }
+
+      // Check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        return 'light';
+      }
+
+      return defaultTheme;
+    }
+
+    private setStoredTheme(theme: ThemeName) {
+      localStorage.setItem('theme', theme);
+    }
+
+    private applyTheme() {
+      const theme = themes[this.currentTheme];
+      const root = document.documentElement;
+
+      // Apply CSS custom properties
+      Object.entries(theme.colors).forEach(([key, value]) => {
+        const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        root.style.setProperty(`--color-${cssKey}`, value);
+      });
+
+      // Update body classes
+      document.body.classList.remove('theme-dark', 'theme-light');
+      document.body.classList.add(`theme-${this.currentTheme}`);
+
+      // Update meta theme-color
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', theme.colors.primary);
+      }
+    }
+
+    private updateToggleButton() {
+      if (!this.sunIcon || !this.moonIcon) return;
+
+      if (this.currentTheme === 'dark') {
+        this.sunIcon.classList.remove('hidden');
+        this.moonIcon.classList.add('hidden');
+      } else {
+        this.sunIcon.classList.add('hidden');
+        this.moonIcon.classList.remove('hidden');
+      }
+    }
+
+    public toggleTheme() {
+      this.currentTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+      this.setStoredTheme(this.currentTheme);
+      this.applyTheme();
+      this.updateToggleButton();
+
+      // Dispatch custom event for other components
+      window.dispatchEvent(new CustomEvent('themeChange', {
+        detail: { theme: this.currentTheme }
+      }));
+    }
+
+    public getCurrentTheme(): ThemeName {
+      return this.currentTheme;
+    }
+  }
+
+  // Initialize theme manager when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => new ThemeManager());
+  } else {
+    new ThemeManager();
+  }
+
+  // Listen for system theme changes
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        // Only auto-switch if user hasn't manually set a preference
+        const themeManager = new ThemeManager();
+        if (e.matches) {
+          themeManager.toggleTheme();
+        }
+      }
+    });
+  }
+</script>
