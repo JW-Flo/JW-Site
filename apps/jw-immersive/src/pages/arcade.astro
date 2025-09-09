@@ -11,6 +11,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <li>The dark translucent game canvas fades in and the menu loads.</li>
       <li>Select a game using arrow keys + Enter, or click directly.</li>
     </ol>
+    <div style="margin: 2em 0;">
+      <button
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg transition-all duration-200"
+        onclick="if(window.retroArcade && typeof window.retroArcade.activateGame==='function'){window.retroArcade.activateGame();}else{alert('Arcade overlay not ready. Try again in a moment.');}"
+        style="display: block; margin: 0 auto;"
+      >
+        🚀 Play Now
+      </button>
+    </div>
     <p>If nothing happens, ensure JavaScript is enabled and check the browser console for any blocked scripts.</p>
     <h2>Controls</h2>
     <ul>
