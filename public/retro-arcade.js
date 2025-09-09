@@ -187,10 +187,40 @@ class RetroArcade {
 }
 
 // Initialize when DOM is ready and expose for testing
-document.addEventListener("DOMContentLoaded", () => {
+
+function initRetroArcade() {
   try {
-    window.retroArcade = new RetroArcade();
+    if (window.retroArcade && typeof window.retroArcade.bindEvents === 'function') {
+      // Re-bind events in case of navigation
+      window.retroArcade.bindEvents();
+      console.log("[RetroArcade] Re-bound events after navigation");
+    } else {
+      window.retroArcade = new RetroArcade();
+      console.log("[RetroArcade] Initialized new instance");
+    }
   } catch (e) {
-    console.error("Failed to initialize RetroArcade for testing", e);
+    console.error("Failed to initialize RetroArcade", e);
+  }
+}
+
+// Standard DOMContentLoaded
+document.addEventListener("DOMContentLoaded", initRetroArcade);
+
+// Astro client navigation support (if present)
+if (window && window.addEventListener) {
+  window.addEventListener('astro:after-swap', () => {
+    setTimeout(initRetroArcade, 0);
+  });
+}
+
+// Fallback for popstate (history navigation)
+window.addEventListener('popstate', () => {
+  setTimeout(initRetroArcade, 0);
+});
+
+// Fallback for visibilitychange (tab switch)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    setTimeout(initRetroArcade, 0);
   }
 });
