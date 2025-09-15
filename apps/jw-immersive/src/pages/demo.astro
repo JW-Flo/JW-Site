@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import projects from '../data/projects.json';
+import projects from '../data/projects.json' assert { type: 'json' };
 ---
 <BaseLayout title="Live Demos | Joe Whittle" description="Interactive demos of featured projects and applications">
   <section class="py-20 relative min-h-screen">

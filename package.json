@@ -12,7 +12,8 @@
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces",
-    "install:all": "npm install"
+  "install:all": "npm install",
+  "preview:jw-immersive:static": "npx serve apps/jw-immersive/dist -l 4321"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

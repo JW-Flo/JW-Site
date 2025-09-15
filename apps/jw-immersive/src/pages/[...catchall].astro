@@ -1,0 +1,10 @@
+---
+// SSR catch-all route to serve the root at the base path
+import Index from './index.astro';
+const { pathname } = Astro.request;
+const base = '/team/jw/immersive';
+if (pathname === base || pathname === base + '/') {
+  // Render the main index page at the SSR base path
+}
+---
+<Index />

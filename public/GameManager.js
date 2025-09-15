@@ -53,12 +53,27 @@ export class GameManager {
   async deactivate() {
     this.isActive = false;
     if (this.currentGame) {
-      this.currentGame.destroy();
+      try {
+        this.currentGame.destroy();
+      } catch (e) {
+        console.warn("Error destroying currentGame during deactivate:", e);
+      }
       this.currentGame = null;
     }
+    // Clear lastGameName to avoid stale restarts
+    this.lastGameName = null;
   }
 
   async showMenu() {
+    // Destroy any existing game before showing menu
+    if (this.currentGame) {
+      try {
+        this.currentGame.destroy();
+      } catch (e) {
+        console.warn("Error destroying currentGame before showMenu:", e);
+      }
+      this.currentGame = null;
+    }
     // Import and create menu game
     const { MenuGame } = await import("./games/MenuGame.js");
     this.currentGame = new MenuGame(this.overlay.canvas, this);
@@ -66,8 +81,14 @@ export class GameManager {
   }
 
   async startGame(gameName) {
+    // Always destroy current game before starting new one
     if (this.currentGame) {
-      this.currentGame.destroy();
+      try {
+        this.currentGame.destroy();
+      } catch (e) {
+        console.warn("Error destroying currentGame before startGame:", e);
+      }
+      this.currentGame = null;
     }
 
     // Remember last played (non-menu) game for restart support
@@ -357,8 +378,14 @@ export class GameManager {
   }
 
   returnToMenu() {
+    // Always destroy current game before returning to menu
     if (this.currentGame) {
-      this.currentGame.destroy();
+      try {
+        this.currentGame.destroy();
+      } catch (e) {
+        console.warn("Error destroying currentGame before returnToMenu:", e);
+      }
+      this.currentGame = null;
     }
     this.showMenu();
   }

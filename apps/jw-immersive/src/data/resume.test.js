@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import resumeData from "../data/resume.json";
+const resumeData = require("../data/resume.json");
 
 describe("Resume Data", () => {
   describe("Name Consistency", () => {

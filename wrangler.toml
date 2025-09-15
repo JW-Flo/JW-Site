@@ -1,12 +1,11 @@
+# Cloudflare Pages project build output
 name = "jw-site"
 compatibility_date = "2025-08-29"
-
-# Cloudflare Pages project build output
-pages_build_output_dir = "dist"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "apps/jw-immersive/dist"
 
 [vars]
-# Production site URL - update this with your custom domain later
-SITE_URL = "https://atlasit.pro"
+SITE_URL = "https://thewanderingwhittle.com"
 # Feature flags & admin keys (set securely in dashboard for production)
 # FEATURE_CONSENT_D1 = "true"  # Enable consent D1 persistence
 # FEATURE_GEO_CLASSIFICATION = "true" # Enable geo hashing output
@@ -74,11 +73,10 @@ database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
 binding = "MEDIA"
 bucket_name = "jw-site-media"
 preview_bucket_name = "jw-site-media-preview"
-kv_namespaces = [
-	{ binding = "RATE_LIMIT", id = "33fcae0c755840f996bfbb3ca3f9394f" },
-	{ binding = "LEADERBOARD", id = "4792010013254ed7815b2d66adb9a50e" },
-	{ binding = "ANALYTICS", id = "3dd7938561f5402bb41760edda181030" },
-]
+
+# NOTE: kv_namespaces is not a valid field under r2_buckets. If you need KV namespaces, define them separately as shown in the commented example above.
+
+# IMPORTANT: Always run 'wrangler pages deploy' from the project root (where this wrangler.toml lives) to avoid ENOENT errors with relative paths.
 
 # Workflows configuration (implemented as functions for now)
 # These will be converted to proper workflows when Cloudflare Workflows supports them
