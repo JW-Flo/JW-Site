@@ -1,11 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ResumeSection from '../components/ResumeSection.astro';
-import resume from '../data/resume.json';
+import resume from '../data/resume.json' assert { type: 'json' };
 ---
 <BaseLayout title="Resume | Joe Whittle" description="Professional cybersecurity resume for Joe Whittle">
 
-  <div class="flex justify-end mb-4 print:hidden relative">
+  <div class="flex flex-wrap justify-end gap-2 mb-4 print:hidden relative">
+  <a href="/joe.whittle.resume.pdf" target="_blank" rel="noopener" class="px-4 py-2 text-sm font-medium border border-neon-green text-neon-green rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon z-20 flex items-center gap-2" title="View or Download PDF Resume">
+      <span>📥</span> <span>Download PDF</span>
+    </a>
     <button id="printBtn" class="px-4 py-2 text-sm font-medium border border-neon-cyan text-neon-cyan rounded hover:border-neon-pink hover:text-neon-pink transition hover-neon z-20">
       📄 Print PDF
     </button>

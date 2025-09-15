@@ -12,6 +12,18 @@ const clientFlags = projectClientFlags(serverFlags);
 ---
 <html lang="en" class="scroll-smooth dark">
   <head>
+    <!-- Inject TEST_MODE for Playwright and robust testability -->
+    <script>
+      (function() {
+        try {
+          var search = window.location.search;
+          var cookie = document.cookie || '';
+          if (search.match(/[?&]testMode=1(?!\d)/) || /TEST_MODE=1/.test(cookie)) {
+            window.TEST_MODE = true;
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -64,7 +76,6 @@ const clientFlags = projectClientFlags(serverFlags);
       </div>
     
     <!-- Leaderboard removed (hidden for now to prevent nav overlap & simplify UI). Preserve commented block for potential future clue panel. -->
-    {/**
     <div id="leaderboard" class="fixed top-6 right-6 bg-slate-800/95 backdrop-blur-sm border border-slate-600 rounded-xl p-6 opacity-0 transition-all duration-500 z-40 max-w-sm shadow-2xl shadow-slate-900/50">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-blue-400 font-bold text-lg flex items-center">
@@ -76,7 +87,6 @@ const clientFlags = projectClientFlags(serverFlags);
         <!-- Leaderboard entries will be populated by JavaScript -->
       </div>
     </div>
-    */}
     
     <!-- Compact Dynamic Navigation -->
     <nav class="bg-slate-900/95 backdrop-blur-sm border-b border-slate-600 px-4 md:px-8 py-3 relative z-40 shadow-lg shadow-slate-900/50">

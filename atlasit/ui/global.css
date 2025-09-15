@@ -1,0 +1,106 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #0f172a;
+  color: #fff;
+  margin: 0;
+}
+
+h1, h2, h3 {
+  color: #60a5fa;
+}
+
+a {
+  color: #38bdf8;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+pre, code {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+}
+
+section {
+  margin-top: 2rem;
+}
+
+.bg-slate-800\/60 {
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.border-slate-700 {
+  border-color: #334155;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-slate-300 {
+  color: #cbd5e1;
+}
+
+.text-slate-400 {
+  color: #94a3b8;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}

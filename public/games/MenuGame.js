@@ -43,14 +43,22 @@ export class MenuGame {
   }
 
   destroy() {
+    // Cancel animation loop
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
+      this.animationId = null;
     }
     // Remove event listeners using the bound function references
-    this.canvas.removeEventListener("click", this.boundHandleClick);
-    if (typeof document !== "undefined") {
+    if (this.canvas && this.boundHandleClick) {
+      this.canvas.removeEventListener("click", this.boundHandleClick);
+    }
+    if (typeof document !== "undefined" && this.boundHandleKeyPress) {
       document.removeEventListener("keydown", this.boundHandleKeyPress);
     }
+    // Clear references to avoid leaks
+    this.canvas = null;
+    this.ctx = null;
+    this.gameManager = null;
   }
 
   handleClick(e) {

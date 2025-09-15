@@ -16,4 +16,10 @@ export default defineConfig({
     },
   }),
   integrations: [tailwind(), mdx(), sitemap()],
+  // Avoid using sharp at runtime in Cloudflare Worker; rely on build-time (compile) or no transforms
+  image: {
+    service: {
+      entrypoint: "astro/assets/services/sharp",
+    },
+  },
 });

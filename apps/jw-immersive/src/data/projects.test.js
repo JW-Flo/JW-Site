@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import projects from "../data/projects.json";
+const projects = require("../data/projects.json");
 
 describe("Projects Data", () => {
   describe("Project Structure", () => {

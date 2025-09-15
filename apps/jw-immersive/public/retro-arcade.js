@@ -1,3 +1,4 @@
+console.log('[RetroArcade] immersive public/retro-arcade.js script loaded');
 // Retro arcade client script moved out of inline layout
 class RetroArcade {
   constructor() {
