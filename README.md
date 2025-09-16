@@ -115,10 +115,30 @@ You can deploy either through the Cloudflare Pages UI or locally with Wrangler.
 - Authenticate with `npx wrangler login` (OAuth) or provide a Pages-capable `CLOUDFLARE_API_TOKEN`.
 - Configure bindings referenced in `wrangler.toml` (D1 `DB`, R2 `MEDIA`, optional `SESSION`/`SCANNER_META`).
 - Set secrets in the Pages dashboard: `SUPER_ADMIN_KEY`, `SESSION_SIGNING_KEY`, `CONSENT_ADMIN_KEY`, `TURNSTILE_SECRET_KEY`, scanner API keys, etc.
-- Confirm `wrangler.toml` values (project name, bindings) match the target account/zone by running `npx wrangler whoami` and `wrangler projects list`.
+- Confirm `wrangler.toml` values (project name, bindings) match the target account/zone by running `npx wrangler whoami` and `npx wrangler pages project list`.
 - When using API tokens, grant **Cloudflare Pages – Edit** and **Account Workers Scripts – Edit** permissions; store tokens securely (shell profile, CI secret store) and never commit.
 - Use Wrangler secret management for local/CI secrets: `wrangler pages secret put SUPER_ADMIN_KEY --env=production` (repeat per secret).
 - Before deploying, run `npm run validate:env` to ensure required variables are present.
+
+### Project Confirmation
+
+Verify your Cloudflare Pages projects and current configuration:
+
+```bash
+# Check authentication and account
+npx wrangler whoami
+
+# List all Pages projects
+npx wrangler pages project list
+
+# Check current deployments for atlasit-platform
+npx wrangler pages deployment list --project-name=atlasit-platform
+```
+
+Expected projects:
+
+- `atlasit-platform` - Main AtlasIT platform (target for atlasit.pro)
+- `jw-site` - Personal portfolio site
 
 ### One-time (UI)
 
@@ -131,9 +151,17 @@ You can deploy either through the Cloudflare Pages UI or locally with Wrangler.
 ### Local (Wrangler CLI)
 
 ```bash
-# Preview deploy
+# Build the project first
 npm run build
-wrangler pages deploy apps/platform/dist --project-name atlasit-platform --branch=preview
+
+# Deploy platform to atlasit-platform project
+npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform
+
+# Deploy portfolio to jw-site project
+npx wrangler pages deploy apps/jw-immersive/dist --project-name=jw-site
+
+# Preview deploy (staging)
+npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform --branch=preview
 
 # Production deploy (scripted helper)
 CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main DEPLOY_HEALTHCHECK_URL=https://atlasit.pro/health npm run deploy:production
@@ -148,18 +176,98 @@ CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main npm run deploy:production
 #   CONSENT_ADMIN_KEY, TURNSTILE_SECRET_KEY, SITE_URL, optional scanner API keys.
 ```
 
+### Custom Domain Setup (atlasit.pro)
+
+To map the custom domain `atlasit.pro` to the `atlasit-platform` project:
+
+1. **In Cloudflare Dashboard:**
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → Pages
+   - Select the `atlasit-platform` project
+   - Go to **Custom domains** tab
+   - Click **Set up a custom domain**
+   - Enter `atlasit.pro`
+   - Follow verification instructions (CNAME or TXT record)
+
+2. **DNS Configuration:**
+   - If Cloudflare manages your DNS: Records are added automatically
+   - If external DNS: Add the CNAME record provided by Cloudflare
+   - Example: `atlasit.pro CNAME atlasit-platform.pages.dev`
+
+3. **Verification:**
+   - Wait for domain verification (usually 1-5 minutes)
+   - Status should show "Active" in the Custom domains tab
+
+4. **Post-Setup Redeploy:**
+   ```bash
+   # Redeploy to update SITE_URL metadata
+   npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform
+   ```
+
+### Troubleshooting Domain Issues
+
+**SSL Handshake Failed (Error 525):**
+- Check that the custom domain is mapped to the correct Pages project
+- Ensure SSL/TLS mode is set to "Full" (not "Full (Strict)")
+- Verify no conflicting DNS records (A/AAAA pointing to legacy servers)
+- Remove any Cloudflare Tunnel routes that might conflict
+
+**404 on Custom Domain:**
+- Verify the domain is mapped to the correct project (`atlasit-platform`, not `jw-site`)
+- Check that the latest deployment is successful
+- Ensure the build output directory matches the expected structure
+
+**Domain Points to Wrong Project:**
+- Remove the custom domain from the old project first
+- Add it to the correct project (`atlasit-platform`)
+- Wait for DNS propagation (up to 24 hours, usually 5-10 minutes)
+
 The `deploy:production` script wraps `wrangler pages deploy` and performs a post-deploy health check (defaults provided via env vars). The script intentionally fails fast if `CF_PAGES_PROJECT` is not set to avoid accidental deployments.
 
 > Running the script with `--dry-run` validates authentication, bindings, and artifacts without publishing.
 
 ### Post-deploy health check
 
+After successful deployment and domain mapping, verify the deployment:
+
 ```bash
+# Check domain resolution and SSL
+curl -I https://atlasit.pro/
+
+# Health check (if health endpoint exists)
 curl -sfS https://atlasit.pro/health | jq '.status'
+
+# Test key platform endpoints
+curl -I https://atlasit.pro/dashboard/
+curl -I https://atlasit.pro/onboarding/
 curl -sfS https://atlasit.pro/api/demo/data | jq '.requestId'
 ```
 
+Expected responses:
+
+- Root domain: 200 OK (or redirect to dashboard)
+- Dashboard: 200 OK with HTML content
+- API endpoints: 200 OK with JSON responses
+
 Manually spot-check `/dashboard`, `/onboarding`, persona switching, and the reset button right after each deploy.
+
+### Current Deployment Status
+
+**Platform URLs:**
+- **Production:** https://atlasit.pro (custom domain)
+- **Preview:** https://1d9d5ba0.atlasit-platform.pages.dev (latest deployment)
+- **Dashboard:** https://atlasit.pro/dashboard/
+- **Onboarding:** https://atlasit.pro/onboarding/
+
+**Quick Verification:**
+```bash
+# Verify platform is live
+curl -I https://atlasit.pro/dashboard/
+
+# Test new deployment
+curl -I https://1d9d5ba0.atlasit-platform.pages.dev/dashboard/
+```
+
+Note: The platform app has no root index page by design. Access specific applications via `/dashboard/`, `/onboarding/`, etc.
 
 When preparing (no publish), run:
 
@@ -356,16 +464,32 @@ All architectural decisions and future enhancements are mapped to findings and r
 
 Run after staging & before promoting to production:
 
-1. Headers: `curl -I https://staging.example` → confirm CSP present with per-request nonce, HSTS, Frame deny, Permissions-Policy, COOP/COEP.
-2. CSP Nonce Validity: Load page; ensure inline bootstrap script has a nonce attribute matching CSP header value.
-3. Rate Limits: Hit `/api/geo` >30 times quickly → receive 429 with RateLimit headers.
-4. Health Endpoint: `curl /api/health` → verify commit hash matches latest main branch commit.
-5. Guestbook Submit: Valid Turnstile token path returns 200 and appears in GET list; exceeding quota yields 429.
-6. Super Admin Elevation: POST to `/api/super-admin-elevate` with wrong key → fast failure; correct key issues role cookie.
-7. Admin Consent Stats: GET with missing/incorrect `X-Admin-Key` returns 404; with correct key returns stats JSON.
-8. Waitlist (if enabled): Duplicate email returns `{ ok: true, duplicate: true }` without error.
-9. Security Scanner: Super-admin mode only accessible when SUPER_ADMIN_KEY set; role cookie not present otherwise.
-10. Logs (Preview via Wrangler): Confirm structured JSON lines with request IDs & server timing.
+1. **Build & Deploy:** `npm run build && npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform`
+2. **Domain Mapping:** Verify `atlasit.pro` points to `atlasit-platform` project in Cloudflare Dashboard
+3. **SSL/TLS:** Check domain resolves with valid certificate: `curl -I https://atlasit.pro/`
+4. **Platform Access:** Verify dashboard loads: `curl -I https://atlasit.pro/dashboard/` → 200 OK
+5. **API Endpoints:** Test demo data: `curl -sfS https://atlasit.pro/api/demo/data | jq '.requestId'`
+6. **Health Check:** If health endpoint exists: `curl -sfS https://atlasit.pro/health | jq '.status'`
+7. **Onboarding Flow:** Manual check of `/onboarding` form and persona switching
+8. **Security Headers:** `curl -I https://atlasit.pro/dashboard/` → confirm CSP, HSTS, Frame deny
+9. **Rate Limits:** Hit API endpoints repeatedly → should receive 429 with RateLimit headers
+10. **Deployment Status:** Verify latest commit hash matches deployment
+
+**Quick Deployment Commands:**
+```bash
+# Full deployment
+npm run build
+npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform
+
+# Verify deployment
+curl -I https://atlasit.pro/dashboard/
+curl -I https://1d9d5ba0.atlasit-platform.pages.dev/dashboard/
+```
+
+**Troubleshooting:**
+- If SSL handshake fails (525): Check domain mapping and SSL/TLS mode
+- If 404 on custom domain: Verify correct project mapping
+- If dashboard not loading: Check build output and deployment logs
 
 Optional Automated Script Idea: A future `scripts/qa.sh` can encapsulate these checks.
 
