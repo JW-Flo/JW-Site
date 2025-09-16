@@ -1,0 +1,42 @@
+---
+const title = "Security Scanner - AtlasIT Marketplace";
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+  <main class="container mx-auto px-6 py-8">
+    <h1 class="text-3xl font-bold mb-6">Security Scanner</h1>
+    <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Quick Integration Walkthrough</h2>
+      <ol class="list-decimal ml-6 space-y-3">
+        <li>Authorize AtlasIT to scan your environment <button class="px-4 py-2 bg-blue-600 text-white rounded-lg ml-2">Enable Scanner</button></li>
+        <li>Configure scan schedule:
+          <div class="mt-2">
+            <label class="block mb-1">Scan Frequency:</label>
+            <select class="input-field w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded text-slate-100 text-sm">
+              <option value="">Choose...</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+        </li>
+        <li>Set notification preferences:
+          <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> Threat Detected</label>
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> Scan Success</label>
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> Scan Failure</label>
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> System Updates</label>
+          </div>
+        </li>
+        <li>Finish setup and run test scan <button class="px-4 py-2 bg-green-600 text-white rounded-lg ml-2">Test Scan</button></li>
+      </ol>
+    </div>
+  </main>
+</body>
+</html>
