@@ -1,0 +1,260 @@
+---
+title: "JML Lifecycle Demo - AtlasIT"
+---
+
+<html lang="en">
+  <head>
+    <title>JML Lifecycle Demo - AtlasIT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+      .nav-link { transition: all 0.2s ease; }
+      .nav-link:hover { transform: translateY(-1px); }
+      .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+      .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+      .demo-banner { 
+        background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); 
+        border: 1px solid rgba(59,130,246,0.35); 
+        border-radius: 0.75rem; 
+        color: #bfdbfe; 
+        font-size: 0.75rem; 
+        letter-spacing: 0.08em; 
+        padding: 0.6rem 1rem; 
+        text-transform: uppercase; 
+        text-align: center; 
+        margin: 1.5rem auto 0; 
+        max-width: 60rem; 
+      }
+      
+      .scenario-card {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        transition: all 0.3s ease;
+      }
+      .scenario-card:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      
+      .scenario-active {
+        border-color: rgba(34, 197, 94, 0.7) !important;
+        background: rgba(34, 197, 94, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+    <!-- Header -->
+    <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+      <nav class="container mx-auto px-6 py-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold text-sm">AI</span>
+            </div>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-1">
+            <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+            <a href="/onboarding" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Onboarding</a>
+            <a href="/marketplace" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Marketplace</a>
+            <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Orchestrator</a>
+            <a href="/api-manager" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">API Manager</a>
+            <a href="/jml-demo" class="nav-link px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white">JML Demo</a>
+
+            <!-- IT Dropdown -->
+            <div class="relative group">
+              <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+                IT <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+                <a href="/it/policies" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Policies</a>
+                <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-b-lg">Backup & Recovery</a>
+              </div>
+            </div>
+
+            <!-- Security Dropdown -->
+            <div class="relative group">
+              <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+                Security <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+                <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Security Center</a>
+                <a href="/enhanced-security-scanner" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-b-lg">Scanner</a>
+              </div>
+            </div>
+
+            <!-- Governance Dropdown -->
+            <div class="relative group">
+              <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+                Governance <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+                <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
+              </div>
+            </div>
+
+            <div class="w-px h-6 bg-slate-600 mx-2"></div>
+            <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
+            <a href="/register" class="nav-link px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-all duration-200">Register</a>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white p-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <div class="demo-banner">
+      🚀 Interactive JML Lifecycle Demo - Enterprise IAM Automation
+    </div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+          JML Lifecycle Demo
+        </h1>
+        <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+          Experience automated onboarding, role changes, and offboarding workflows powered by HRIS integration, Okta API, and AWS IAM automation
+        </p>
+      </div>
+
+      <!-- Scenario Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="scenario-card p-6 rounded-xl cursor-pointer">
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">👋</div>
+            <div>
+              <h3 class="text-lg font-semibold">New Employee</h3>
+              <p class="text-sm text-slate-400">Joiner Workflow</p>
+            </div>
+          </div>
+          <p class="text-slate-300 mb-4">Jordan Miles joins as Security Engineer. Watch automated provisioning across Okta and AWS.</p>
+          <div class="space-y-2">
+            <div class="text-sm font-medium">Workflow Steps:</div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <div>• HRIS Employee Creation</div>
+              <div>• Okta User Provisioning</div>
+              <div>• AWS IAM Role Creation</div>
+              <div>• CloudTrail Monitoring Setup</div>
+              <div>• Welcome Email & Credentials</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario-card p-6 rounded-xl cursor-pointer">
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">🔄</div>
+            <div>
+              <h3 class="text-lg font-semibold">Role Change</h3>
+              <p class="text-sm text-slate-400">Mover Workflow</p>
+            </div>
+          </div>
+          <p class="text-slate-300 mb-4">Alex Chen moves from Developer to DevOps Lead. See automated permission updates.</p>
+          <div class="space-y-2">
+            <div class="text-sm font-medium">Workflow Steps:</div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <div>• HRIS Role Update</div>
+              <div>• Okta Group Membership Changes</div>
+              <div>• AWS IAM Role Migration</div>
+              <div>• Access Review Trigger</div>
+              <div>• Team Notifications</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario-card p-6 rounded-xl cursor-pointer">
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">👋</div>
+            <div>
+              <h3 class="text-lg font-semibold">Employee Exit</h3>
+              <p class="text-sm text-slate-400">Leaver Workflow</p>
+            </div>
+          </div>
+          <p class="text-slate-300 mb-4">Sam Taylor departs the company. Witness complete access deprovisioning and audit trail.</p>
+          <div class="space-y-2">
+            <div class="text-sm font-medium">Workflow Steps:</div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <div>• HRIS Termination Recording</div>
+              <div>• Immediate Okta Suspension</div>
+              <div>• AWS IAM Deprovisioning</div>
+              <div>• Final Audit & Backup</div>
+              <div>• Manager Notifications</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Features -->
+      <div class="glass-effect p-8 rounded-xl border border-slate-700/50 mb-8">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Enterprise IAM Automation Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div class="text-3xl mb-2">🏢</div>
+            <h3 class="font-semibold mb-1">HRIS Integration</h3>
+            <p class="text-sm text-slate-400">BambooHR as source of truth</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">🔐</div>
+            <h3 class="font-semibold mb-1">Okta API</h3>
+            <p class="text-sm text-slate-400">User lifecycle management</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">☁️</div>
+            <h3 class="font-semibold mb-1">AWS IAM</h3>
+            <p class="text-sm text-slate-400">Terraform automation</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">📊</div>
+            <h3 class="font-semibold mb-1">Compliance</h3>
+            <p class="text-sm text-slate-400">Audit trails & reporting</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Integration Overview -->
+      <div class="glass-effect p-8 rounded-xl border border-slate-700/50">
+        <h2 class="text-2xl font-semibold mb-6 text-center">API Integration Flow</h2>
+        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">HR</span>
+            </div>
+            <span class="text-slate-300">BambooHR</span>
+          </div>
+          <div class="text-slate-400">→</div>
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">API</span>
+            </div>
+            <span class="text-slate-300">AtlasIT</span>
+          </div>
+          <div class="text-slate-400">→</div>
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">ID</span>
+            </div>
+            <span class="text-slate-300">Okta</span>
+          </div>
+          <div class="text-slate-400">→</div>
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">AWS</span>
+            </div>
+            <span class="text-slate-300">IAM</span>
+          </div>
+        </div>
+        <p class="text-center text-slate-400 mt-6">
+          Seamless integration from HRIS to cloud infrastructure with full audit trail
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

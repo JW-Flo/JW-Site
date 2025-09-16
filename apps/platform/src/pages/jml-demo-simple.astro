@@ -1,0 +1,89 @@
+---
+title: "JML Lifecycle Demo - AtlasIT"
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      .demo-banner { 
+        background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); 
+        border: 1px solid rgba(59,130,246,0.35); 
+        border-radius: 0.75rem; 
+        color: #bfdbfe; 
+        font-size: 0.75rem; 
+        letter-spacing: 0.08em; 
+        padding: 0.6rem 1rem; 
+        text-transform: uppercase; 
+        text-align: center; 
+        margin: 1.5rem auto 0; 
+        max-width: 60rem; 
+      }
+    </style>
+  </head>
+  <body class="bg-slate-900 text-white min-h-screen">
+    <div id="app">
+      <div class="demo-banner">
+        🚀 Interactive JML Lifecycle Demo - Enterprise IAM Automation
+      </div>
+      
+      <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8">
+          JML Lifecycle Demo
+        </h1>
+        
+        <div class="text-center mb-8">
+          <p class="text-lg text-slate-300">
+            Experience automated onboarding, role changes, and offboarding workflows
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div v-for="scenario in scenarios" :key="scenario.id" class="scenario-card p-6 border rounded-lg cursor-pointer" @click="selectScenario(scenario.id)">
+            <div class="text-2xl mb-3">{{ scenario.icon }}</div>
+            <h3 class="text-lg font-semibold">{{ scenario.title }}</h3>
+            <p class="text-sm text-slate-400">{{ scenario.subtitle }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            currentScenario: null,
+            scenarios: [
+              {
+                id: 'joiner',
+                icon: '👋',
+                title: 'New Employee',
+                subtitle: 'Joiner Workflow'
+              },
+              {
+                id: 'mover',
+                icon: '🔄',
+                title: 'Role Change',
+                subtitle: 'Mover Workflow'
+              },
+              {
+                id: 'leaver',
+                icon: '👋',
+                title: 'Employee Exit',
+                subtitle: 'Leaver Workflow'
+              }
+            ]
+          };
+        },
+        methods: {
+          selectScenario(id) {
+            this.currentScenario = this.scenarios.find(s => s.id === id);
+          }
+        }
+      }).mount('#app');
+    </script>
+  </body>
+</html>

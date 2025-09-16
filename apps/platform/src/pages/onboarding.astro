@@ -162,6 +162,7 @@ const title = "Onboarding - AtlasIT";
                 type="text"
                 placeholder="Enter your tenant ID"
                 name="tenantId"
+                value="HWCO-2025"
                 required
                 class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none"
               >
@@ -211,23 +212,23 @@ const title = "Onboarding - AtlasIT";
               <dl class="grid grid-cols-2 gap-2 text-xs text-slate-300">
                 <div>
                   <dt class="text-slate-400">Name</dt>
-                  <dd id="demo-user-name">—</dd>
+                  <dd id="demo-user-name">-</dd>
                 </div>
                 <div>
                   <dt class="text-slate-400">Role</dt>
-                  <dd id="demo-user-role">—</dd>
+                  <dd id="demo-user-role">-</dd>
                 </div>
                 <div>
                   <dt class="text-slate-400">Status</dt>
-                  <dd id="demo-user-status" class="font-medium">—</dd>
+                  <dd id="demo-user-status" class="font-medium">-</dd>
                 </div>
                 <div>
                   <dt class="text-slate-400">Last Active</dt>
-                  <dd id="demo-user-last-active">—</dd>
+                  <dd id="demo-user-last-active">-</dd>
                 </div>
                 <div class="col-span-2">
                   <dt class="text-slate-400">Persona Focus</dt>
-                  <dd id="demo-user-persona" class="mt-1">—</dd>
+                  <dd id="demo-user-persona" class="mt-1">-</dd>
                 </div>
               </dl>
             </div>
@@ -430,11 +431,11 @@ const title = "Onboarding - AtlasIT";
 
       function clearPreview() {
         if (previewCard) previewCard.classList.add('hidden');
-        if (previewName) previewName.textContent = '—';
-        if (previewRole) previewRole.textContent = '—';
-        if (previewStatus) previewStatus.textContent = '—';
-        if (previewLastActive) previewLastActive.textContent = '—';
-        if (previewPersona) previewPersona.textContent = '—';
+        if (previewName) previewName.textContent = '-';
+        if (previewRole) previewRole.textContent = '-';
+        if (previewStatus) previewStatus.textContent = '-';
+        if (previewLastActive) previewLastActive.textContent = '-';
+        if (previewPersona) previewPersona.textContent = '-';
         evaluateStep();
       }
 
@@ -550,7 +551,7 @@ const title = "Onboarding - AtlasIT";
 
         try {
           resetButton.disabled = true;
-          resetButton.textContent = 'Resetting…';
+          resetButton.textContent = 'Resetting...';
           resetSuccess?.classList.add('hidden');
           errorBox?.classList.add('hidden');
 

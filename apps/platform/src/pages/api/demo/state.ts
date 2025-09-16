@@ -13,7 +13,7 @@ interface DemoState {
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
-    // Use existing D1 database binding
+    // Get D1 database from Cloudflare environment
     const db = (locals as any).runtime?.env?.DB;
     if (!db) {
       return new Response(JSON.stringify({ error: 'Database not available' }), {
@@ -22,11 +22,19 @@ export const GET: APIRoute = async ({ locals }) => {
       });
     }
 
-    // Get current demo state from existing guestbook_demo database
+    // Get current demo session
     const result = await db.prepare(`
-      SELECT * FROM paycom_demo_states 
+      SELECT 
+        scenario_id,
+        employee_id,
+        current_step_index,
+        progress_percentage,
+        session_status,
+        session_data,
+        updated_at
+      FROM jml_demo_sessions 
       WHERE id = 'current' 
-      ORDER BY timestamp DESC 
+      ORDER BY updated_at DESC 
       LIMIT 1
     `).first();
 
@@ -37,13 +45,24 @@ export const GET: APIRoute = async ({ locals }) => {
       });
     }
 
-    return new Response(JSON.stringify(JSON.parse(result.state)), {
+    // Parse session data and return structured response
+    const sessionData = result.session_data ? JSON.parse(result.session_data) : {};
+    
+    return new Response(JSON.stringify({
+      scenario: result.scenario_id,
+      employee: sessionData.employee,
+      stepIndex: result.current_step_index,
+      progress: result.progress_percentage,
+      status: result.session_status,
+      timestamp: result.updated_at,
+      logs: sessionData.logs || []
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error getting Paycom demo state:', error);
-    return new Response(JSON.stringify({ error: 'Failed to get Paycom demo state' }), {
+    console.error('Error getting demo state:', error);
+    return new Response(JSON.stringify({ error: 'Failed to get demo state' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -62,35 +81,44 @@ export const PUT: APIRoute = async ({ request, locals }) => {
 
     const demoState: DemoState = await request.json();
     
-    // Create Paycom-specific table if it doesn't exist
+    // Upsert demo session with proper Paycom employee data
     await db.prepare(`
-      CREATE TABLE IF NOT EXISTS paycom_demo_states (
-        id TEXT PRIMARY KEY,
-        state TEXT NOT NULL,
-        paycom_employee_id TEXT,
-        workflow_type TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `).run();
-
-    // Upsert demo state with Paycom context
-    await db.prepare(`
-      INSERT OR REPLACE INTO paycom_demo_states (id, state, paycom_employee_id, workflow_type, timestamp)
-      VALUES ('current', ?, ?, ?, ?)
+      INSERT OR REPLACE INTO jml_demo_sessions (
+        id, 
+        scenario_id, 
+        employee_id, 
+        current_step_index, 
+        progress_percentage,
+        session_status,
+        session_data,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      JSON.stringify(demoState),
-      demoState.employee?.employeeId || null,
-      demoState.scenario || null,
+      'current',
+      demoState.scenario,
+      demoState.employee?.employeeId || 'unknown',
+      demoState.stepIndex,
+      demoState.progress,
+      'active',
+      JSON.stringify({
+        employee: demoState.employee,
+        logs: demoState.logs,
+        paycomIntegration: true,
+        lastUpdated: demoState.timestamp
+      }),
       new Date().toISOString()
     ).run();
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Demo state saved to AtlasIT JML database' 
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error saving Paycom demo state:', error);
-    return new Response(JSON.stringify({ error: 'Failed to save Paycom demo state' }), {
+    console.error('Error saving demo state:', error);
+    return new Response(JSON.stringify({ error: 'Failed to save demo state' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -107,15 +135,18 @@ export const DELETE: APIRoute = async ({ locals }) => {
       });
     }
 
-    await db.prepare(`DELETE FROM paycom_demo_states WHERE id = 'current'`).run();
+    await db.prepare(`DELETE FROM jml_demo_sessions WHERE id = 'current'`).run();
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Demo session cleared' 
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error clearing Paycom demo state:', error);
-    return new Response(JSON.stringify({ error: 'Failed to clear Paycom demo state' }), {
+    console.error('Error clearing demo state:', error);
+    return new Response(JSON.stringify({ error: 'Failed to clear demo state' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
