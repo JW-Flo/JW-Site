@@ -17,7 +17,7 @@ jobs:
       CF_PAGES_PROJECT: ${{ secrets.CF_PAGES_PROJECT }}
       CF_PAGES_BRANCH: main
       CF_PAGES_DIST_DIR: apps/platform/dist
-      DEPLOY_HEALTHCHECK_URL: https://atlasit.pro/health
+  DEPLOY_HEALTHCHECK_URL: https://www.atlasit.pro/health
       SUPER_ADMIN_KEY: ${{ secrets.SUPER_ADMIN_KEY }}
       SESSION_SIGNING_KEY: ${{ secrets.SESSION_SIGNING_KEY }}
       CONSENT_ADMIN_KEY: ${{ secrets.CONSENT_ADMIN_KEY }}

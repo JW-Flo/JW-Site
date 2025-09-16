@@ -70,7 +70,7 @@ preview_bucket_name = "jw-site-media-preview"
 
 
 [env.production]
-vars = { SITE_URL = "https://atlasit.pro" }
+vars = { SITE_URL = "https://www.atlasit.pro" }
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "atlasit_jml_demo"

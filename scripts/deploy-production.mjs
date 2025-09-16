@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const project = process.env.CF_PAGES_PROJECT;
 const branch = process.env.CF_PAGES_BRANCH ?? 'main';
 const dist = process.env.CF_PAGES_DIST_DIR ?? 'apps/platform/dist';
-const healthUrl = process.env.DEPLOY_HEALTHCHECK_URL ?? 'https://atlasit.pro/health';
+const healthUrl = process.env.DEPLOY_HEALTHCHECK_URL ?? 'https://www.atlasit.pro/health';
 
 function log(step, message) {
   console.log(`\n[deploy:${step}] ${message}`);
@@ -35,11 +35,18 @@ try {
   });
 
   log('health', `Checking ${healthUrl}`);
-  const res = await fetch(healthUrl);
-  if (!res.ok) {
-    throw new Error(`Health check failed: ${res.status} ${res.statusText}`);
-  }
-  log('health', 'Health check succeeded');
+  await new Promise((resolve, reject) => {
+    fetch(healthUrl)
+      .then(res => {
+        if (!res.ok) {
+          reject(new Error(`Health check failed: ${res.status} ${res.statusText}`));
+          return;
+        }
+        log('health', 'Health check succeeded');
+        resolve();
+      })
+      .catch(err => reject(new Error(`Health check request failed: ${err.message}`)));
+  });
   log('done', 'Deployment complete');
 } catch (error) {
   console.error('\n[deploy:error]', error instanceof Error ? error.message : error);

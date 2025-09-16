@@ -4,7 +4,7 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import cloudflare from "@astrojs/cloudflare";
 
-const SITE_URL = process.env.SITE_URL || "https://atlasit.pro";
+const SITE_URL = process.env.SITE_URL || "https://www.atlasit.pro";
 
 export default defineConfig({
   // Canonical site URL used by Astro for absolute links & sitemap
