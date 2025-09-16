@@ -95,6 +95,21 @@ title: "JML Demo - AtlasIT"
       border-left: 4px solid #374151;
     }
     
+    .step-active {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .step-completed {
+      border-left-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .highlight {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
     .btn {
       padding: 0.75rem 1.5rem;
       border: none;
@@ -111,9 +126,20 @@ title: "JML Demo - AtlasIT"
       background: #2563eb;
     }
     
-    .highlight {
-      background: rgba(59, 130, 246, 0.1);
-      border-left-color: #3b82f6;
+    .btn:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
+    
+    .log-container {
+      background: #111827;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 2rem;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.875rem;
     }
   </style>
 </head>
@@ -232,46 +258,46 @@ title: "JML Demo - AtlasIT"
       <h2 id="workflow-title" style="font-size: 1.5rem; margin-bottom: 2rem;"></h2>
       
       <div style="margin-bottom: 2rem;">
-        <button class="btn" onclick="runDemo()">▶️ Start Workflow Demo</button>
+        <button class="btn" onclick="runDemo()" id="runButton">▶️ Start Workflow Demo</button>
         <button class="btn" onclick="resetDemo()">🔄 Reset</button>
       </div>
       
       <ul id="step-list" class="step-list"></ul>
       
-      <div id="demo-log" style="background: #111827; border-radius: 0.5rem; padding: 1rem; margin-top: 2rem; font-family: monospace; font-size: 0.875rem; max-height: 300px; overflow-y: auto; display: none;"></div>
+      <div id="demo-log" class="log-container" style="display: none;"></div>
     </div>
   </div>
 
-  <script>
+  <script type="text/javascript">
     const workflows = {
       onboarding: {
         title: 'New Employee Onboarding Workflow',
         steps: [
-          'HRIS Detection: Paycom triggers automated workflow for new employee',
-          'Okta Account Creation: Create user account with appropriate group memberships',
-          'AWS IAM Provisioning: Create AWS account and assign role-based permissions',
-          'Application Access: Provision access to required SaaS applications',
-          'Compliance Verification: Verify all access grants meet compliance requirements'
+          'HRIS Detection: Paycom triggers automated workflow for new employee (⏱️ ~5s)',
+          'Okta Account Creation: Create user account with appropriate group memberships (⏱️ ~10s)',
+          'AWS IAM Provisioning: Create AWS account and assign role-based permissions (⏱️ ~15s)',
+          'Application Access: Provision access to required SaaS applications (⏱️ ~20s)',
+          'Compliance Verification: Verify all access grants meet compliance requirements (⏱️ ~5s)'
         ]
       },
       'role-change': {
         title: 'Role Change Management Workflow',
         steps: [
-          'Role Change Detection: Paycom detects department/role change and triggers workflow',
-          'Access Review: Review current permissions and identify changes needed',
-          'New Permissions: Grant additional AWS and application access for DevOps role',
-          'Legacy Access Removal: Remove unnecessary permissions from previous role',
-          'Validation & Audit: Verify access changes and log for compliance'
+          'Role Change Detection: Paycom detects department/role change and triggers workflow (⏱️ ~3s)',
+          'Access Review: Review current permissions and identify changes needed (⏱️ ~8s)',
+          'New Permissions: Grant additional AWS and application access for DevOps role (⏱️ ~12s)',
+          'Legacy Access Removal: Remove unnecessary permissions from previous role (⏱️ ~10s)',
+          'Validation & Audit: Verify access changes and log for compliance (⏱️ ~5s)'
         ]
       },
       offboarding: {
         title: 'Employee Offboarding Workflow',
         steps: [
-          'Termination Detection: Paycom triggers immediate offboarding workflow',
-          'Account Deactivation: Immediately disable Okta account and sessions',
-          'AWS Access Revocation: Remove all AWS permissions and access keys',
-          'Application Cleanup: Revoke access from all SaaS applications',
-          'Data Security & Audit: Generate compliance report and secure data transfer'
+          'Termination Detection: Paycom triggers immediate offboarding workflow (⏱️ ~2s)',
+          'Account Deactivation: Immediately disable Okta account and sessions (⏱️ ~5s)',
+          'AWS Access Revocation: Remove all AWS permissions and access keys (⏱️ ~8s)',
+          'Application Cleanup: Revoke access from all SaaS applications (⏱️ ~15s)',
+          'Data Security & Audit: Generate compliance report and secure data transfer (⏱️ ~10s)'
         ]
       }
     };
@@ -281,10 +307,13 @@ title: "JML Demo - AtlasIT"
     
     function showWorkflow(workflowId) {
       currentWorkflow = workflows[workflowId];
-      document.getElementById('workflow-container').style.display = 'block';
-      document.getElementById('workflow-title').textContent = currentWorkflow.title;
-      
+      const container = document.getElementById('workflow-container');
+      const title = document.getElementById('workflow-title');
       const stepList = document.getElementById('step-list');
+      
+      container.style.display = 'block';
+      title.textContent = currentWorkflow.title;
+      
       stepList.innerHTML = '';
       
       currentWorkflow.steps.forEach((step, index) => {
@@ -296,6 +325,9 @@ title: "JML Demo - AtlasIT"
       });
       
       resetDemo();
+      
+      // Scroll to workflow section
+      container.scrollIntoView({ behavior: 'smooth' });
     }
     
     async function runDemo() {
@@ -303,14 +335,19 @@ title: "JML Demo - AtlasIT"
       
       isRunning = true;
       const log = document.getElementById('demo-log');
+      const runButton = document.getElementById('runButton');
+      
       log.style.display = 'block';
       log.innerHTML = '<div style="color: #60a5fa;">[' + new Date().toLocaleTimeString() + '] 🚀 Starting workflow execution...</div>';
+      runButton.innerHTML = '⏳ Running...';
+      runButton.disabled = true;
       
       for (let i = 0; i < currentWorkflow.steps.length; i++) {
         const stepElement = document.getElementById(`step-${i}`);
         stepElement.classList.add('highlight');
         
         log.innerHTML += `<div style="color: #60a5fa;">[${new Date().toLocaleTimeString()}] ▶️ Executing step ${i + 1}...</div>`;
+        log.innerHTML += `<div style="color: #f59e0b;">[${new Date().toLocaleTimeString()}] 📡 API calls in progress...</div>`;
         
         await new Promise(resolve => setTimeout(resolve, 2000));
         
@@ -326,9 +363,15 @@ title: "JML Demo - AtlasIT"
       
       log.innerHTML += `<div style="color: #34d399;">[${new Date().toLocaleTimeString()}] 🎉 Workflow completed successfully!</div>`;
       log.innerHTML += `<div style="color: #60a5fa;">[${new Date().toLocaleTimeString()}] 📊 All systems updated and compliance verified</div>`;
+      log.innerHTML += `<div style="color: #8b5cf6;">[${new Date().toLocaleTimeString()}] 📋 Audit trail generated and stored</div>`;
       log.scrollTop = log.scrollHeight;
       
-      isRunning = false;
+      runButton.innerHTML = '✅ Demo Complete';
+      setTimeout(() => {
+        runButton.innerHTML = '▶️ Start Workflow Demo';
+        runButton.disabled = false;
+        isRunning = false;
+      }, 3000);
     }
     
     function resetDemo() {
@@ -336,15 +379,24 @@ title: "JML Demo - AtlasIT"
       
       currentWorkflow.steps.forEach((step, index) => {
         const stepElement = document.getElementById(`step-${index}`);
-        stepElement.className = 'step-item';
-        stepElement.style.borderLeftColor = '#374151';
-        stepElement.style.background = 'rgba(51, 65, 85, 0.3)';
-        stepElement.innerHTML = `<strong>Step ${index + 1}:</strong> ${step}`;
+        if (stepElement) {
+          stepElement.className = 'step-item';
+          stepElement.style.borderLeftColor = '#374151';
+          stepElement.style.background = 'rgba(51, 65, 85, 0.3)';
+          stepElement.innerHTML = `<strong>Step ${index + 1}:</strong> ${step}`;
+        }
       });
       
-      document.getElementById('demo-log').innerHTML = '';
-      document.getElementById('demo-log').style.display = 'none';
+      const log = document.getElementById('demo-log');
+      log.innerHTML = '';
+      log.style.display = 'none';
       isRunning = false;
+      
+      const runButton = document.getElementById('runButton');
+      if (runButton) {
+        runButton.innerHTML = '▶️ Start Workflow Demo';
+        runButton.disabled = false;
+      }
     }
   </script>
 </body>
