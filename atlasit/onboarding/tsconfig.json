@@ -12,11 +12,11 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
-    "rootDir": ".",
     "resolveJsonModule": true,
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types", "node"],
     "baseUrl": ".",
     "paths": {
+      "@atlasit/auth": ["../auth/src"],
       "@atlasit/shared": ["../shared/src"]
     }
   },

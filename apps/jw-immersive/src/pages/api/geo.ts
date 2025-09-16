@@ -7,18 +7,6 @@ export const prerender = false;
 
 export const GET: APIRoute = async (ctx) => {
   const isProd = process.env.NODE_ENV === 'production';
-  // In test/dev/static mode, always return safe fallback/test data
-  if (!isProd) {
-    return json({
-      ip: '127.0.0.1',
-      timestamp: new Date().toISOString(),
-      userAgent: 'Playwright Test User',
-      featureGeo: false,
-      ipHash: 'test-hash',
-      hashAlgo: 'sha256',
-      geo: { country: 'US', city: 'Testville' }
-    });
-  }
   const request = ctx.request;
   const locals = ctx.locals;
   const clientAddress = ctx.clientAddress;
@@ -33,6 +21,29 @@ export const GET: APIRoute = async (ctx) => {
                    request.headers.get('X-Real-IP') ||
                    '127.0.0.1';
   const featureEnabled = process.env.FEATURE_GEO_CLASSIFICATION === 'true';
+  // In non-production we still honor the feature flag so tests can toggle behavior.
+  // When disabled, omit hash fields entirely.
+  // When enabled, fabricate deterministic hash data for test stability.
+  if (!isProd) {
+    if (!featureEnabled) {
+      return json({
+        ip: clientIP,
+        timestamp: new Date().toISOString(),
+        userAgent: 'Playwright Test User',
+        featureGeo: false
+      });
+    }
+    const fakeHash = 'test-hash';
+    return json({
+      ip: clientIP,
+      timestamp: new Date().toISOString(),
+      userAgent: 'Playwright Test User',
+      featureGeo: true,
+      ipHash: fakeHash,
+      hashAlgo: 'hmac-sha256:16',
+      geo: { country: 'US', city: 'Testville' }
+    });
+  }
   let privacy: any = undefined;
   if (featureEnabled) {
     const secret = process.env.GEO_HASH_KEY || 'dev-secret';

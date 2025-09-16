@@ -9,4 +9,3 @@ export { AIService, aiService, OpenAIProvider, AnthropicProvider, MockAIProvider
 // HTTP client
 export { HttpClient, httpClient, get, post, put, del, patch } from './http';
 export { AtlasITError } from './types';
-//# sourceMappingURL=index.js.map

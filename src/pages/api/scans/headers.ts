@@ -1,11 +1,11 @@
-import { EnhancedFinding } from './types';
+// import removed, not needed
 
 export const headersScanModule = {
   name: 'headers',
   description: 'Enhanced security headers analysis',
 
-  scan: async function scanEnhancedSecurityHeaders(url: string): Promise<EnhancedFinding[]> {
-    const findings: EnhancedFinding[] = [];
+  scan: async function scanEnhancedSecurityHeaders(url: string): Promise<import('./types').EnhancedScanResult> {
+    const findings: import('./types').EnhancedFinding[] = [];
 
     try {
       const response = await fetch(url, { method: 'HEAD' });
@@ -59,7 +59,7 @@ export const headersScanModule = {
             description: config.description,
             recommendation: config.recommendation,
             businessImpact: 'Missing security headers can expose the application to various attacks.',
-            consultingOpportunity: 'Security headers implementation and configuration services available.'
+            // consultingOpportunity removed
           });
         }
       }
@@ -74,7 +74,7 @@ export const headersScanModule = {
           description: `Server header reveals: ${serverHeader}`,
           recommendation: 'Consider removing or obscuring server information in production.',
           businessImpact: 'Server information can help attackers identify potential vulnerabilities.',
-          consultingOpportunity: 'Server hardening and information disclosure prevention services available.'
+          // consultingOpportunity removed
         });
       }
 
@@ -86,10 +86,37 @@ export const headersScanModule = {
         description: `Failed to fetch headers from ${url}: ${error}`,
         recommendation: 'Ensure the URL is accessible and properly configured.',
         businessImpact: 'Inability to analyze security headers prevents proper security assessment.',
-        consultingOpportunity: 'Network security and connectivity assessment services available.'
+  // consultingOpportunity removed
       });
     }
 
-    return findings;
+    // Compose EnhancedScanResult
+    return {
+      scanId: 'headers-' + Math.random().toString(36).slice(2,10),
+      url,
+      scanType: 'headers',
+      timestamp: new Date().toISOString(),
+      duration: 0,
+      findings,
+      summary: {
+        totalFindings: findings.length,
+        criticalCount: findings.filter(f => f.severity === 'critical').length,
+        highCount: findings.filter(f => f.severity === 'high').length,
+        mediumCount: findings.filter(f => f.severity === 'medium').length,
+        lowCount: findings.filter(f => f.severity === 'low').length,
+        securityScore: findings.length === 0 ? 100 : 100 - findings.length * 10
+      },
+      businessMetrics: {
+        trustScore: 100,
+        professionalismScore: 100,
+        userExperienceScore: 100,
+        brandProtectionScore: 100
+      },
+      metadata: {
+        scannerVersion: '2.0-modular',
+        scanDepth: 1,
+        externalApisUsed: []
+      }
+    };
   }
 };

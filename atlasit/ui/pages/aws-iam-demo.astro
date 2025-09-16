@@ -9,6 +9,9 @@ import Layout from '../../components/Layout.astro';
     <p class="mb-6 text-slate-300">
       This page demonstrates automated AWS IAM user, role, and permission management using Terraform, with Okta as the central Identity Provider (IdP). The backend is not fully wired, but you can view the example code, configuration, and outputs below. Use this as a reference for interviews or demos. For a full cross-system workflow (AWS, Entra ID, AD), see <code>IAM_AUTOMATION_OVERVIEW.md</code> in the demo directory.
     </p>
+    <div class="mb-4">
+      <span class="inline-block bg-yellow-500 text-black px-3 py-1 rounded font-semibold text-xs shadow">Demo Mode: Example only. No real AWS resources are provisioned.</span>
+    </div>
     <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-6 mb-8">
       <h2 class="text-xl font-semibold mb-2">Terraform Example</h2>
       <pre class="overflow-x-auto text-xs bg-slate-900 p-4 rounded"><code>{`

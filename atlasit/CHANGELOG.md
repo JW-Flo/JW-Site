@@ -8,6 +8,13 @@
 - All tests passing, no runtime errors
 - Next: Begin deployment and integration of IAM/JML automation (Okta, AWS, Entra), security scanner, and retro arcade mode
 
+## [2025-09-16] IAM/JML Automation Phase
+
+- Agent registry extended with IAM/JML automation tool stubs: provision_user, assign_role, sync_profile (Okta, AWS, Entra, AD)
+- Integration plan documented in ROADMAP.md
+- Referenced workflows and demo steps from IAM_AUTOMATION_OVERVIEW.md
+- All changes committed and tracked
+
 ## [2025-09-15] API Documentation Sync
 
 - OpenAPI spec generated for MCP server endpoints

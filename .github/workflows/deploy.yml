@@ -1,35 +1,57 @@
-name: Deploy to Cloudflare Pages
+name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Run deploy script with --dry-run'
+        required: false
+        default: 'true'
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    env:
+      CF_PAGES_PROJECT: ${{ secrets.CF_PAGES_PROJECT }}
+      CF_PAGES_BRANCH: main
+      CF_PAGES_DIST_DIR: apps/platform/dist
+      DEPLOY_HEALTHCHECK_URL: https://atlasit.pro/health
+      SUPER_ADMIN_KEY: ${{ secrets.SUPER_ADMIN_KEY }}
+      SESSION_SIGNING_KEY: ${{ secrets.SESSION_SIGNING_KEY }}
+      CONSENT_ADMIN_KEY: ${{ secrets.CONSENT_ADMIN_KEY }}
+      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+      OPENCVE_API_TOKEN: ${{ secrets.OPENCVE_API_TOKEN }}
+      OPENCVE_BASIC_USER: ${{ secrets.OPENCVE_BASIC_USER }}
+      OPENCVE_BASIC_PASSWORD: ${{ secrets.OPENCVE_BASIC_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+
       - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: jw-site
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: "4"
+        run: npm install
+
+      - name: Validate environment
+        run: npm run validate:env
+
+      - name: Check bundle sizes
+        run: npm run check:bundle
+
+      - name: Dry-run deploy
+        run: |
+          args=""
+          if [ "${{ github.event.inputs.dry-run }}" != "false" ]; then
+            args="-- --dry-run"
+          fi
+          npm run deploy:production $args
         env:
-          SUPER_ADMIN_KEY: ${{ secrets.SUPER_ADMIN_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

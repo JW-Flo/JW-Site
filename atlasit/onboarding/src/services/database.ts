@@ -1,22 +1,6 @@
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context),
-  error: (message: string, error?: any, context?: any) => console.error(`[ERROR] ${message}`, error, context),
-  warn: (message: string, context?: any) => console.warn(`[WARN] ${message}`, context),
-};
+import { logger as sharedLogger, AtlasITError } from '@atlasit/shared';
 
-class AtlasITError extends Error {
-  public readonly code: string;
-  public readonly statusCode: number;
-  public readonly details?: any;
-
-  constructor(code: string, message: string, statusCode: number = 500, details?: any) {
-    super(message);
-    this.name = 'AtlasITError';
-    this.code = code;
-    this.statusCode = statusCode;
-    this.details = details;
-  }
-}
+const logger = sharedLogger.withContext({ service: 'onboarding-database' });
 
 export interface OnboardingState {
   tenantId: string;

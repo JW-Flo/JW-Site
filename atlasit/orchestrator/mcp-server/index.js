@@ -22,7 +22,9 @@ function requireBearerToken(req, res, next) {
     return res.status(401).json({ error: "Missing or invalid bearer token" });
   }
   if (!BEARER_TOKEN) {
-    console.error(`[mcp] request ${req.id} blocked: bearer token not configured`);
+    console.error(
+      `[mcp] request ${req.id} blocked: bearer token not configured`
+    );
     return res.status(503).json({ error: "Bearer token not configured" });
   }
   const provided = Buffer.from(auth.split(" ")[1]);
@@ -210,7 +212,9 @@ if (oauthConfigured) {
 function requireOAuth(req, res, next) {
   if (!oauthConfigured) return next();
   if (req.isAuthenticated && req.isAuthenticated()) return next();
-  console.warn(`[mcp] request ${req.id} rejected: OAuth authentication required`);
+  console.warn(
+    `[mcp] request ${req.id} rejected: OAuth authentication required`
+  );
   return res.status(401).json({ error: "Authentication required" });
 }
 

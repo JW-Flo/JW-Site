@@ -16,6 +16,7 @@ const title = "Onboarding - AtlasIT";
     .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
     .input-field { transition: all 0.2s ease; }
     .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
@@ -102,18 +103,61 @@ const title = "Onboarding - AtlasIT";
     </nav>
   </header>
 
+  <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
+
   <!-- Main Content -->
   <main class="container mx-auto px-6 py-8">
     <div class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-bold mb-6 text-center">Welcome to AtlasIT</h1>
       <p class="text-slate-300 mb-8 text-center">Let's set up your IT automation platform. We'll guide you through the process.</p>
 
+      <div class="glass-effect border border-blue-500/30 text-sm text-slate-200 rounded-lg px-5 py-4 mb-6">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-blue-200 mb-2">Demo Tips</h2>
+        <ul class="list-disc list-inside space-y-1 text-slate-300">
+          <li>Select a persona to auto-fill tenant details and view tailored responses.</li>
+          <li>Submit the form to generate an onboarding template; the dashboard picks up the results instantly.</li>
+          <li>Use the reset button anytime you want to start a fresh walkthrough.</li>
+        </ul>
+      </div>
+
       <div class="space-y-6">
         <div class="glass-effect p-8 rounded-xl border border-slate-700/50">
-          <h2 class="text-xl font-semibold mb-4">Step 1: Basic Information</h2>
-          <form id="onboarding-form" class="space-y-4">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-slate-100">AI-Guided Onboarding</h2>
+            <span class="text-xs uppercase tracking-wide text-slate-400">Interactive demo</span>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div class="text-xs text-slate-400">Use personas or enter your own tenant to see generated configs.</div>
+            <button
+              id="demo-reset-btn"
+              type="button"
+              class="px-3 py-2 text-xs uppercase tracking-wide rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800 transition-colors"
+            >
+              Reset Demo Data
+            </button>
+          </div>
+          <div id="onboarding-reset-success" class="hidden mb-4 text-xs text-green-300 bg-green-500/10 border border-green-500/40 rounded-lg px-3 py-2">
+            Demo data reset. Personas reloaded.
+          </div>
+
+          <div class="mb-6">
+            <div class="flex justify-between text-xs uppercase tracking-wide text-slate-400 mb-2" id="onboarding-step-labels">
+              <span data-step="1" class="font-semibold text-blue-300">1. Company</span>
+              <span data-step="2">2. Persona</span>
+              <span data-step="3">3. Review</span>
+            </div>
+            <div class="h-1.5 bg-slate-700/70 rounded-full overflow-hidden">
+              <div id="onboarding-progress-bar" class="h-full bg-blue-500 transition-all duration-300" style="width: 33%;"></div>
+            </div>
+          </div>
+
+          <form id="onboarding-form" class="space-y-6">
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">Tenant ID (unique identifier)</label>
+              <label class="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
+                Tenant ID (unique identifier)
+                <span class="text-xs text-slate-400" title="Used as the unique key for KV storage and persona lookup.">🛈</span>
+              </label>
               <input
                 type="text"
                 placeholder="Enter your tenant ID"
@@ -124,7 +168,10 @@ const title = "Onboarding - AtlasIT";
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">Company Name</label>
+              <label class="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
+                Company Name
+                <span class="text-xs text-slate-400" title="Displayed in generated templates and audit logs.">🛈</span>
+              </label>
               <input
                 type="text"
                 placeholder="Enter your company name"
@@ -135,7 +182,10 @@ const title = "Onboarding - AtlasIT";
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-300 mb-2">Industry</label>
+              <label class="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
+                Industry
+                <span class="text-xs text-slate-400" title="Industry drives dynamic questions and template defaults.">🛈</span>
+              </label>
               <select name="industry" class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 focus:outline-none" required>
                 <option value="">Select Industry</option>
                 <option value="technology">Technology</option>
@@ -147,12 +197,48 @@ const title = "Onboarding - AtlasIT";
               </select>
             </div>
 
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Demo User Persona (optional)</label>
+              <select id="demo-user-select" class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 focus:outline-none">
+                <option value="">Select a demo user to pre-fill</option>
+              </select>
+              <input type="hidden" name="demoUserId" id="demo-user-id" />
+              <p class="text-xs text-slate-400 mt-2">Choosing a persona auto-fills the tenant fields and adds persona notes to the generated config.</p>
+            </div>
+
+            <div id="demo-user-preview" class="hidden border border-slate-700/60 bg-slate-900/70 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-slate-200 mb-2">Persona summary</h3>
+              <dl class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+                <div>
+                  <dt class="text-slate-400">Name</dt>
+                  <dd id="demo-user-name">—</dd>
+                </div>
+                <div>
+                  <dt class="text-slate-400">Role</dt>
+                  <dd id="demo-user-role">—</dd>
+                </div>
+                <div>
+                  <dt class="text-slate-400">Status</dt>
+                  <dd id="demo-user-status" class="font-medium">—</dd>
+                </div>
+                <div>
+                  <dt class="text-slate-400">Last Active</dt>
+                  <dd id="demo-user-last-active">—</dd>
+                </div>
+                <div class="col-span-2">
+                  <dt class="text-slate-400">Persona Focus</dt>
+                  <dd id="demo-user-persona" class="mt-1">—</dd>
+                </div>
+              </dl>
+            </div>
+
             <button
               type="submit"
               class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Start Onboarding
             </button>
+            <div id="onboarding-error" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 text-red-300 text-sm px-4 py-3"></div>
           </form>
         </div>
 
@@ -161,6 +247,27 @@ const title = "Onboarding - AtlasIT";
           <div id="result-content"></div>
         </div>
       </div>
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold text-slate-100 mb-4">Demo Onboarding Pipeline</h3>
+          <ul id="demo-requests" class="space-y-4 text-sm"></ul>
+        </div>
+
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50 overflow-x-auto">
+          <h3 class="text-lg font-semibold text-slate-100 mb-4">Demo Users</h3>
+          <table class="min-w-full text-left text-sm">
+            <thead class="text-slate-400 uppercase tracking-wide text-xs">
+              <tr>
+                <th class="py-2">User</th>
+                <th class="py-2">Role</th>
+                <th class="py-2">Status</th>
+                <th class="py-2">Last Active</th>
+              </tr>
+            </thead>
+            <tbody id="demo-users-table" class="divide-y divide-slate-700"></tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -199,33 +306,289 @@ const title = "Onboarding - AtlasIT";
       }
     });
 
-    // Onboarding form submission
+    // Onboarding form submission + demo data hydration
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
+      const form = document.getElementById('onboarding-form');
+      const tenantInput = form?.querySelector('input[name="tenantId"]');
+      const companyInput = form?.querySelector('input[name="name"]');
+      const demoSelect = document.getElementById('demo-user-select');
+      const demoUserIdInput = document.getElementById('demo-user-id');
+      const previewCard = document.getElementById('demo-user-preview');
+      const previewName = document.getElementById('demo-user-name');
+      const previewRole = document.getElementById('demo-user-role');
+      const previewStatus = document.getElementById('demo-user-status');
+      const previewLastActive = document.getElementById('demo-user-last-active');
+      const previewPersona = document.getElementById('demo-user-persona');
+      const requestList = document.getElementById('demo-requests');
+      const usersTable = document.getElementById('demo-users-table');
+      const errorBox = document.getElementById('onboarding-error');
+      const stepLabels = document.querySelectorAll('#onboarding-step-labels [data-step]');
+      const progressBar = document.getElementById('onboarding-progress-bar');
+      const resultPanel = document.getElementById('onboarding-result');
+      const resetButton = document.getElementById('demo-reset-btn');
+      const resetSuccess = document.getElementById('onboarding-reset-success');
+
+      let demoUsers = [];
+      let currentStep = 1;
+
+      function formatDateTime(isoString) {
         try {
-          const response = await fetch('/api/onboarding', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-          const result = await response.json();
-          if (response.ok) {
-            document.getElementById('onboarding-result').classList.remove('hidden');
-            document.getElementById('result-content').innerHTML = `
-              <p class="text-green-400 mb-4">✅ Onboarding successful!</p>
-              <pre class="bg-slate-800 p-4 rounded text-sm overflow-x-auto text-slate-100">${JSON.stringify(result, null, 2)}</pre>
-              <a href="/dashboard" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Go to Dashboard</a>
-            `;
+          return new Intl.DateTimeFormat('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }).format(new Date(isoString));
+        } catch (error) {
+          return isoString;
+        }
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case 'Active':
+            return 'bg-green-500/20 text-green-300';
+          case 'Pending Approval':
+            return 'bg-yellow-500/20 text-yellow-300';
+          case 'Provisioning':
+            return 'bg-blue-500/20 text-blue-300';
+          case 'Dormant':
+            return 'bg-slate-500/20 text-slate-200';
+          default:
+            return 'bg-red-500/20 text-red-300';
+        }
+      }
+
+      function setProgress(step) {
+        currentStep = step;
+        const widths = { 1: 33, 2: 66, 3: 100 };
+        if (progressBar) {
+          progressBar.style.width = `${widths[step] ?? 33}%`;
+        }
+        stepLabels.forEach((label) => {
+          const stepValue = Number(label.getAttribute('data-step'));
+          if (stepValue <= step) {
+            label.classList.add('text-blue-300', 'font-semibold');
           } else {
-            alert('Error: ' + result.error);
+            label.classList.remove('text-blue-300', 'font-semibold');
+          }
+        });
+      }
+
+      function evaluateStep() {
+        if (resultPanel && !resultPanel.classList.contains('hidden')) {
+          setProgress(3);
+          return;
+        }
+        const hasBasics = Boolean(tenantInput?.value && companyInput?.value);
+        const hasPersona = Boolean(demoUserIdInput?.value);
+        setProgress(hasBasics || hasPersona ? 2 : 1);
+      }
+
+      function renderUsers(users) {
+        if (!usersTable) return;
+        usersTable.innerHTML = '';
+        users.forEach((user) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="py-3">
+              <div class="font-medium text-slate-200">${user.name}</div>
+              <div class="text-slate-400 text-xs">${user.email}</div>
+            </td>
+            <td class="py-3 text-slate-300">${user.role}</td>
+            <td class="py-3">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusClass(user.status)}">${user.status}</span>
+            </td>
+            <td class="py-3 text-slate-300">${formatDateTime(user.lastActive)}</td>
+          `;
+          usersTable.appendChild(row);
+        });
+      }
+
+      function renderRequests(requests) {
+        if (!requestList) return;
+        requestList.innerHTML = '';
+        requests.forEach((request) => {
+          const user = demoUsers.find((u) => u.id === request.userId);
+          const li = document.createElement('li');
+          li.className = 'p-4 bg-slate-900/60 border border-slate-700/40 rounded-lg';
+          const approvals = request.approvals
+            .map((approval) => `${approval.stage}: ${approval.status === 'approved' ? '✅' : approval.status === 'pending' ? '🕒' : '⛔️'}`)
+            .join(' · ');
+          li.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-slate-200 font-medium">${request.title}</p>
+                <p class="text-slate-400 text-xs mt-1">${user ? user.name : request.userId} • Submitted ${formatDateTime(request.submittedAt)}</p>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-full ${request.status === 'completed' ? 'bg-green-500/20 text-green-300' : request.status === 'in-flight' ? 'bg-blue-500/20 text-blue-200' : request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-200' : 'bg-red-500/20 text-red-200'}">${request.status}</span>
+            </div>
+            <p class="text-slate-300 text-sm mt-3">Targets: ${request.targetApps.join(', ')}</p>
+            <p class="text-slate-500 text-xs mt-2">Approvals: ${approvals}</p>
+          `;
+          requestList.appendChild(li);
+        });
+      }
+
+      function clearPreview() {
+        if (previewCard) previewCard.classList.add('hidden');
+        if (previewName) previewName.textContent = '—';
+        if (previewRole) previewRole.textContent = '—';
+        if (previewStatus) previewStatus.textContent = '—';
+        if (previewLastActive) previewLastActive.textContent = '—';
+        if (previewPersona) previewPersona.textContent = '—';
+        evaluateStep();
+      }
+
+      function updatePreview(user) {
+        if (!previewCard) return;
+        previewCard.classList.remove('hidden');
+        if (previewName) previewName.textContent = user.name;
+        if (previewRole) previewRole.textContent = `${user.role} • ${user.department}`;
+        if (previewStatus) previewStatus.textContent = `${user.status} (${user.onboardingStage})`;
+        if (previewLastActive) previewLastActive.textContent = formatDateTime(user.lastActive);
+        if (previewPersona) previewPersona.textContent = `${user.persona} – Managed by ${user.manager} in ${user.location}`;
+        evaluateStep();
+      }
+
+      async function hydrateDemoData() {
+        try {
+          const response = await fetch('/api/demo/data');
+          if (!response.ok) {
+            throw new Error('Failed to load demo data');
+          }
+          const payload = await response.json();
+          demoUsers = payload?.data?.users || [];
+          const requests = payload?.data?.requests || [];
+
+          if (demoSelect) {
+            demoUsers.forEach((user) => {
+              const option = document.createElement('option');
+              option.value = user.id;
+              option.textContent = `${user.name} • ${user.role} (${user.status})`;
+              demoSelect.appendChild(option);
+            });
+          }
+
+          renderUsers(demoUsers);
+          renderRequests(requests);
+          evaluateStep();
+        } catch (error) {
+          console.warn('[demo-data] Unable to load demo data', error);
+          clearPreview();
+        }
+      }
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData);
+          try {
+            const response = await fetch('/api/onboarding', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (response.ok) {
+              errorBox?.classList.add('hidden');
+              resultPanel?.classList.remove('hidden');
+              document.getElementById('result-content').innerHTML = `
+                <p class="text-green-400 mb-4">✅ Onboarding successful!</p>
+                <pre class="bg-slate-800 p-4 rounded text-sm overflow-x-auto text-slate-100">${JSON.stringify(result, null, 2)}</pre>
+                <a href="/dashboard" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Go to Dashboard</a>
+              `;
+              setProgress(3);
+            } else {
+              const message = result?.error || result?.code || 'Unexpected error';
+              if (errorBox) {
+                errorBox.textContent = `⚠️ ${message}`;
+                errorBox.classList.remove('hidden');
+              }
+              resultPanel?.classList.add('hidden');
+              evaluateStep();
+            }
+          } catch (error) {
+            if (errorBox) {
+              errorBox.textContent = `⚠️ Network error: ${error.message}`;
+              errorBox.classList.remove('hidden');
+            }
+            resultPanel?.classList.add('hidden');
+            evaluateStep();
+          }
+        });
+      }
+
+      form?.addEventListener('input', () => {
+        if (errorBox) {
+          errorBox.classList.add('hidden');
+        }
+        evaluateStep();
+      });
+
+      demoSelect?.addEventListener('change', (event) => {
+        const selectedId = event.target.value;
+        if (!selectedId) {
+          if (demoUserIdInput) demoUserIdInput.value = '';
+          clearPreview();
+          return;
+        }
+        const user = demoUsers.find((entry) => entry.id === selectedId);
+        if (!user) {
+          clearPreview();
+          return;
+        }
+        if (tenantInput) tenantInput.value = user.tenantId;
+        if (companyInput) companyInput.value = user.company;
+        if (demoUserIdInput) demoUserIdInput.value = user.id;
+        updatePreview(user);
+      });
+
+      resetButton?.addEventListener('click', async () => {
+        if (!confirm('Reset all demo data to default values? This clears personas, onboarding requests, and cached configs.')) {
+          return;
+        }
+
+        try {
+          resetButton.disabled = true;
+          resetButton.textContent = 'Resetting…';
+          resetSuccess?.classList.add('hidden');
+          errorBox?.classList.add('hidden');
+
+          const response = await fetch('/api/demo/reset', { method: 'POST' });
+          if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload?.error || 'Failed to reset demo');
+          }
+
+          form?.reset();
+          if (demoSelect) demoSelect.value = '';
+          if (demoUserIdInput) demoUserIdInput.value = '';
+          clearPreview();
+          resultPanel?.classList.add('hidden');
+
+          await hydrateDemoData();
+          evaluateStep();
+
+          if (resetSuccess) {
+            resetSuccess.textContent = 'Demo data reset. Personas reloaded.';
+            resetSuccess.classList.remove('hidden');
           }
         } catch (error) {
-          alert('Network error: ' + error.message);
+          if (errorBox) {
+            const message = error instanceof Error ? error.message : String(error);
+            errorBox.textContent = `⚠️ ${message}`;
+            errorBox.classList.remove('hidden');
+          }
+        } finally {
+          if (resetButton) {
+            resetButton.disabled = false;
+            resetButton.textContent = 'Reset Demo Data';
+          }
         }
       });
+
+      hydrateDemoData();
+      evaluateStep();
     });
   </script>
 </body>

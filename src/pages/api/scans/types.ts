@@ -86,5 +86,5 @@ export interface EnhancedScanResult {
 export interface ScanModule {
   name: string;
   description: string;
-  scan: (url: string, options?: any) => Promise<EnhancedFinding[]>;
+  scan: (url: string, options?: any) => Promise<EnhancedScanResult>;
 }

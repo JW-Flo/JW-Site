@@ -1,60 +1,55 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context),
-  error: (message: string, error?: any, context?: any) => console.error(`[ERROR] ${message}`, error, context),
-  warn: (message: string, context?: any) => console.warn(`[WARN] ${message}`, context),
-};
-
-const aiService = {
-  generateText: async (prompt: string) => `Mock response for: ${prompt}`,
-};
-
-class AtlasITError extends Error {
-  public readonly code: string;
-  public readonly statusCode: number;
-  public readonly details?: any;
-
-  constructor(code: string, message: string, statusCode: number = 500, details?: any) {
-    super(message);
-    this.name = 'AtlasITError';
-    this.code = code;
-    this.statusCode = statusCode;
-    this.details = details;
-  }
-}
-
-type Industry = 'technology' | 'healthcare' | 'finance' | 'retail' | 'manufacturing' | 'education' | 'government' | 'other';
-type Requirement = 'compliance' | 'analytics' | 'automation' | 'security' | 'integration' | 'reporting' | 'monitoring' | 'backup';
-
+import { AtlasITError, type Industry, type Requirement } from '@atlasit/shared';
 import { generateQuestions } from '../services/questionGenerator';
 import { createOnboardingTemplate } from '../services/templateGenerator';
-import { saveOnboardingState, getOnboardingState } from '../services/database';
+import { saveOnboardingState, getOnboardingState, createAuditEvent } from '../services/database';
 import type { OnboardingEnv } from '../types';
+import { getRequestId, getRequestLogger } from '../utils/logger';
 
-const onboardingRoutes = new Hono();
+const industries = [
+  'technology',
+  'healthcare',
+  'finance',
+  'retail',
+  'manufacturing',
+  'education',
+  'government',
+  'other',
+] as const satisfies readonly Industry[];
 
-// Request validation schemas
+const requirementKeys = [
+  'compliance',
+  'analytics',
+  'automation',
+  'security',
+  'integration',
+  'reporting',
+  'monitoring',
+  'backup',
+] as const satisfies readonly Requirement[];
+
+const onboardingRoutes = new Hono<OnboardingEnv>();
+
 const startOnboardingSchema = z.object({
   tenantId: z.string().min(1, 'Tenant ID is required'),
   name: z.string().min(1, 'Tenant name is required'),
-  industry: z.enum(['technology', 'healthcare', 'finance', 'retail', 'manufacturing', 'education', 'government', 'other'] as const),
-  requirements: z.array(z.enum(['compliance', 'analytics', 'automation', 'security', 'integration', 'reporting', 'monitoring', 'backup'] as const)).optional(),
+  industry: z.enum(industries),
+  requirements: z.array(z.enum(requirementKeys)).optional(),
 });
 
 const submitOnboardingSchema = z.object({
   tenantId: z.string().min(1, 'Tenant ID is required'),
   name: z.string().min(1, 'Tenant name is required'),
-  industry: z.enum(['technology', 'healthcare', 'finance', 'retail', 'manufacturing', 'education', 'government', 'other'] as const),
+  industry: z.enum(industries),
   answers: z.record(z.any()),
-  requirements: z.array(z.enum(['compliance', 'analytics', 'automation', 'security', 'integration', 'reporting', 'monitoring', 'backup'] as const)).optional(),
+  requirements: z.array(z.enum(requirementKeys)).optional(),
 });
 
-// POST /api/onboarding/start - Generate dynamic onboarding questions
-onboardingRoutes.post('/start', async (c: any) => {
-  const requestId = crypto.randomUUID();
-  const actor = 'anonymous'; // Will be set by auth middleware
+onboardingRoutes.post('/start', async (c) => {
+  const requestId = getRequestId(c);
+  const actor = (c.get('actor') as string | undefined) ?? 'anonymous';
+  const logger = getRequestLogger(c, { route: 'POST /api/onboarding/start', actor });
 
   try {
     const body = await c.req.json();
@@ -62,18 +57,15 @@ onboardingRoutes.post('/start', async (c: any) => {
 
     logger.info('Starting onboarding question generation', {
       requestId,
-      actor,
       tenantId: validatedData.tenantId,
       industry: validatedData.industry,
     });
 
-    // Generate dynamic questions based on industry and requirements
     const questions = await generateQuestions(
       validatedData.industry,
-      validatedData.requirements || []
+      validatedData.requirements ?? []
     );
 
-    // Cache questions for later retrieval
     await c.env.ONBOARDING_CACHE.put(
       `questions:${validatedData.tenantId}`,
       JSON.stringify({
@@ -82,7 +74,7 @@ onboardingRoutes.post('/start', async (c: any) => {
         requirements: validatedData.requirements,
         createdAt: new Date().toISOString(),
       }),
-      { expirationTtl: 3600 } // 1 hour
+      { expirationTtl: 3600 }
     );
 
     return c.json({
@@ -95,8 +87,9 @@ onboardingRoutes.post('/start', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
+    }, 200, {
+      'x-request-id': requestId,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       logger.warn('Invalid onboarding start request', {
@@ -114,7 +107,9 @@ onboardingRoutes.post('/start', async (c: any) => {
         },
         requestId,
         timestamp: new Date().toISOString(),
-      }, 400);
+      }, 400, {
+        'x-request-id': requestId,
+      });
     }
 
     logger.error('Failed to start onboarding', error, { requestId, actor });
@@ -127,14 +122,16 @@ onboardingRoutes.post('/start', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
-    }, 500);
+    }, 500, {
+      'x-request-id': requestId,
+    });
   }
 });
 
-// POST /api/onboarding - Submit onboarding data and generate config/template
-onboardingRoutes.post('/', async (c: any) => {
-  const requestId = c.get('requestId') || crypto.randomUUID();
-  const actor = c.get('actor') || 'anonymous';
+onboardingRoutes.post('/', async (c) => {
+  const requestId = getRequestId(c);
+  const actor = (c.get('actor') as string | undefined) ?? 'anonymous';
+  const logger = getRequestLogger(c, { route: 'POST /api/onboarding', actor });
 
   try {
     const body = await c.req.json();
@@ -142,17 +139,14 @@ onboardingRoutes.post('/', async (c: any) => {
 
     logger.info('Processing onboarding submission', {
       requestId,
-      actor,
       tenantId: validatedData.tenantId,
       industry: validatedData.industry,
     });
 
-    // Check if onboarding already exists (idempotency)
     const existingState = await getOnboardingState(c.env.DB, validatedData.tenantId);
     if (existingState) {
       logger.info('Onboarding already exists, returning cached result', {
         requestId,
-        actor,
         tenantId: validatedData.tenantId,
       });
 
@@ -167,49 +161,43 @@ onboardingRoutes.post('/', async (c: any) => {
         },
         requestId,
         timestamp: new Date().toISOString(),
+      }, 200, {
+        'x-request-id': requestId,
       });
     }
 
-    // Generate onboarding template based on answers
     const template = await createOnboardingTemplate(
       validatedData.industry,
       validatedData.answers,
-      validatedData.requirements || []
+      validatedData.requirements ?? []
     );
 
-    // Save onboarding state to database
     const onboardingState = await saveOnboardingState(c.env.DB, {
       tenantId: validatedData.tenantId,
       name: validatedData.name,
       industry: validatedData.industry,
       answers: validatedData.answers,
-      requirements: validatedData.requirements || [],
-      config: {}, // Initialize empty config - will be populated by template
+      requirements: validatedData.requirements ?? [],
+      config: {},
       template,
       status: 'completed',
     });
 
-    // Create audit event
-    await c.env.DB.prepare(`
-      INSERT INTO audit_events (tenant_id, actor, action, resource, details, request_id, timestamp)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      validatedData.tenantId,
+    await createAuditEvent(c.env.DB, {
+      tenantId: validatedData.tenantId,
       actor,
-      'onboarding.completed',
-      'onboarding',
-      JSON.stringify({
+      action: 'onboarding.completed',
+      resource: 'onboarding',
+      details: {
         tenantId: validatedData.tenantId,
         industry: validatedData.industry,
         requirements: validatedData.requirements,
-      }),
+      },
       requestId,
-      new Date().toISOString()
-    ).run();
+    });
 
     logger.info('Onboarding completed successfully', {
       requestId,
-      actor,
       tenantId: validatedData.tenantId,
     });
 
@@ -223,8 +211,9 @@ onboardingRoutes.post('/', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
+    }, 200, {
+      'x-request-id': requestId,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       logger.warn('Invalid onboarding submission', {
@@ -242,10 +231,18 @@ onboardingRoutes.post('/', async (c: any) => {
         },
         requestId,
         timestamp: new Date().toISOString(),
-      }, 400);
+      }, 400, {
+        'x-request-id': requestId,
+      });
     }
 
     if (error instanceof AtlasITError) {
+      logger.warn('Onboarding processing failed with expected error', {
+        requestId,
+        actor,
+        code: error.code,
+      });
+
       return c.json({
         success: false,
         error: {
@@ -255,7 +252,9 @@ onboardingRoutes.post('/', async (c: any) => {
         },
         requestId,
         timestamp: new Date().toISOString(),
-      }, error.statusCode);
+      }, error.statusCode, {
+        'x-request-id': requestId,
+      });
     }
 
     logger.error('Failed to process onboarding', error, { requestId, actor });
@@ -268,17 +267,21 @@ onboardingRoutes.post('/', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
-    }, 500);
+    }, 500, {
+      'x-request-id': requestId,
+    });
   }
 });
 
-// GET /api/onboarding/:tenantId - Retrieve onboarding state
-onboardingRoutes.get('/:tenantId', async (c: any) => {
-  const requestId = c.get('requestId') || crypto.randomUUID();
-  const actor = c.get('actor') || 'anonymous';
+onboardingRoutes.get('/:tenantId', async (c) => {
+  const requestId = getRequestId(c);
+  const actor = (c.get('actor') as string | undefined) ?? 'anonymous';
+  const logger = getRequestLogger(c, { route: 'GET /api/onboarding/:tenantId', actor });
   const tenantId = c.req.param('tenantId');
 
   if (!tenantId) {
+    logger.warn('Tenant ID missing in onboarding lookup', { requestId });
+
     return c.json({
       success: false,
       error: {
@@ -287,19 +290,25 @@ onboardingRoutes.get('/:tenantId', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
-    }, 400);
+    }, 400, {
+      'x-request-id': requestId,
+    });
   }
 
   try {
     logger.info('Retrieving onboarding state', {
       requestId,
-      actor,
       tenantId,
     });
 
     const onboardingState = await getOnboardingState(c.env.DB, tenantId);
 
     if (!onboardingState) {
+      logger.warn('Onboarding state not found', {
+        requestId,
+        tenantId,
+      });
+
       return c.json({
         success: false,
         error: {
@@ -308,7 +317,9 @@ onboardingRoutes.get('/:tenantId', async (c: any) => {
         },
         requestId,
         timestamp: new Date().toISOString(),
-      }, 404);
+      }, 404, {
+        'x-request-id': requestId,
+      });
     }
 
     return c.json({
@@ -323,12 +334,12 @@ onboardingRoutes.get('/:tenantId', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
+    }, 200, {
+      'x-request-id': requestId,
     });
-
   } catch (error) {
     logger.error('Failed to retrieve onboarding state', error, {
       requestId,
-      actor,
       tenantId,
     });
 
@@ -340,7 +351,9 @@ onboardingRoutes.get('/:tenantId', async (c: any) => {
       },
       requestId,
       timestamp: new Date().toISOString(),
-    }, 500);
+    }, 500, {
+      'x-request-id': requestId,
+    });
   }
 });
 

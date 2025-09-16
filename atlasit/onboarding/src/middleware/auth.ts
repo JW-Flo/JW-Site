@@ -1,28 +1,35 @@
-import { MiddlewareHandler } from 'hono';
+import type { MiddlewareHandler } from 'hono';
+import { ApiKeyAuthenticator } from '@atlasit/auth';
+import { getRequestId, getRequestLogger } from '../utils/logger';
+import type { OnboardingEnv } from '../types';
 
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context),
-  error: (message: string, error?: any, context?: any) => console.error(`[ERROR] ${message}`, error, context),
-  warn: (message: string, context?: any) => console.warn(`[WARN] ${message}`, context),
-};
-
-export const auth = (): MiddlewareHandler => {
+export const auth = (): MiddlewareHandler<OnboardingEnv> => {
   return async (c, next) => {
-    const requestId = c.get('requestId') || 'unknown';
-    const apiKey = c.req.header('x-api-key');
+    const requestId = getRequestId(c);
+    const logger = getRequestLogger(c, { scope: 'auth' });
+    const apiKey = c.req.header('x-api-key') ?? undefined;
 
-    // Check if API key authentication is required
-    const allowedKeys = c.env.API_ALLOWED_KEYS;
-    if (!allowedKeys) {
-      // No API key requirement, continue
+    const authenticator = ApiKeyAuthenticator.fromEnv(c.env.API_ALLOWED_KEYS, {
+      logger,
+      description: 'onboarding-api',
+    });
+
+    const result = await authenticator.verify(apiKey);
+
+    if (result.status === 'skipped') {
       await next();
       return;
     }
 
-    // Check if API key is provided
-    if (!apiKey) {
-      logger.warn('Missing API key', { requestId });
+    if (result.status === 'valid') {
+      if (result.actor) {
+        c.set('actor', result.actor);
+      }
+      await next();
+      return;
+    }
 
+    if (result.status === 'missing') {
       return c.json({
         success: false,
         error: {
@@ -32,34 +39,21 @@ export const auth = (): MiddlewareHandler => {
         requestId,
         timestamp: new Date().toISOString(),
       }, 401, {
-        'WWW-Authenticate': 'Bearer',
+        'WWW-Authenticate': 'Bearer realm="onboarding-api", error="invalid_token"',
+        'x-request-id': requestId,
       });
     }
 
-    // Validate API key
-    const keys = allowedKeys.split(',').map((k: string) => k.trim());
-    if (!keys.includes(apiKey)) {
-      logger.warn('Invalid API key', { requestId, apiKey: apiKey.substring(0, 8) + '...' });
-
-      return c.json({
-        success: false,
-        error: {
-          code: 'AUTH_INVALID',
-          message: 'Invalid API key',
-        },
-        requestId,
-        timestamp: new Date().toISOString(),
-      }, 401);
-    }
-
-    // Set actor for audit logging
-    c.set('actor', apiKey);
-
-    logger.info('API key authenticated', {
+    return c.json({
+      success: false,
+      error: {
+        code: 'AUTH_INVALID',
+        message: 'Invalid API key',
+      },
       requestId,
-      actor: apiKey.substring(0, 8) + '...',
+      timestamp: new Date().toISOString(),
+    }, 401, {
+      'x-request-id': requestId,
     });
-
-    await next();
   };
 };

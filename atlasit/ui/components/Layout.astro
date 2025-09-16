@@ -1,6 +1,7 @@
 ---
 // Simple layout for AtlasIT demo pages
 const { title = 'AtlasIT Demo', description = '' } = Astro.props;
+const DEMO_MODE = true;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +13,11 @@ const { title = 'AtlasIT Demo', description = '' } = Astro.props;
     <link rel="stylesheet" href="/global.css" />
   </head>
   <body class="bg-slate-900 text-white min-h-screen">
+    {DEMO_MODE && (
+      <div class="w-full bg-yellow-500 text-black text-center py-2 font-semibold text-sm shadow-md">
+        Demo Mode: All data is simulated. Actions are read-only and resettable.
+      </div>
+    )}
     <main>
       <slot />
     </main>

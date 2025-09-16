@@ -127,4 +127,3 @@ export const post = (url, body, options) => httpClient.post(url, body, options);
 export const put = (url, body, options) => httpClient.put(url, body, options);
 export const del = (url, options) => httpClient.delete(url, options);
 export const patch = (url, body, options) => httpClient.patch(url, body, options);
-//# sourceMappingURL=index.js.map

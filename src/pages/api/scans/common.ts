@@ -1,11 +1,10 @@
-import { EnhancedFinding } from './types';
+// import removed, not needed
 
 export const commonScanModule = {
   name: 'common',
   description: 'Common vulnerable files and paths analysis',
-
-  scan: async function scanEnhancedCommonFiles(url: string): Promise<EnhancedFinding[]> {
-    const findings: EnhancedFinding[] = [];
+  scan: async function scanEnhancedCommonFiles(url: string): Promise<import('./types').EnhancedScanResult> {
+    const findings: import('./types').EnhancedFinding[] = [];
 
     // Common vulnerable files and paths to check
     const commonPaths = [
@@ -80,8 +79,7 @@ export const commonScanModule = {
             title,
             description: `Accessible path found: ${path}`,
             recommendation,
-            businessImpact: 'Exposed sensitive paths can lead to data breaches, unauthorized access, or system compromise.',
-            consultingOpportunity: 'File system security audit and access control implementation services available.'
+            businessImpact: 'Exposed sensitive paths can lead to data breaches, unauthorized access, or system compromise.'
           });
         }
       } catch (error) {
@@ -108,8 +106,7 @@ export const commonScanModule = {
             title: `Information File Found: ${pattern}`,
             description: `Information disclosure file accessible: ${pattern}`,
             recommendation: 'Review content of information files and ensure no sensitive data is exposed.',
-            businessImpact: 'Information files can reveal site structure and potential attack vectors.',
-            consultingOpportunity: 'Information disclosure assessment services available.'
+            businessImpact: 'Information files can reveal site structure and potential attack vectors.'
           });
         }
       } catch {
@@ -117,6 +114,33 @@ export const commonScanModule = {
       }
     }
 
-    return findings;
+    // Compose EnhancedScanResult
+    return {
+      scanId: 'common-' + Math.random().toString(36).slice(2,10),
+      url,
+      scanType: 'common',
+      timestamp: new Date().toISOString(),
+      duration: 0,
+      findings,
+      summary: {
+        totalFindings: findings.length,
+        criticalCount: findings.filter(f => f.severity === 'critical').length,
+        highCount: findings.filter(f => f.severity === 'high').length,
+        mediumCount: findings.filter(f => f.severity === 'medium').length,
+        lowCount: findings.filter(f => f.severity === 'low').length,
+        securityScore: findings.length === 0 ? 100 : 100 - findings.length * 10
+      },
+      businessMetrics: {
+        trustScore: 100,
+        professionalismScore: 100,
+        userExperienceScore: 100,
+        brandProtectionScore: 100
+      },
+      metadata: {
+        scannerVersion: '2.0-modular',
+        scanDepth: 1,
+        externalApisUsed: []
+      }
+    };
   }
 };

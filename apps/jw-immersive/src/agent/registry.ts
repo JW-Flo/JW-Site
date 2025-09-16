@@ -108,6 +108,54 @@ const tools: AgentTool[] = [
     async execute() {
       return { ok: true, data: snapshotMetrics() };
     }
+  },
+  {
+    name: 'provision_user',
+    description: 'Provision a new user in Okta, AWS, Entra ID, or AD. Input: { system, userData }',
+    inputSchema: z.object({
+      system: z.enum(['okta', 'aws', 'entra', 'ad']),
+      userData: z.object({
+        email: z.string().email(),
+        name: z.string().min(1),
+        role: z.string().min(1)
+      })
+    }).strict(),
+    async execute(input, ctx) {
+      // Stub: Log request, return fake userId
+      ctx.session.messages.push({ role: 'tool', tool: 'provision_user', content: JSON.stringify(input), ts: Date.now() });
+      return { ok: true, data: { userId: `${input.system}-user-${Date.now()}` } };
+    }
+  },
+  {
+    name: 'assign_role',
+    description: 'Assign a role to a user in Okta, AWS, Entra ID, or AD. Input: { system, userId, role }',
+    inputSchema: z.object({
+      system: z.enum(['okta', 'aws', 'entra', 'ad']),
+      userId: z.string().min(1),
+      role: z.string().min(1)
+    }).strict(),
+    async execute(input, ctx) {
+      // Stub: Log request, return success
+      ctx.session.messages.push({ role: 'tool', tool: 'assign_role', content: JSON.stringify(input), ts: Date.now() });
+      return { ok: true, data: { assigned: true } };
+    }
+  },
+  {
+    name: 'sync_profile',
+    description: 'Sync user profile data across Okta, AWS, Entra ID, and AD. Input: { userId, profileData }',
+    inputSchema: z.object({
+      userId: z.string().min(1),
+      profileData: z.object({
+        email: z.string().email().optional(),
+        name: z.string().optional(),
+        role: z.string().optional()
+      })
+    }).strict(),
+    async execute(input, ctx) {
+      // Stub: Log request, return success
+      ctx.session.messages.push({ role: 'tool', tool: 'sync_profile', content: JSON.stringify(input), ts: Date.now() });
+      return { ok: true, data: { synced: true } };
+    }
   }
 ];
 

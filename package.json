@@ -13,7 +13,11 @@
     "lint": "npm run lint --workspaces",
     "test": "npm run test --workspaces",
   "install:all": "npm install",
-  "preview:jw-immersive:static": "npx serve apps/jw-immersive/dist -l 4321"
+  "preview:jw-immersive:static": "npx serve apps/jw-immersive/dist -l 4321",
+  "demo:refresh": "node scripts/demo-refresh.mjs",
+  "deploy:production": "node scripts/deploy-production.mjs",
+  "check:bundle": "node scripts/check-bundle.mjs",
+  "validate:env": "node scripts/validate-env.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

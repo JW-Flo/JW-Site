@@ -189,4 +189,3 @@ export class AIService {
 }
 // Export singleton instance with mock provider by default
 export const aiService = new AIService('mock');
-//# sourceMappingURL=index.js.map
