@@ -1,0 +1,56 @@
+name: terraform-validate
+
+on:
+  pull_request:
+    paths:
+      - 'apps/**/infra/terraform/**.tf'
+      - 'infra/terraform/**.tf'
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/**/infra/terraform/**.tf'
+      - 'infra/terraform/**.tf'
+
+jobs:
+  fmt-validate-plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Terraform FMT
+        working-directory: apps/awhittlewandering/docs/infra/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: apps/awhittlewandering/docs/infra/terraform
+        run: terraform init -input=false
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Terraform Validate
+        working-directory: apps/awhittlewandering/docs/infra/terraform
+        run: terraform validate
+
+      - name: Terraform Plan (no apply)
+        working-directory: apps/awhittlewandering/docs/infra/terraform
+        run: terraform plan -input=false -lock=false -out=plan.out || true
+        env:
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Upload Plan Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: apps/awhittlewandering/docs/infra/terraform/plan.out
+          if-no-files-found: ignore

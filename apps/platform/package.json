@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "start": "node server.js"
+  "start": "node server.js",
+  "deploy": "astro build && npx wrangler pages deploy dist --branch=main"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.8",
