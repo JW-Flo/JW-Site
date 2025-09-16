@@ -20,7 +20,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@atlasit/shared": ["../shared/dist"]
+      "@atlasit/shared": ["../shared/dist"],
+      "@atlasit/core": ["../packages/core/src"]
     }
   },
   "include": ["src/**/*"],

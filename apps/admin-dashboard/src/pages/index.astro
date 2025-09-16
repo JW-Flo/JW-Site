@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="AtlasIT Admin Dashboard">
+  <h1 class="text-3xl font-bold mb-6">AtlasIT Admin Dashboard</h1>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section class="p-6 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">Analytics Overview</h2>
+      <p>Platform-wide analytics widgets will appear here.</p>
+    </section>
+    <section class="p-6 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">Tenant Management</h2>
+      <p>Multi-tenant data isolation controls and demo mode.</p>
+    </section>
+    <section class="p-6 bg-white rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">Security Center</h2>
+      <p>YubiKey-only authentication and AWS alerting widgets.</p>
+    </section>
+  </div>
+</BaseLayout>

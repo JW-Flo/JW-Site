@@ -16,17 +16,30 @@ All roadmap decisions, architectural choices, and feature prioritization are ref
 **Branding:** See monorepo root for generated logo options and taglines.  
 **Migration Guide:** See `/docs/# AtlasIT Platform Consolidation & Migra.md`
 
+
 ## Monorepo Context
 
-This app is part of the AtlasIT monorepo:
+This repository is the AtlasIT platform monorepo:
 
 - Root: `/Users/jw/Projects/JW-Site/` (monorepo root)
-- This app: `apps/jw-immersive/`
+- Main platform: `atlasit/platform/` ([Platform README](atlasit/platform/README.md))
+- Admin dashboard: `apps/admin-dashboard/` ([Admin Dashboard README](apps/admin-dashboard/README.md))
+- JW immersive app: `apps/jw-immersive/`
 - Shared packages: `packages/ui/`, `packages/content/`
-- Other apps: `apps/platform/`, `apps/marketing/`
+- Other apps: `apps/marketing/`, `apps/platform/`
 
-To run this app in the monorepo:
+To run the admin dashboard:
 
+```bash
+```bash
+cd apps/admin-dashboard
+npm install
+npm run dev
+```
+
+To run the immersive app:
+
+```bash
 ```bash
 cd apps/jw-immersive
 npm run dev
@@ -35,14 +48,21 @@ npm run dev
 For full monorepo development:
 
 ```bash
+```bash
 npm run dev  # from root
 ```
 
 ---
 
-# Original JW-Site Documentation
 
-Cybersecurity engineering portfolio + human journey context, now served via Cloudflare Pages Worker (Astro SSR) with selective edge APIs (guestbook, consent, waitlist, geo, security scanner) and hardened security headers.
+
+## Platform Features
+
+- Platform-wide analytics tracking (D1 database)
+- Secure admin dashboard with YubiKey-only authentication
+- Multi-tenant data isolation and demo mode
+- Astro SSR, TailwindCSS, Cloudflare Pages/Workers
+
 
 ## Stack
 
@@ -50,7 +70,7 @@ Cybersecurity engineering portfolio + human journey context, now served via Clou
 - TailwindCSS
 - Cloudflare Pages / Workers Runtime
 - Cloudflare KV (RATE_LIMIT, LEADERBOARD, ANALYTICS, optional SCANNER_META)
-- Cloudflare D1 (guestbook entries, consent events, waitlist signups)
+- Cloudflare D1 (analytics events, guestbook entries, consent events, waitlist signups)
 - Turnstile (bot mitigation for guestbook submits)
 - Feature Flags (server evaluated, safe projection to client)
 
@@ -99,8 +119,11 @@ npm run docker:down
 
 Docker provides a consistent development environment across different machines and ensures all dependencies are properly isolated.
 
+
 ## Content Updates
 
+- Analytics: see `atlasit/platform/d1-schema.sql` and `apps/admin-dashboard/src/pages/api/analytics.ts`
+- Admin dashboard: see `apps/admin-dashboard/README.md`
 - Resume: edit `src/data/resume.json`.
 - Blog posts: add new `.mdx` files under `src/pages/blog/` with frontmatter.
 - Projects: update array in `src/pages/projects.astro` (or later move to data file).
@@ -176,7 +199,7 @@ CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main npm run deploy:production
 #   CONSENT_ADMIN_KEY, TURNSTILE_SECRET_KEY, SITE_URL, optional scanner API keys.
 ```
 
-### Custom Domain Setup (www.atlasit.pro)
+### Custom Domain Setup (<www.atlasit.pro>)
 
 To map the custom domain `www.atlasit.pro` to the `atlasit-platform` project (apex `atlasit.pro` will be added later or redirected once DNS is configured):
 
@@ -449,9 +472,9 @@ The `/verification` page can publish a cryptographic assertion of domain control
 node -e "const { generateKeyPairSync, sign } = require('crypto'); const { publicKey, privateKey } = generateKeyPairSync('ed25519'); const stmt='I, Joe Whittle (\"Andrey Sergeevich\" professionally), assert control over the domain andreysergeevich.me for portfolio and identity verification purposes.'; const sig=sign(null, Buffer.from(stmt), privateKey).toString('base64'); const pub=publicKey.export({format:'der',type:'spki'}).toString('base64'); console.log('VERIFICATION_PUBKEY='+pub); console.log('VERIFICATION_SIGNATURE='+sig);"
 ```
 
-2. Add the printed values to Cloudflare Pages env vars `VERIFICATION_PUBKEY` & `VERIFICATION_SIGNATURE` (Signature is treated as secret).
-3. Redeploy and visit `/verification` – a DNS TXT record suggestion plus the signed statement appears.
-4. (Optional) Publish the TXT record: `_identity.andreysergeevich.me  v=proof;id=joseph-whittle;alg=ed25519;pub=<pub>;sig=<sig>`
+1. Add the printed values to Cloudflare Pages env vars `VERIFICATION_PUBKEY` & `VERIFICATION_SIGNATURE` (Signature is treated as secret).
+2. Redeploy and visit `/verification` – a DNS TXT record suggestion plus the signed statement appears.
+3. (Optional) Publish the TXT record: `_identity.andreysergeevich.me  v=proof;id=joseph-whittle;alg=ed25519;pub=<pub>;sig=<sig>`
 
 If the variables are absent the page shows a non-intrusive notice instead of a placeholder signature.
 
@@ -463,7 +486,7 @@ See `ARCHITECTURE.md` for diagrams (ASCII + Mermaid), data flow, and future enha
 
 ---
 
-**Research Reference:**
+## Research Reference
 All architectural decisions and future enhancements are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for justification and strategic context
 ---
 
@@ -565,6 +588,7 @@ chmod +x scripts/smoke.sh # first run
 ```
 {
   "url": "https://example.com",
+```json
   "type": "headers" // or any supported scan type
 }
 ```
@@ -579,6 +603,7 @@ chmod +x scripts/smoke.sh # first run
 ```
 {
   "result": {
+```sql
     "scanId": "...",
     "url": "...",
     "scanType": "...",
@@ -590,6 +615,7 @@ chmod +x scripts/smoke.sh # first run
     "metadata": { ... }
   }
 }
+  ```text
 ```
 
 See `src/pages/api/scans/types.ts` for full type definitions.
@@ -637,10 +663,17 @@ Core concepts:
 File:
 
 - `public/arcadeHints.js` exports:
+
+
+
+
   - `getArcadeHint()` – returns a `{ text, segment }` object or `null` if no new hint is available.
+
   - `incrementSecretProgress(n = 1)` – increments an internal counter (future unlock triggers / meta puzzles).
 
+
 Menu Integration:
+
 
 - `MenuGame.drawInstructions()` calls `window.ArcadeHints?.getArcadeHint()` once per render cadence (with basic timestamp throttling) and appends the returned hint text if present.
 
@@ -1088,7 +1121,6 @@ Recommended token scopes for future expansion:
 - Modularize into `infra/terraform/modules/*` for reusable primitives (kv_namespace, r2_bucket, pages_project)
 
 Until those are in place, treat the existing configuration as a reference / guardrail rather than authoritative infra source of truth.
-
 
 ## MCP Server API Documentation
 

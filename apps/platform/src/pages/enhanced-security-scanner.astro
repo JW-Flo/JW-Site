@@ -12,7 +12,7 @@ title: "Enhanced Security Scanner"
         Demo Mode · Sample data resets regularly and is not production
       </div>
     </div>
-    <div class="container mx-auto px-4 pb-8">
+  <div class="container mx-auto px-4 pb-8" id="atlasit-main-content">
       <div class="mb-8">
         <h1 class="text-4xl font-bold mb-4">Enhanced Security Scanner</h1>
         <p class="text-lg text-gray-300 mb-6">Comprehensive security analysis and vulnerability assessment for your IT infrastructure</p>
@@ -172,5 +172,14 @@ title: "Enhanced Security Scanner"
         </div>
       </div>
     </div>
+    <script type="module">
+      import { trackPageView, trackUserAction } from '../utils/analytics.ts';
+      trackPageView('enhanced_security_scanner');
+      document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', e => {
+          trackUserAction('scanner_button_click', { label: btn.textContent });
+        });
+      });
+    </script>
   </body>
 </html>

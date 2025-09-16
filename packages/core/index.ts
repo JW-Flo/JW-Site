@@ -1,2 +1,3 @@
 // Core domain logic and schemas
-export * from './schemas';
+export * from './src/schemas';
+export * from './src/connectors';

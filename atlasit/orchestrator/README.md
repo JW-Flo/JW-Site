@@ -178,6 +178,51 @@ Workflows are defined as JSON objects with the following structure:
 }
 ```
 
+## Simulated Connectors & Workflow Resolution
+
+The workflow engine boots with a catalog of simulated SaaS connectors so flows
+execute end-to-end without real tenant credentials. During construction the
+`OktaStyleWorkflowEngine` registers the simulated auth profiles declared in
+[`src/config/simulatedConnectors.ts`](src/config/simulatedConnectors.ts) and
+instantiates the connector implementations that ship with
+[`@atlasit/core`](../../packages/core).
+
+- **Alias support**: Workflow cards can reference friendly connector keys such
+  as `office365`, `slack`, or `activeDirectory`. When no explicit resource
+  override is provided the engine falls back to the simulated catalog and
+  resolves the alias to the correct implementation (`microsoft-365`,
+  `slack-enterprise`, `active-directory`, etc.).
+- **Metadata propagation**: Simulation metadata (e.g. `simulate: true`,
+  `aliasOf`, connector display name) is attached to the card state and emitted
+  in logs so dashboards and developers can tell that a simulated backend is in
+  play.
+- **Extending the catalog**: To add another simulated provider, export a new
+  `ConnectorImplementation` from
+  `packages/core/src/connectors/examples/`, register it inside
+  `src/config/simulatedConnectors.ts`, and include it in the default registry in
+  `src/engine/oktaStyleWorkflowEngine.ts`.
+- **Testing**: Validate alias resolution and metadata wiring with:
+
+  ```bash
+  cd atlasit/orchestrator
+  npx vitest run --config vitest.config.ts src/engine/oktaStyleWorkflowEngine.test.ts
+  ```
+
+### Change Management & Auto-Documentation
+
+- **Jira-driven approvals**: Workflows can reference the `jira` connector alias
+  which resolves to the simulated `jira-cloud` implementation by default. The
+  sample test suite exercises ticket creation, approval transitions, and
+  comment logging so change-management gates run end-to-end even without a live
+  Jira tenant.
+- **Confluence documentation**: Use the `confluence` alias to automatically
+  publish or update deployment runbooks. The simulated connector emits metadata
+  that the UI can display to show documentation status.
+- **Release process**: A reference workflow combines Jira approvals with
+  Confluence publication (`OktaStyleWorkflowEngine` tests). When moving to real
+  tenants, override the connector resources with production credentials while
+  retaining the same workflow definition.
+
 ## Error Handling
 
 The service uses consistent error codes:

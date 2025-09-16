@@ -3,6 +3,7 @@ import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import cloudflare from "@astrojs/cloudflare";
+import vue from "@astrojs/vue";
 
 const SITE_URL = process.env.SITE_URL || "https://thewhittlewandering.com";
 
@@ -15,7 +16,7 @@ export default defineConfig({
       enabled: true,
     },
   }),
-  integrations: [tailwind(), mdx(), sitemap()],
+  integrations: [tailwind(), mdx(), sitemap(), vue()],
   // Avoid using sharp at runtime in Cloudflare Worker; rely on build-time (compile) or no transforms
   image: {
     service: {
