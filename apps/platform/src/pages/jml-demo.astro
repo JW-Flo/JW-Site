@@ -1,0 +1,842 @@
+---
+title: "JML Lifecycle Demo - AtlasIT"
+---
+
+<html lang="en">
+  <head>
+    <title>JML Lifecycle Demo - AtlasIT</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      .nav-link { transition: all 0.2s ease; }
+      .nav-link:hover { transform: translateY(-1px); }
+      .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+      .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+      .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
+      
+      .scenario-card { 
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        transition: all 0.3s ease;
+      }
+      
+      .scenario-card:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      
+      .scenario-active {
+        border-color: rgba(34, 197, 94, 0.7) !important;
+        background: rgba(34, 197, 94, 0.1);
+      }
+      
+      .step-indicator {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.875rem;
+      }
+      
+      .step-pending { background: rgba(71, 85, 105, 0.5); color: #94a3b8; }
+      .step-active { background: rgba(59, 130, 246, 0.7); color: white; }
+      .step-completed { background: rgba(34, 197, 94, 0.7); color: white; }
+      .step-error { background: rgba(239, 68, 68, 0.7); color: white; }
+      
+      .timeline-line {
+        width: 2px;
+        height: 3rem;
+        background: rgba(71, 85, 105, 0.3);
+        margin: 0 auto;
+      }
+      
+      .timeline-line-active {
+        background: rgba(59, 130, 246, 0.7);
+      }
+      
+      .timeline-line-completed {
+        background: rgba(34, 197, 94, 0.7);
+      }
+      
+      .log-entry {
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 3px solid rgba(59, 130, 246, 0.7);
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        border-radius: 0.25rem;
+        font-family: 'Monaco', 'Menlo', monospace;
+        font-size: 0.875rem;
+      }
+      
+      .employee-card {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin: 0.5rem 0;
+      }
+      
+      .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      
+      .status-active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+      .status-pending { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+      .status-terminated { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+      
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        transform: translateY(-1px);
+      }
+      
+      .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+      
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+      
+      .btn-secondary {
+        background: rgba(71, 85, 105, 0.5);
+        color: #e2e8f0;
+      }
+      
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity 0.5s ease;
+      }
+      
+      .fade-enter-from, .fade-leave-to {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+    <!-- Header -->
+    <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+      <nav class="container mx-auto px-6 py-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold text-sm">AI</span>
+            </div>
+            <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+          </div>
+          <div class="flex items-center space-x-4">
+            <a href="/api-manager" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">API Manager</a>
+            <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="demo-banner">Interactive JML Lifecycle Demo · Experience Real-Time Identity Automation</div>
+
+    <!-- Main App -->
+    <div id="app" class="container mx-auto px-6 py-8">
+      <!-- Header Section -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-4">JML Lifecycle Automation</h1>
+        <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+          Experience the complete Joiner-Mover-Leaver employee lifecycle automation from HRIS to AWS IAM provisioning
+        </p>
+      </div>
+
+      <!-- Demo Controls -->
+      <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
+        <div class="flex flex-wrap justify-center gap-4">
+          <button @click="resetDemo" class="btn btn-secondary">
+            🔄 Reset Demo
+          </button>
+          <button @click="runFullDemo" class="btn btn-primary" :disabled="demoRunning">
+            🚀 Run Complete Demo
+          </button>
+          <button @click="toggleAutoAdvance" class="btn" :class="autoAdvance ? 'btn-success' : 'btn-secondary'">
+            {{ autoAdvance ? '⏸️ Pause Auto' : '▶️ Auto Advance' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Scenario Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div 
+          v-for="scenario in scenarios" 
+          :key="scenario.id"
+          @click="selectScenario(scenario.id)"
+          class="scenario-card cursor-pointer"
+          :class="{ 'scenario-active': currentScenario?.id === scenario.id }"
+        >
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">{{ scenario.icon }}</div>
+            <div>
+              <h3 class="text-lg font-semibold">{{ scenario.title }}</h3>
+              <p class="text-sm text-slate-400">{{ scenario.subtitle }}</p>
+            </div>
+          </div>
+          <p class="text-slate-300 text-sm">{{ scenario.description }}</p>
+          
+          <div class="mt-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400">Progress</span>
+              <span class="text-xs text-slate-400">{{ scenario.progress }}%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-1.5">
+              <div 
+                class="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all duration-500"
+                :style="{ width: scenario.progress + '%' }"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Employee Profile -->
+      <div v-if="currentEmployee" class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
+        <h2 class="text-2xl font-semibold mb-4">👤 Employee Profile</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="employee-card">
+            <h3 class="text-lg font-semibold mb-3">Personal Information</h3>
+            <div class="space-y-2 text-sm">
+              <div><strong>Name:</strong> {{ currentEmployee.firstName }} {{ currentEmployee.lastName }}</div>
+              <div><strong>Email:</strong> {{ currentEmployee.email }}</div>
+              <div><strong>Employee ID:</strong> {{ currentEmployee.employeeId }}</div>
+              <div><strong>Start Date:</strong> {{ currentEmployee.startDate }}</div>
+              <div v-if="currentEmployee.endDate"><strong>End Date:</strong> {{ currentEmployee.endDate }}</div>
+            </div>
+          </div>
+          
+          <div class="employee-card">
+            <h3 class="text-lg font-semibold mb-3">Job Information</h3>
+            <div class="space-y-2 text-sm">
+              <div><strong>Title:</strong> {{ currentEmployee.title }}</div>
+              <div><strong>Department:</strong> {{ currentEmployee.department }}</div>
+              <div><strong>Manager:</strong> {{ currentEmployee.manager }}</div>
+              <div><strong>Employee Type:</strong> 
+                <span class="status-badge" :class="'status-' + currentEmployee.status">{{ currentEmployee.employeeType }}</span>
+              </div>
+              <div><strong>System Access:</strong> {{ currentEmployee.systemAccess.join(', ') }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflow Timeline -->
+      <div v-if="currentScenario" class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-semibold">🔄 Workflow Timeline</h2>
+          <div class="flex gap-2">
+            <button 
+              v-if="currentStepIndex > 0" 
+              @click="previousStep" 
+              class="btn btn-secondary"
+              :disabled="demoRunning"
+            >
+              ← Previous
+            </button>
+            <button 
+              v-if="currentStepIndex < currentScenario.steps.length - 1" 
+              @click="nextStep" 
+              class="btn btn-primary"
+              :disabled="demoRunning"
+            >
+              Next →
+            </button>
+            <button 
+              v-if="currentStepIndex === currentScenario.steps.length - 1 && !workflowComplete" 
+              @click="completeWorkflow" 
+              class="btn btn-success"
+            >
+              Complete ✓
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <div 
+            v-for="(step, index) in currentScenario.steps" 
+            :key="index"
+            class="flex items-start"
+          >
+            <div class="flex flex-col items-center mr-4">
+              <div 
+                class="step-indicator"
+                :class="{
+                  'step-completed': index < currentStepIndex,
+                  'step-active': index === currentStepIndex,
+                  'step-pending': index > currentStepIndex
+                }"
+              >
+                <span v-if="index < currentStepIndex">✓</span>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <div 
+                v-if="index < currentScenario.steps.length - 1"
+                class="timeline-line"
+                :class="{
+                  'timeline-line-completed': index < currentStepIndex,
+                  'timeline-line-active': index === currentStepIndex
+                }"
+              ></div>
+            </div>
+            
+            <div class="flex-1 pb-8">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold">{{ step.title }}</h3>
+                <span v-if="step.duration" class="text-sm text-slate-400">{{ step.duration }}</span>
+              </div>
+              <p class="text-slate-300 mb-3">{{ step.description }}</p>
+              
+              <div v-if="step.systems && step.systems.length > 0" class="mb-3">
+                <div class="text-sm text-slate-400 mb-1">Systems Involved:</div>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="system in step.systems" 
+                    :key="system"
+                    class="px-2 py-1 bg-slate-700 rounded text-xs"
+                  >
+                    {{ system }}
+                  </span>
+                </div>
+              </div>
+              
+              <div v-if="index === currentStepIndex && stepLogs[index]" class="space-y-2">
+                <transition-group name="fade">
+                  <div 
+                    v-for="(log, logIndex) in stepLogs[index]" 
+                    :key="logIndex"
+                    class="log-entry"
+                  >
+                    <span class="text-slate-400 text-xs">{{ log.timestamp }}</span> - {{ log.message }}
+                  </div>
+                </transition-group>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Logs -->
+      <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-semibold">📊 Real-time Activity Logs</h2>
+          <button @click="clearLogs" class="btn btn-secondary">Clear Logs</button>
+        </div>
+        
+        <div class="bg-black bg-opacity-50 rounded-lg p-4 h-64 overflow-y-auto">
+          <div v-if="globalLogs.length === 0" class="text-slate-400 text-center py-8">
+            No activity yet. Start a workflow to see real-time logs.
+          </div>
+          <transition-group name="fade">
+            <div 
+              v-for="(log, index) in globalLogs" 
+              :key="index"
+              class="text-sm py-1 font-mono"
+              :class="{
+                'text-green-400': log.type === 'success',
+                'text-blue-400': log.type === 'info',
+                'text-yellow-400': log.type === 'warning',
+                'text-red-400': log.type === 'error',
+                'text-slate-300': log.type === 'default'
+              }"
+            >
+              <span class="text-slate-500">{{ log.timestamp }}</span> 
+              <span class="text-slate-400">[{{ log.system }}]</span> 
+              {{ log.message }}
+            </div>
+          </transition-group>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            currentScenario: null,
+            currentEmployee: null,
+            currentStepIndex: 0,
+            workflowComplete: false,
+            demoRunning: false,
+            autoAdvance: false,
+            stepLogs: {},
+            globalLogs: [],
+            
+            scenarios: [
+              {
+                id: 'joiner',
+                icon: '👋',
+                title: 'New Employee',
+                subtitle: 'Joiner Workflow',
+                description: 'Jordan Miles joins as Security Engineer. Watch automated provisioning across Okta and AWS.',
+                progress: 0,
+                employee: {
+                  employeeId: 'EMP001',
+                  firstName: 'Jordan',
+                  lastName: 'Miles',
+                  email: 'jordan.miles@atlasit.pro',
+                  title: 'Security Engineer',
+                  department: 'Security',
+                  manager: 'security-lead@atlasit.pro',
+                  employeeType: 'fulltime',
+                  status: 'active',
+                  startDate: '2025-01-15',
+                  systemAccess: ['HRIS', 'Okta', 'AWS IAM', 'CloudTrail']
+                },
+                steps: [
+                  {
+                    title: 'HRIS Employee Created',
+                    description: 'HR creates new employee record in BambooHR with system access requirements',
+                    systems: ['BambooHR'],
+                    duration: '~1 min'
+                  },
+                  {
+                    title: 'HRIS Webhook Triggered',
+                    description: 'HRIS sends employee.created webhook to AtlasIT API Manager',
+                    systems: ['BambooHR', 'API Manager'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'Okta User Creation',
+                    description: 'API Manager creates Okta user with HRIS profile data',
+                    systems: ['API Manager', 'Okta'],
+                    duration: '~10 sec'
+                  },
+                  {
+                    title: 'Okta Group Assignment',
+                    description: 'User added to AWS Access and Security Team groups based on role',
+                    systems: ['Okta'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'JML Workflow Triggered',
+                    description: 'API Manager triggers joiner workflow for downstream systems',
+                    systems: ['API Manager'],
+                    duration: '~2 sec'
+                  },
+                  {
+                    title: 'Terraform Execution',
+                    description: 'Terraform provisions AWS IAM user with security engineer policies',
+                    systems: ['Terraform', 'AWS IAM'],
+                    duration: '~30 sec'
+                  },
+                  {
+                    title: 'AWS Resources Created',
+                    description: 'IAM user, security policies, and CloudTrail monitoring configured',
+                    systems: ['AWS IAM', 'CloudTrail'],
+                    duration: '~15 sec'
+                  },
+                  {
+                    title: 'Compliance Setup',
+                    description: 'MFA enabled, session controls configured, audit logging activated',
+                    systems: ['AWS IAM', 'CloudTrail', 'Lambda'],
+                    duration: '~10 sec'
+                  }
+                ]
+              },
+              {
+                id: 'mover',
+                icon: '🔄',
+                title: 'Role Change',
+                subtitle: 'Mover Workflow',
+                description: 'Maya Greene moves from Data Analyst to Security Engineer. See automated permission updates.',
+                progress: 0,
+                employee: {
+                  employeeId: 'EMP002',
+                  firstName: 'Maya',
+                  lastName: 'Greene',
+                  email: 'maya.greene@atlasit.pro',
+                  title: 'Senior Security Engineer',
+                  department: 'Security',
+                  manager: 'security-lead@atlasit.pro',
+                  employeeType: 'fulltime',
+                  status: 'active',
+                  startDate: '2024-06-01',
+                  systemAccess: ['HRIS', 'Okta', 'AWS IAM', 'CloudTrail']
+                },
+                steps: [
+                  {
+                    title: 'HRIS Role Update',
+                    description: 'HR updates Maya\'s role from Data Analyst to Security Engineer',
+                    systems: ['BambooHR'],
+                    duration: '~1 min'
+                  },
+                  {
+                    title: 'Change Detection',
+                    description: 'HRIS detects role change and sends employee.updated webhook',
+                    systems: ['BambooHR', 'API Manager'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'Okta Profile Update',
+                    description: 'User profile updated with new title and department',
+                    systems: ['API Manager', 'Okta'],
+                    duration: '~10 sec'
+                  },
+                  {
+                    title: 'Group Membership Changes',
+                    description: 'Removed from Data Team, added to Security Team group',
+                    systems: ['Okta'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'Mover Workflow Triggered',
+                    description: 'API Manager triggers mover workflow with role change metadata',
+                    systems: ['API Manager'],
+                    duration: '~2 sec'
+                  },
+                  {
+                    title: 'AWS Policy Update',
+                    description: 'Terraform updates IAM policies from data analyst to security engineer',
+                    systems: ['Terraform', 'AWS IAM'],
+                    duration: '~20 sec'
+                  },
+                  {
+                    title: 'Permission Verification',
+                    description: 'Verify new security tool access, remove data service permissions',
+                    systems: ['AWS IAM'],
+                    duration: '~10 sec'
+                  },
+                  {
+                    title: 'Audit Trail Updated',
+                    description: 'Role change logged with before/after permissions for compliance',
+                    systems: ['CloudTrail', 'Lambda'],
+                    duration: '~5 sec'
+                  }
+                ]
+              },
+              {
+                id: 'leaver',
+                icon: '👋',
+                title: 'Employee Exit',
+                subtitle: 'Leaver Workflow',
+                description: 'Contractor departure triggers immediate access revocation across all systems.',
+                progress: 0,
+                employee: {
+                  employeeId: 'EMP003',
+                  firstName: 'Alex',
+                  lastName: 'Johnson',
+                  email: 'alex.johnson@contractor.atlasit.pro',
+                  title: 'Contract Developer',
+                  department: 'Engineering',
+                  manager: 'dev-lead@atlasit.pro',
+                  employeeType: 'contractor',
+                  status: 'terminated',
+                  startDate: '2024-09-01',
+                  endDate: '2025-01-15',
+                  systemAccess: ['HRIS', 'Okta (Deactivated)', 'AWS IAM (Revoked)']
+                },
+                steps: [
+                  {
+                    title: 'Contract Termination',
+                    description: 'HR marks contractor as terminated in HRIS with end date',
+                    systems: ['BambooHR'],
+                    duration: '~1 min'
+                  },
+                  {
+                    title: 'Termination Webhook',
+                    description: 'HRIS sends employee.terminated webhook immediately',
+                    systems: ['BambooHR', 'API Manager'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'Leaver Workflow Triggered',
+                    description: 'API Manager initiates immediate access revocation workflow',
+                    systems: ['API Manager'],
+                    duration: '~2 sec'
+                  },
+                  {
+                    title: 'Okta Group Removal',
+                    description: 'User removed from all system access groups (AWS, applications)',
+                    systems: ['Okta'],
+                    duration: '~10 sec'
+                  },
+                  {
+                    title: 'AWS Access Revocation',
+                    description: 'Terraform destroys IAM user and deactivates all access keys',
+                    systems: ['Terraform', 'AWS IAM'],
+                    duration: '~20 sec'
+                  },
+                  {
+                    title: 'Session Termination',
+                    description: 'All active AWS sessions forcibly terminated',
+                    systems: ['AWS IAM'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'Okta User Deactivation',
+                    description: 'Okta user account deactivated, preventing all logins',
+                    systems: ['Okta'],
+                    duration: '~5 sec'
+                  },
+                  {
+                    title: 'Audit Documentation',
+                    description: 'Complete access termination logged for compliance and security audit',
+                    systems: ['CloudTrail', 'Lambda'],
+                    duration: '~10 sec'
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        
+        methods: {
+          selectScenario(scenarioId) {
+            this.currentScenario = this.scenarios.find(s => s.id === scenarioId);
+            this.currentEmployee = this.currentScenario.employee;
+            this.currentStepIndex = 0;
+            this.workflowComplete = false;
+            this.stepLogs = {};
+            this.addGlobalLog('info', 'Demo', `Selected ${this.currentScenario.title} scenario`);
+          },
+          
+          async nextStep() {
+            if (this.currentStepIndex < this.currentScenario.steps.length - 1) {
+              this.currentStepIndex++;
+              await this.executeStep(this.currentStepIndex);
+              this.updateProgress();
+            }
+          },
+          
+          async previousStep() {
+            if (this.currentStepIndex > 0) {
+              this.currentStepIndex--;
+              this.updateProgress();
+            }
+          },
+          
+          async executeStep(stepIndex) {
+            const step = this.currentScenario.steps[stepIndex];
+            
+            if (!this.stepLogs[stepIndex]) {
+              this.stepLogs[stepIndex] = [];
+            }
+            
+            this.addStepLog(stepIndex, `Starting: ${step.title}`);
+            this.addGlobalLog('info', step.systems[0], step.title);
+            
+            // Simulate step execution with realistic timing
+            const logs = this.getStepSimulationLogs(step, this.currentScenario.id);
+            
+            for (let i = 0; i < logs.length; i++) {
+              await this.delay(800 + Math.random() * 1200);
+              this.addStepLog(stepIndex, logs[i].message);
+              this.addGlobalLog(logs[i].type, logs[i].system, logs[i].message);
+            }
+            
+            this.addStepLog(stepIndex, `✓ Completed: ${step.title}`);
+            this.addGlobalLog('success', step.systems[0], `Completed ${step.title}`);
+          },
+          
+          getStepSimulationLogs(step, scenarioType) {
+            const stepTitle = step.title.toLowerCase();
+            
+            if (stepTitle.includes('hris') && stepTitle.includes('created')) {
+              return [
+                { type: 'info', system: 'BambooHR', message: 'Validating employee data...' },
+                { type: 'info', system: 'BambooHR', message: 'Creating employee record...' },
+                { type: 'success', system: 'BambooHR', message: 'Employee record created successfully' }
+              ];
+            }
+            
+            if (stepTitle.includes('webhook')) {
+              return [
+                { type: 'info', system: 'BambooHR', message: 'Preparing webhook payload...' },
+                { type: 'info', system: 'HTTP', message: 'Sending POST request to API Manager...' },
+                { type: 'success', system: 'API Manager', message: 'Webhook received and validated' }
+              ];
+            }
+            
+            if (stepTitle.includes('okta') && stepTitle.includes('creation')) {
+              return [
+                { type: 'info', system: 'API Manager', message: 'Parsing HRIS employee data...' },
+                { type: 'info', system: 'Okta API', message: 'Creating user profile...' },
+                { type: 'info', system: 'Okta', message: 'Setting up user attributes...' },
+                { type: 'success', system: 'Okta', message: 'User created with ID: okta-user-001' }
+              ];
+            }
+            
+            if (stepTitle.includes('group assignment') || stepTitle.includes('group membership')) {
+              return [
+                { type: 'info', system: 'API Manager', message: 'Determining required groups...' },
+                { type: 'info', system: 'Okta API', message: 'Adding user to AWS Access group...' },
+                { type: 'info', system: 'Okta API', message: 'Adding user to Security Team group...' },
+                { type: 'success', system: 'Okta', message: 'Group assignments completed' }
+              ];
+            }
+            
+            if (stepTitle.includes('jml workflow') || stepTitle.includes('workflow triggered')) {
+              return [
+                { type: 'info', system: 'API Manager', message: 'Initializing JML workflow...' },
+                { type: 'info', system: 'Workflow Engine', message: `Starting ${scenarioType} process...` },
+                { type: 'success', system: 'Workflow Engine', message: 'Workflow queued for execution' }
+              ];
+            }
+            
+            if (stepTitle.includes('terraform')) {
+              return [
+                { type: 'info', system: 'Terraform', message: 'Preparing workspace...' },
+                { type: 'info', system: 'Terraform', message: 'Planning infrastructure changes...' },
+                { type: 'info', system: 'AWS Provider', message: 'Authenticating with AWS...' },
+                { type: 'info', system: 'Terraform', message: 'Applying configuration...' },
+                { type: 'success', system: 'Terraform', message: 'Infrastructure deployment completed' }
+              ];
+            }
+            
+            if (stepTitle.includes('aws resources') || stepTitle.includes('aws access')) {
+              return [
+                { type: 'info', system: 'AWS IAM', message: 'Creating IAM user...' },
+                { type: 'info', system: 'AWS IAM', message: 'Attaching security policies...' },
+                { type: 'info', system: 'AWS IAM', message: 'Configuring resource permissions...' },
+                { type: 'success', system: 'AWS IAM', message: 'User provisioning completed' }
+              ];
+            }
+            
+            // Default simulation
+            return [
+              { type: 'info', system: step.systems[0], message: 'Processing...' },
+              { type: 'success', system: step.systems[0], message: 'Operation completed' }
+            ];
+          },
+          
+          async completeWorkflow() {
+            this.workflowComplete = true;
+            this.currentScenario.progress = 100;
+            this.addGlobalLog('success', 'System', `${this.currentScenario.title} workflow completed successfully!`);
+          },
+          
+          async runFullDemo() {
+            if (!this.currentScenario) {
+              this.addGlobalLog('warning', 'Demo', 'Please select a scenario first');
+              return;
+            }
+            
+            this.demoRunning = true;
+            this.currentStepIndex = 0;
+            this.workflowComplete = false;
+            this.stepLogs = {};
+            
+            this.addGlobalLog('info', 'Demo', `Starting full ${this.currentScenario.title} demo...`);
+            
+            for (let i = 0; i < this.currentScenario.steps.length; i++) {
+              this.currentStepIndex = i;
+              await this.executeStep(i);
+              this.updateProgress();
+              
+              if (i < this.currentScenario.steps.length - 1) {
+                await this.delay(1500); // Pause between steps
+              }
+            }
+            
+            await this.completeWorkflow();
+            this.demoRunning = false;
+          },
+          
+          updateProgress() {
+            const progress = Math.round(((this.currentStepIndex + 1) / this.currentScenario.steps.length) * 100);
+            this.currentScenario.progress = progress;
+          },
+          
+          addStepLog(stepIndex, message) {
+            if (!this.stepLogs[stepIndex]) {
+              this.stepLogs[stepIndex] = [];
+            }
+            
+            this.stepLogs[stepIndex].push({
+              timestamp: new Date().toLocaleTimeString(),
+              message: message
+            });
+          },
+          
+          addGlobalLog(type, system, message) {
+            this.globalLogs.push({
+              timestamp: new Date().toLocaleTimeString(),
+              type: type,
+              system: system,
+              message: message
+            });
+            
+            // Keep only last 50 logs
+            if (this.globalLogs.length > 50) {
+              this.globalLogs.shift();
+            }
+          },
+          
+          clearLogs() {
+            this.globalLogs = [];
+            this.stepLogs = {};
+          },
+          
+          resetDemo() {
+            this.scenarios.forEach(scenario => scenario.progress = 0);
+            this.currentScenario = null;
+            this.currentEmployee = null;
+            this.currentStepIndex = 0;
+            this.workflowComplete = false;
+            this.demoRunning = false;
+            this.stepLogs = {};
+            this.globalLogs = [];
+            this.addGlobalLog('info', 'Demo', 'Demo reset completed');
+          },
+          
+          toggleAutoAdvance() {
+            this.autoAdvance = !this.autoAdvance;
+            if (this.autoAdvance && this.currentScenario && !this.workflowComplete) {
+              this.runAutoAdvance();
+            }
+          },
+          
+          async runAutoAdvance() {
+            while (this.autoAdvance && this.currentScenario && !this.workflowComplete && !this.demoRunning) {
+              if (this.currentStepIndex < this.currentScenario.steps.length - 1) {
+                await this.nextStep();
+                await this.delay(3000); // Auto advance every 3 seconds
+              } else {
+                await this.completeWorkflow();
+                this.autoAdvance = false;
+                break;
+              }
+            }
+          },
+          
+          delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+          }
+        },
+        
+        mounted() {
+          this.addGlobalLog('success', 'System', 'JML Lifecycle Demo initialized');
+          this.addGlobalLog('info', 'Demo', 'Select a scenario to begin the interactive demonstration');
+        }
+      }).mount('#app');
+    </script>
+  </body>
+</html>
