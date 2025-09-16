@@ -1012,7 +1012,82 @@ atlasit/
 └── 📜 scripts/                 # Build & deployment scripts
 ```
 
-# MCP Server API Documentation
+## Terraform (Infrastructure as Code)
+
+Lightweight Terraform examples currently live in `apps/awhittlewandering/docs/infra/terraform/` demonstrating Cloudflare resources (e.g. KV namespace). This is an initial scaffold to standardize future infrastructure modules (R2 buckets, KV namespaces, D1 databases, Pages project settings) before expansion.
+
+### Repository Layout (current)
+
+```text
+apps/awhittlewandering/docs/infra/terraform/
+  main.tf        # Cloudflare provider + sample resource(s)
+  variables.tf   # Input variables (account IDs, tokens, etc.)
+  outputs.tf     # Exposed outputs (future reference by automation)
+```
+
+### Local Usage
+
+1. Install Terraform 1.9.5 locally with the helper script:
+
+  ```bash
+  ./scripts/install-terraform.sh    # installs to ~/.local/bin (add to PATH)
+  ```
+
+1. Export required environment variables (or create a `.tfvars` file):
+
+  ```bash
+  export TF_VAR_cloudflare_api_token=***
+  export TF_VAR_cloudflare_account_id=***
+  ```
+
+1. Plan changes:
+
+  ```bash
+  cd apps/awhittlewandering/docs/infra/terraform
+  terraform init
+  terraform fmt -recursive
+  terraform validate
+  terraform plan
+  ```
+
+No `apply` step is wired into CI yet (intentional – manual review required before any write operations). Add `terraform apply` only when you are certain of resource impact and have appropriate state backend strategy (e.g., remote state via Cloudflare R2 or Terraform Cloud) – currently defaults to local state.
+
+### CI Validation Workflow
+
+GitHub Actions workflow: `.github/workflows/terraform-validate.yml`
+
+What it does on PRs and pushes touching `*.tf` files:
+
+1. `terraform fmt -check` (fails on style drift)
+2. `terraform init` (using pinned 1.9.5)
+3. `terraform validate`
+4. `terraform plan` (non-blocking; errors do not fail build due to `|| true` – revisit once code stabilizes)
+5. Uploads `plan.out` as an artifact (reviewable in PR UI)
+
+Required repository secrets:
+
+- `CLOUDFLARE_API_TOKEN` – Token with least-privilege Terraform-managed permissions (e.g., Workers R2 / KV / Pages as needed)
+- `CLOUDFLARE_ACCOUNT_ID` – Account identifier passed as variable
+
+Recommended token scopes for future expansion:
+
+- Cloudflare Pages: Edit
+- Workers KV Storage: Read & Edit (namespace creation / key mgmt if needed)
+- R2 Storage: Edit (bucket lifecycle)
+- D1: Edit (database provisioning)
+
+### Next Steps (Roadmap)
+
+- Introduce environment-specific workspaces (`-workspace=prod|staging`) once multiple environments are provisioned
+- Add remote state (Cloudflare R2 or Terraform Cloud) to avoid local state drift
+- Implement automated security scanning of Terraform (tfsec / checkov) in CI
+- Promote `plan` failures to build failures once baseline stabilized
+- Modularize into `infra/terraform/modules/*` for reusable primitives (kv_namespace, r2_bucket, pages_project)
+
+Until those are in place, treat the existing configuration as a reference / guardrail rather than authoritative infra source of truth.
+
+
+## MCP Server API Documentation
 
 See `atlasit/orchestrator/mcp-server/openapi.yaml` for full OpenAPI/Swagger specification of all MCP endpoints.
 
