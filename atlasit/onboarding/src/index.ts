@@ -1,30 +1,15 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-// import { logger } from '@atlasit/shared';
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context),
-  error: (message: string, error?: any, context?: any) => console.error(`[ERROR] ${message}`, error, context),
-  warn: (message: string, context?: any) => console.warn(`[WARN] ${message}`, context),
-};
 import { rateLimit } from './middleware/rateLimit';
 import { auth } from './middleware/auth';
 import { onboardingRoutes } from './handlers/onboarding';
 import { healthRoutes } from './handlers/health';
+import { requestContext } from './middleware/requestContext';
+import { appLogger, getRequestId, getRequestLogger } from './utils/logger';
+import type { OnboardingEnv } from './types';
 
-export interface Env {
-  DB: D1Database;
-  ONBOARDING_CACHE: KVNamespace;
-  RATE_LIMIT: KVNamespace;
-  AI: any;
-  API_ALLOWED_KEYS?: string;
-  RATE_LIMIT_MAX_REQUESTS?: string;
-  RATE_LIMIT_WINDOW_SECONDS?: string;
-  [key: string]: any; // Allow additional bindings
-}
+const app = new Hono<OnboardingEnv>();
 
-const app = new Hono();
-
-// Global middleware
 app.use('*', cors({
   origin: ['http://localhost:3000', 'https://atlasit.com'],
   allowHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-request-id'],
@@ -33,28 +18,7 @@ app.use('*', cors({
   maxAge: 86400,
 }));
 
-// Request logging middleware
-app.use('*', async (c, next) => {
-  const requestId = crypto.randomUUID();
-  const start = Date.now();
-
-  logger.info('Request started', {
-    method: c.req.method,
-    url: c.req.url,
-    requestId,
-  });
-
-  await next();
-
-  const duration = Date.now() - start;
-  logger.info('Request completed', {
-    method: c.req.method,
-    url: c.req.url,
-    status: c.res.status,
-    duration,
-    requestId,
-  });
-});
+app.use('*', requestContext(appLogger));
 
 // Health check routes
 app.route('/health', healthRoutes);
@@ -65,9 +29,11 @@ app.use('/api/*', auth());
 app.route('/api/onboarding', onboardingRoutes);
 
 // Error handling
-app.onError((err, c) => {
-  const requestId = 'unknown';
-  logger.error('Unhandled error', err, { requestId });
+app.onError((error, c) => {
+  const requestId = getRequestId(c);
+  const requestLogger = getRequestLogger(c, { scope: 'onError' });
+
+  requestLogger.error('Unhandled error', error);
 
   return c.json({
     success: false,
@@ -82,11 +48,12 @@ app.onError((err, c) => {
 
 // 404 handler
 app.notFound((c) => {
-  const requestId = 'unknown';
-  logger.warn('Route not found', {
+  const requestId = getRequestId(c);
+  const requestLogger = getRequestLogger(c, { scope: 'notFound' });
+
+  requestLogger.warn('Route not found', {
     method: c.req.method,
     url: c.req.url,
-    requestId,
   });
 
   return c.json({

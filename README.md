@@ -109,31 +109,77 @@ Docker provides a consistent development environment across different machines a
 
 You can deploy either through the Cloudflare Pages UI or locally with Wrangler.
 
+### Prerequisites
+
+- Install [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/).
+- Authenticate with `npx wrangler login` (OAuth) or provide a Pages-capable `CLOUDFLARE_API_TOKEN`.
+- Configure bindings referenced in `wrangler.toml` (D1 `DB`, R2 `MEDIA`, optional `SESSION`/`SCANNER_META`).
+- Set secrets in the Pages dashboard: `SUPER_ADMIN_KEY`, `SESSION_SIGNING_KEY`, `CONSENT_ADMIN_KEY`, `TURNSTILE_SECRET_KEY`, scanner API keys, etc.
+- Confirm `wrangler.toml` values (project name, bindings) match the target account/zone by running `npx wrangler whoami` and `wrangler projects list`.
+- When using API tokens, grant **Cloudflare Pages – Edit** and **Account Workers Scripts – Edit** permissions; store tokens securely (shell profile, CI secret store) and never commit.
+- Use Wrangler secret management for local/CI secrets: `wrangler pages secret put SUPER_ADMIN_KEY --env=production` (repeat per secret).
+- Before deploying, run `npm run validate:env` to ensure required variables are present.
+
 ### One-time (UI)
 
-1. Create a new Pages project, point at this repo (or upload zip of `dist`).
-2. Build command: `npm run build`
-3. Output directory: `dist`
-4. Set env var `SITE_URL=https://yourdomain.tld` (no trailing slash) once domain is known.
-5. After first deploy, add any custom domain; trigger a redeploy so canonical URLs + feeds update.
+1. Create a Cloudflare Pages project, point at this repo (or manually upload the `dist` output).
+2. Build command: `npm run build` (monorepo aware).
+3. Output directory: `apps/platform/dist` (platform demo) or `apps/jw-immersive/dist` (portfolio app).
+4. Set `SITE_URL=https://yourdomain.tld` once the custom domain is known.
+5. Redeploy after attaching the custom domain so canonical URLs update.
 
 ### Local (Wrangler CLI)
 
-Build then deploy:
-
 ```bash
+# Preview deploy
 npm run build
-npm run deploy:preview   # preview branch deploy
-npm run deploy           # production deploy
+wrangler pages deploy apps/platform/dist --project-name atlasit-platform --branch=preview
+
+# Production deploy (scripted helper)
+CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main DEPLOY_HEALTHCHECK_URL=https://atlasit.pro/health npm run deploy:production
+
+# Dry-run validation (safe)
+CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main npm run deploy:production -- --dry-run
+
+# GitHub Actions (automated check + dry-run)
+# See .github/workflows/deploy.yml which runs environment validation, bundle-size checks,
+# and a wrangler deploy with --dry-run by default. Secrets needed:
+#   CF_PAGES_PROJECT, CLOUDFLARE_API_TOKEN, SUPER_ADMIN_KEY, SESSION_SIGNING_KEY,
+#   CONSENT_ADMIN_KEY, TURNSTILE_SECRET_KEY, SITE_URL, optional scanner API keys.
 ```
 
-During development you can iterate on the already-built output (rarely needed) with:
+The `deploy:production` script wraps `wrangler pages deploy` and performs a post-deploy health check (defaults provided via env vars). The script intentionally fails fast if `CF_PAGES_PROJECT` is not set to avoid accidental deployments.
+
+> Running the script with `--dry-run` validates authentication, bindings, and artifacts without publishing.
+
+### Post-deploy health check
 
 ```bash
-npm run pages:dev
+curl -sfS https://atlasit.pro/health | jq '.status'
+curl -sfS https://atlasit.pro/api/demo/data | jq '.requestId'
 ```
 
-Historical note: GitHub Pages was the initial fallback; canonical generation now expects `SITE_URL` to be set for production.
+Manually spot-check `/dashboard`, `/onboarding`, persona switching, and the reset button right after each deploy.
+
+When preparing (no publish), run:
+
+```bash
+# Build once
+npm run build
+
+# Check bundle sizes (skip rebuild if already built)
+CHECK_BUNDLE_SKIP_BUILD=1 npm run check:bundle
+
+# Confirm env vars
+npm run validate:env
+
+# Dry-run deploy to confirm creds/bindings
+CF_PAGES_PROJECT=atlasit-platform npm run deploy:production -- --dry-run
+```
+
+Capture any discrepancies in team runbooks or `docs/DEMO_DATA.md` before performing a real deploy.
+
+During development you can iterate against the already-built output with `npm run pages:dev` (rarely required).
 
 ### Staging Workflow
 
@@ -173,6 +219,7 @@ If you previously exported a token in your shell profile, remove that line and r
 - Rate limit externally reachable mutation/read endpoints
 - Defense-in-depth; fall back fast & quietly on auth failures (404 for hidden admin endpoints)
 - Simple, readable code
+- Track performance and architecture actions in [`docs/PERFORMANCE_AND_ARCHITECTURE.md`](docs/PERFORMANCE_AND_ARCHITECTURE.md) and revisit quarterly.
 
 Historical note: Earlier iteration was fully static (“no backend”). The project now purposefully includes a controlled backend surface (D1 + KV) to enable interactive features while maintaining a constrained threat profile.
 
@@ -378,12 +425,45 @@ chmod +x scripts/smoke.sh # first run
 
 ## API Endpoints (Current)
 
-- `GET /api/guestbook` – recent guestbook entries
-- `POST /api/guestbook` – add entry (Turnstile token required)
-- `GET /api/guestbook/stats` – counts & latest entries
-- `GET /api/geo` – Cloudflare edge geo metadata (rate limited)
-- `GET /api/waitlist` – waitlist count (feature-flag: `FEATURE_WAITLIST`)
-- `POST /api/waitlist` – join waitlist (feature-flag: `FEATURE_WAITLIST`)
+### Enhanced Security Scan API
+
+```
+{
+  "url": "https://example.com",
+  "type": "headers" // or any supported scan type
+}
+```
+
+- On success: HTTP 200, JSON `{ "result": EnhancedScanResult }`
+- On invalid input (missing url/type, invalid URL, unsupported protocol, bad JSON, empty body): HTTP 400, JSON `{ "error": "...", "code": "..." }`
+- On rate limit: HTTP 429, JSON `{ "error": "Rate limit exceeded. Please wait before retrying." }`
+- On internal error: HTTP 500, JSON `{ "error": "Internal server error", "code": "INTERNAL_ERROR" }`
+
+**Result Shape:**
+
+```
+{
+  "result": {
+    "scanId": "...",
+    "url": "...",
+    "scanType": "...",
+    "timestamp": "...",
+    "duration": 0,
+    "findings": [ /* array of EnhancedFinding */ ],
+    "summary": { ... },
+    "businessMetrics": { ... },
+    "metadata": { ... }
+  }
+}
+```
+
+See `src/pages/api/scans/types.ts` for full type definitions.
+
+**Error Handling:**
+
+- All invalid input cases (missing url/type, invalid URL, unsupported protocol, bad JSON, empty body) return status 400.
+- All valid requests return `{ "result": ... }`.
+- Rate limits and internal errors return appropriate status codes and error messages.
 
 ### Retro Arcade (Games)
 
@@ -799,3 +879,40 @@ atlasit/
 │   └── package.json            # Dependencies and scripts
 └── 📜 scripts/                 # Build & deployment scripts
 ```
+
+# MCP Server API Documentation
+
+See `atlasit/orchestrator/mcp-server/openapi.yaml` for full OpenAPI/Swagger specification of all MCP endpoints.
+
+## Endpoints Overview
+
+| Method | Path           | Auth                | Description                       |
+|--------|---------------|---------------------|-----------------------------------|
+| GET    | /health       | None                | Health check                      |
+| GET    | /             | None                | Home endpoint                     |
+| GET    | /sse          | Bearer, OAuth (opt) | SSE heartbeat stream              |
+| POST   | /search       | Bearer, OAuth (opt) | Search documents                  |
+| POST   | /fetch        | Bearer, OAuth (opt) | Fetch document                    |
+| POST   | /tool/:name   | Bearer, OAuth (opt) | Generic tool endpoint             |
+| GET    | /auth         | OAuth (opt)         | OAuth login                       |
+| GET    | /callback     | OAuth (opt)         | OAuth callback                    |
+
+### Authentication
+
+- Most endpoints require a Bearer token (`Authorization: Bearer <token>`).
+- If OAuth is configured, endpoints also require a valid OAuth session.
+
+### Error Codes
+
+- `401 Unauthorized`: Missing/invalid bearer token or OAuth required
+- `403 Forbidden`: Bearer token mismatch
+- `404 Not Found`: Tool not found
+- `500 Internal Server Error`: Tool error, missing id, or not found
+
+### Request/Response Formats
+
+- See OpenAPI spec for detailed schemas and example payloads.
+
+---
+
+For usage examples and more details, see the OpenAPI spec or the test suite in `atlasit/orchestrator/mcp-server/test/mcp-server.test.js`.

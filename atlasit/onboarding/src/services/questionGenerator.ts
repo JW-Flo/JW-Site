@@ -1,11 +1,4 @@
-const aiService = {
-  generateText: async (prompt: string) => `Mock response for: ${prompt}`,
-  getProviderName: () => 'mock',
-  generate: async (options: any) => ({ content: `Mock response for: ${options.prompt}` }),
-};
-
-type Industry = 'technology' | 'healthcare' | 'finance' | 'retail' | 'manufacturing' | 'education' | 'government' | 'other';
-type Requirement = 'compliance' | 'analytics' | 'automation' | 'security' | 'integration' | 'reporting' | 'monitoring' | 'backup';
+import { aiService, type Industry, type Requirement } from '@atlasit/shared';
 
 export interface OnboardingQuestion {
   id: string;

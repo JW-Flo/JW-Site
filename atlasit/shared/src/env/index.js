@@ -81,4 +81,3 @@ export class EnvValidator {
 export const envValidator = EnvValidator.getInstance();
 // Export convenience function
 export const validateEnvironment = () => envValidator.validate();
-//# sourceMappingURL=index.js.map

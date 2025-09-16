@@ -1,46 +1,52 @@
-import { MiddlewareHandler } from 'hono';
+import type { MiddlewareHandler } from 'hono';
+import { getRequestId, getRequestLogger } from '../utils/logger';
+import type { OnboardingEnv } from '../types';
 
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context),
-  error: (message: string, error?: any, context?: any) => console.error(`[ERROR] ${message}`, error, context),
-  warn: (message: string, context?: any) => console.warn(`[WARN] ${message}`, context),
-};
-
-export const rateLimit = (): MiddlewareHandler => {
+export const rateLimit = (): MiddlewareHandler<OnboardingEnv> => {
   return async (c, next) => {
-    const requestId = c.get('requestId') || 'unknown';
+    const requestId = getRequestId(c);
+    const logger = getRequestLogger(c, { scope: 'rateLimit' });
 
-    // Get client identifier (API key or IP)
-    const apiKey = c.req.header('x-api-key');
+    const apiKey = c.req.header('x-api-key') ?? undefined;
     const clientIP = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
-    const clientId = apiKey || clientIP;
+    const clientId = apiKey ?? clientIP;
 
-    // Get rate limit configuration from environment
-    const maxRequests = parseInt(c.env.RATE_LIMIT_MAX_REQUESTS || '100');
-    const windowSeconds = parseInt(c.env.RATE_LIMIT_WINDOW_SECONDS || '60');
+    const maxRequests = Number.parseInt(c.env.RATE_LIMIT_MAX_REQUESTS ?? '100', 10);
+    const windowSeconds = Number.parseInt(c.env.RATE_LIMIT_WINDOW_SECONDS ?? '60', 10);
 
     const now = Math.floor(Date.now() / 1000);
-    const windowStart = now - windowSeconds;
+
+    const kv = c.env.RATE_LIMIT;
+    if (!kv) {
+      logger.warn('RATE_LIMIT binding missing, skipping throttle');
+      await next();
+      return;
+    }
 
     try {
-      // Get current request count for this client
       const key = `ratelimit:${clientId}`;
-      const currentData = await c.env.RATE_LIMIT.get(key);
+      const currentData = await kv.get(key);
 
       let requestCount = 0;
       let resetTime = now + windowSeconds;
 
       if (currentData) {
-        const parsed = JSON.parse(currentData);
-        if (parsed.reset > now) {
-          requestCount = parsed.count;
-          resetTime = parsed.reset;
+        try {
+          const parsed = JSON.parse(currentData) as { count?: number; reset?: number };
+          if (typeof parsed.reset === 'number' && parsed.reset > now) {
+            requestCount = typeof parsed.count === 'number' ? parsed.count : 0;
+            resetTime = parsed.reset;
+          }
+        } catch (parseError) {
+          logger.warn('Failed to parse rate limit state, resetting counter', {
+            requestId,
+            clientId,
+          });
         }
       }
 
-      // Check if limit exceeded
       if (requestCount >= maxRequests) {
-        const resetIn = resetTime - now;
+        const resetIn = Math.max(0, resetTime - now);
 
         logger.warn('Rate limit exceeded', {
           requestId,
@@ -66,27 +72,22 @@ export const rateLimit = (): MiddlewareHandler => {
         });
       }
 
-      // Increment counter
-      requestCount++;
+      requestCount += 1;
 
-      // Store updated counter
-      await c.env.RATE_LIMIT.put(key, JSON.stringify({
+      await kv.put(key, JSON.stringify({
         count: requestCount,
         reset: resetTime,
       }), {
         expirationTtl: windowSeconds,
       });
 
-      // Add rate limit headers to response
       await next();
 
       c.res.headers.set('X-RateLimit-Limit', maxRequests.toString());
-      c.res.headers.set('X-RateLimit-Remaining', (maxRequests - requestCount).toString());
+      c.res.headers.set('X-RateLimit-Remaining', Math.max(0, maxRequests - requestCount).toString());
       c.res.headers.set('X-RateLimit-Reset', resetTime.toString());
-
     } catch (error) {
       logger.error('Rate limiting error', error, { requestId, clientId });
-      // Continue with request if rate limiting fails
       await next();
     }
   };

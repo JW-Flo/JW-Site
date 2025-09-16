@@ -12,4 +12,3 @@ export class AtlasITError extends Error {
         this.details = details;
     }
 }
-//# sourceMappingURL=index.js.map

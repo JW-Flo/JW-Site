@@ -1,0 +1,125 @@
+---
+import Layout from '../components/Layout.astro';
+import {{ useState, useEffect }} from 'react';
+---
+
+<Layout title="IAM Automation Workflow Builder">
+  <section class="max-w-3xl mx-auto py-12">
+    <h1 class="text-3xl font-bold mb-4">IAM Automation Workflow Builder</h1>
+    <p class="mb-6 text-slate-300">
+      Request, approve, and automate IAM changes across AWS, Entra, AD, Google, and KnowBe4. This demo simulates a 3-step approval and real provisioning.
+    </p>
+    <div class="mb-4">
+      <span class="inline-block bg-yellow-500 text-black px-3 py-1 rounded font-semibold text-xs shadow">Demo Mode: All actions are simulated and can be reset.</span>
+    </div>
+    <WorkflowBuilder />
+  </section>
+</Layout>
+
+---
+const [users, setUsers] = useState([]);
+const [groups, setGroups] = useState([]);
+const [apps, setApps] = useState([]);
+const [requests, setRequests] = useState([]);
+const [selectedUser, setSelectedUser] = useState('');
+const [selectedGroup, setSelectedGroup] = useState('');
+const [selectedApp, setSelectedApp] = useState('');
+const [loading, setLoading] = useState(false);
+
+useEffect(() => {
+  fetch('/api/iam-automation?type=users').then(r => r.json()).then(setUsers);
+  fetch('/api/iam-automation?type=groups').then(r => r.json()).then(setGroups);
+  fetch('/api/iam-automation?type=apps').then(r => r.json()).then(setApps);
+  fetch('/api/iam-automation?type=requests').then(r => r.json()).then(setRequests);
+}, [loading]);
+
+function requestAccess() {
+  setLoading(true);
+  fetch('/api/iam-automation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'request-access',
+      userId: selectedUser,
+      groupId: selectedGroup,
+      appId: selectedApp,
+    }),
+  }).then(() => setLoading(false));
+}
+
+function approveStep(requestId) {
+  setLoading(true);
+  fetch('/api/iam-automation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'approve-step', requestId }),
+  }).then(() => setLoading(false));
+}
+
+function denyRequest(requestId) {
+  setLoading(true);
+  fetch('/api/iam-automation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'deny', requestId }),
+  }).then(() => setLoading(false));
+}
+
+function removeAccess(userId, groupId, appId) {
+  setLoading(true);
+  fetch('/api/iam-automation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'remove-access', userId, groupId, appId }),
+  }).then(() => setLoading(false));
+}
+
+function WorkflowBuilder() {
+  return (
+    <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-2">Request Access</h2>
+      <div class="flex gap-2 mb-4">
+        <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)}>
+          <option value="">Select User</option>
+          {users.map(u => <option value={u.id}>{u.name}</option>)}
+        </select>
+        <select value={selectedGroup} onChange={e => setSelectedGroup(e.target.value)}>
+          <option value="">Select Group</option>
+          {groups.map(g => <option value={g.id}>{g.name}</option>)}
+        </select>
+        <select value={selectedApp} onChange={e => setSelectedApp(e.target.value)}>
+          <option value="">Select App</option>
+          {apps.map(a => <option value={a.id}>{a.name}</option>)}
+        </select>
+        <button class="btn" onClick={requestAccess} disabled={loading || !selectedUser || !selectedGroup || !selectedApp}>
+          Request
+        </button>
+      </div>
+      <h2 class="text-xl font-semibold mb-2">Pending Requests</h2>
+      <ul>
+        {requests.map(r => (
+          <li class="mb-2 p-2 bg-slate-900 rounded">
+            <div>User: {users.find(u => u.id === r.userId)?.name}, Group: {groups.find(g => g.id === r.groupId)?.name}, App: {apps.find(a => a.id === r.appId)?.name}</div>
+            <div>Status: {r.status}</div>
+            <div>Approvals: {r.approvals.map((a, i) => <span key={i}>{a ? '✅' : '⬜'}</span>)}</div>
+            {r.status === 'pending' && (
+              <>
+                <button class="btn mr-2" onClick={() => approveStep(r.id)} disabled={loading}>Approve Step</button>
+                <button class="btn" onClick={() => denyRequest(r.id)} disabled={loading}>Deny</button>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+      <h2 class="text-xl font-semibold mb-2 mt-6">Current User Access</h2>
+      <ul>
+        {users.map(u => (
+          <li class="mb-2 p-2 bg-slate-900 rounded">
+            <div>{u.name}: Groups: {u.groups.join(', ') || 'None'}, Apps: {u.apps.join(', ') || 'None'}</div>
+            <button class="btn mt-1" onClick={() => removeAccess(u.id, groups[0]?.id, apps[0]?.id)} disabled={loading}>Remove AWS Access</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

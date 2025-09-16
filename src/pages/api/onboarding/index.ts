@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { json } from '../../../utils/responses.js';
+import { getDemoUserById } from '../../../data/demoData';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
@@ -23,7 +24,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Parse request body
     const body = await request.json() as any;
-    const { tenantId, name, industry } = body;
+    const { tenantId, name, industry, demoUserId } = body;
+
+    let selectedDemoUser = undefined;
+    if (demoUserId) {
+      selectedDemoUser = getDemoUserById(demoUserId);
+      if (!selectedDemoUser) {
+        return json({
+          error: 'Unknown demo user',
+          code: 'ONB-003',
+          details: { demoUserId },
+          requestId: crypto.randomUUID(),
+          actor,
+        }, { status: 400 });
+      }
+    }
 
     // Validate required fields
     if (!tenantId || !name || !industry) {
@@ -69,7 +84,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       industry: industry.toLowerCase(),
       status: 'configured',
       template: generateTemplate(industry.toLowerCase()),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      demoUser: selectedDemoUser || null,
     };
 
     // Store in KV

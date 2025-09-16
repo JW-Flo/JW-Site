@@ -83,11 +83,11 @@ describe('Guestbook API', () => {
       lastPlayed: new Date().toISOString()
     }));
 
-    const request = new Request('http://localhost/api/guestbook', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: 'PlayerTwo', message: 'Great site!', turnstileToken: 'tok' })
-    });
+      const request = new Request('http://localhost/api/guestbook', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'PlayerTwo', message: 'Great site!', turnstileToken: 'tok', bestScore: 150 })
+      });
 
     const response = await GuestbookPOST({ request, locals, clientAddress: '127.0.0.1' } as any);
     expect(response.status).toBe(200);
@@ -107,11 +107,11 @@ describe('Guestbook API', () => {
       lastPlayed: new Date().toISOString()
     }));
 
-    const postReq = new Request('http://localhost/api/guestbook', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name: 'PlayerThree', message: 'Entry test', turnstileToken: 'tok' })
-    });
+      const postReq = new Request('http://localhost/api/guestbook', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'PlayerThree', message: 'Entry test', turnstileToken: 'tok', bestScore: 120 })
+      });
     const postResp = await GuestbookPOST({ request: postReq, locals, clientAddress: '127.0.0.1' } as any);
     expect(postResp.status).toBe(200);
 

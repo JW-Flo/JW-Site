@@ -1,19 +1,15 @@
 import { Hono } from 'hono';
+import type { OnboardingEnv } from '../types';
+import { getRequestId, getRequestLogger } from '../utils/logger';
 
-const logger = {
-  info: (message: string, context?: any) => console.log(`[INFO] ${message}`, context),
-  error: (message: string, error?: any, context?: any) => console.error(`[ERROR] ${message}`, error, context),
-  warn: (message: string, context?: any) => console.warn(`[WARN] ${message}`, context),
-};
+const healthRoutes = new Hono<OnboardingEnv>();
 
-const healthRoutes = new Hono();
-
-healthRoutes.get('/', async (c: any) => {
-  const requestId = crypto.randomUUID();
+healthRoutes.get('/', async (c) => {
+  const requestId = getRequestId(c);
+  const logger = getRequestLogger(c, { route: 'GET /health' });
 
   logger.info('Health check requested', { requestId });
 
-  // Basic health check
   const health = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -26,14 +22,12 @@ healthRoutes.get('/', async (c: any) => {
   });
 });
 
-healthRoutes.get('/ready', async (c: any) => {
-  const requestId = crypto.randomUUID();
+healthRoutes.get('/ready', async (c) => {
+  const requestId = getRequestId(c);
+  const logger = getRequestLogger(c, { route: 'GET /health/ready' });
 
   try {
-    // Check database connectivity
     const dbHealth = await c.env.DB.prepare('SELECT 1').first();
-
-    // Check KV connectivity
     await c.env.ONBOARDING_CACHE.put('health-check', 'ok', { expirationTtl: 60 });
 
     const ready = {

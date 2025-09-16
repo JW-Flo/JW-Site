@@ -1,11 +1,10 @@
-import { EnhancedFinding } from './types';
+// import removed, not needed
 
 export const infoScanModule = {
   name: 'info',
   description: 'Information disclosure analysis',
-
-  scan: async function scanEnhancedInfoDisclosure(url: string): Promise<EnhancedFinding[]> {
-    const findings: EnhancedFinding[] = [];
+  scan: async function scanEnhancedInfoDisclosure(url: string): Promise<import('./types').EnhancedScanResult> {
+    const findings: import('./types').EnhancedFinding[] = [];
 
     try {
       const response = await fetch(url, { method: 'HEAD' });
@@ -31,8 +30,7 @@ export const infoScanModule = {
             title: `Sensitive Header Exposed: ${headerName}`,
             description: `Header ${headerName} reveals: ${headerValue}`,
             recommendation: 'Remove or obscure sensitive headers that disclose technology stack information.',
-            businessImpact: 'Exposed technology information helps attackers identify potential vulnerabilities.',
-            consultingOpportunity: 'Information disclosure prevention and server hardening services available.'
+            businessImpact: 'Exposed technology information helps attackers identify potential vulnerabilities.'
           });
         }
       }
@@ -47,8 +45,7 @@ export const infoScanModule = {
             title: 'Directory Listing Enabled',
             description: 'Directory listing is enabled for /backup/ path.',
             recommendation: 'Disable directory listing and remove backup directories from web root.',
-            businessImpact: 'Directory listing exposes file structure and potentially sensitive files.',
-            consultingOpportunity: 'Web server configuration and security hardening services available.'
+            businessImpact: 'Directory listing exposes file structure and potentially sensitive files.'
           });
         }
       } catch {
@@ -76,8 +73,7 @@ export const infoScanModule = {
               title: `Sensitive File Exposed: ${file}`,
               description: `Sensitive file ${file} is accessible via web.`,
               recommendation: 'Remove sensitive files from web root or restrict access.',
-              businessImpact: 'Exposed sensitive files can contain credentials, configuration, or source code.',
-              consultingOpportunity: 'File system security and access control services available.'
+              businessImpact: 'Exposed sensitive files can contain credentials, configuration, or source code.'
             });
           }
         } catch {
@@ -93,11 +89,37 @@ export const infoScanModule = {
         title: 'Unable to Complete Information Disclosure Scan',
         description: `Failed to analyze information disclosure for ${url}`,
         recommendation: 'Ensure the URL is accessible for comprehensive security analysis.',
-        businessImpact: 'Incomplete analysis may miss critical information disclosure vulnerabilities.',
-        consultingOpportunity: 'Comprehensive security assessment services available.'
+        businessImpact: 'Incomplete analysis may miss critical information disclosure vulnerabilities.'
       });
     }
 
-    return findings;
+    // Compose EnhancedScanResult
+    return {
+      scanId: 'info-' + Math.random().toString(36).slice(2,10),
+      url,
+      scanType: 'info',
+      timestamp: new Date().toISOString(),
+      duration: 0,
+      findings,
+      summary: {
+        totalFindings: findings.length,
+        criticalCount: findings.filter(f => f.severity === 'critical').length,
+        highCount: findings.filter(f => f.severity === 'high').length,
+        mediumCount: findings.filter(f => f.severity === 'medium').length,
+        lowCount: findings.filter(f => f.severity === 'low').length,
+        securityScore: findings.length === 0 ? 100 : 100 - findings.length * 10
+      },
+      businessMetrics: {
+        trustScore: 100,
+        professionalismScore: 100,
+        userExperienceScore: 100,
+        brandProtectionScore: 100
+      },
+      metadata: {
+        scannerVersion: '2.0-modular',
+        scanDepth: 1,
+        externalApisUsed: []
+      }
+    };
   }
 };

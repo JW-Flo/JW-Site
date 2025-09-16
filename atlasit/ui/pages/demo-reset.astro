@@ -1,0 +1,53 @@
+---
+import Layout from '../components/Layout.astro';
+import { useState } from 'react';
+---
+<Layout title="Demo Data Reset">
+  <section class="max-w-xl mx-auto py-12">
+    <h1 class="text-2xl font-bold mb-4">Reset Demo Data</h1>
+    <p class="mb-6 text-slate-300">Click below to reset all demo data for the IAM Automation Workflow Builder. This will restore users, groups, apps, and requests to their initial state.</p>
+    <div class="mb-4">
+      <span class="inline-block bg-yellow-500 text-black px-3 py-1 rounded font-semibold text-xs shadow">Demo Mode: All data is simulated and can be reset at any time.</span>
+    </div>
+    <DemoReset />
+  </section>
+</Layout>
+
+---
+function DemoReset() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleReset() {
+    setLoading(true);
+    setSuccess(false);
+    setError('');
+    try {
+      const res = await fetch('/api/iam-automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess(true);
+      } else {
+        setError('Reset failed.');
+      }
+    } catch (e) {
+      setError('Reset failed.');
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-6">
+      <button class="btn" onClick={handleReset} disabled={loading}>
+        {loading ? 'Resetting...' : 'Reset Demo Data'}
+      </button>
+      {success && <div class="mt-4 text-green-400">Demo data reset successfully!</div>}
+      {error && <div class="mt-4 text-red-400">{error}</div>}
+    </div>
+  );
+}

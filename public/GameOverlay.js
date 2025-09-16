@@ -20,14 +20,19 @@ export class GameOverlay {
     console.log("🎮 Game Overlay initialized");
 
     // TEST HOOK: Use global test hook if present, do not redefine
-    if (typeof window !== 'undefined' && window.__ARCADE_TEST_HOOK__) {
-      if (typeof window.__ARCADE_TEST_HOOK__.injectLeaderboardEntries !== 'function') {
+    if (typeof window !== "undefined" && window.__ARCADE_TEST_HOOK__) {
+      if (
+        typeof window.__ARCADE_TEST_HOOK__.injectLeaderboardEntries !==
+        "function"
+      ) {
         window.__ARCADE_TEST_HOOK__.injectLeaderboardEntries = (entries) => {
           window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries = entries;
           this.updateLeaderboard(entries);
         };
       }
-      if (typeof window.__ARCADE_TEST_HOOK__.forceShowLeaderboard !== 'function') {
+      if (
+        typeof window.__ARCADE_TEST_HOOK__.forceShowLeaderboard !== "function"
+      ) {
         window.__ARCADE_TEST_HOOK__.forceShowLeaderboard = () => {
           this.showLeaderboard();
         };
@@ -80,13 +85,18 @@ export class GameOverlay {
     this.showLeaderboard();
 
     // In test mode, skip backend fetch and fallback logic entirely
-    if (!(typeof window !== 'undefined' && window.TEST_MODE)) {
+    if (!(typeof window !== "undefined" && window.TEST_MODE)) {
       // Fetch persistent leaderboard from server for all games
       await this.fetchAndDisplayPersistentLeaderboard();
     } else {
       // In test mode, always show injected entries if present
-      if (window.__ARCADE_TEST_HOOK__ && Array.isArray(window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries)) {
-        this.updateLeaderboard(window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries);
+      if (
+        window.__ARCADE_TEST_HOOK__ &&
+        Array.isArray(window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries)
+      ) {
+        this.updateLeaderboard(
+          window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries
+        );
       } else {
         this.updateLeaderboard([]);
       }
@@ -154,10 +164,9 @@ export class GameOverlay {
   }
 
   async deactivate() {
-
-  // Hide leaderboard and remove overlays
-  this.hideLeaderboard();
-  // No direct canvas style changes here; handled by RetroArcade
+    // Hide leaderboard and remove overlays
+    this.hideLeaderboard();
+    // No direct canvas style changes here; handled by RetroArcade
 
     // Remove injected arcade controls overlay if present
     const controls = document.getElementById("arcade-controls");
@@ -198,7 +207,12 @@ export class GameOverlay {
   updateLeaderboard(data) {
     if (this.leaderboardList) {
       // In test mode, always use injected entries if present
-      if (typeof window !== 'undefined' && window.TEST_MODE && window.__ARCADE_TEST_HOOK__ && Array.isArray(window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries)) {
+      if (
+        typeof window !== "undefined" &&
+        window.TEST_MODE &&
+        window.__ARCADE_TEST_HOOK__ &&
+        Array.isArray(window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries)
+      ) {
         data = window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries;
       }
       this.leaderboardList.innerHTML = data
@@ -215,7 +229,7 @@ export class GameOverlay {
         )
         .join("");
       // In test mode, always show leaderboard for Playwright
-      if (typeof window !== 'undefined' && window.TEST_MODE) {
+      if (typeof window !== "undefined" && window.TEST_MODE) {
         this.showLeaderboard();
       }
     }

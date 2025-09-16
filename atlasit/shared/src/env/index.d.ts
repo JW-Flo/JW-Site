@@ -4,10 +4,10 @@ export declare const baseEnvSchema: z.ZodObject<{
     LOG_LEVEL: z.ZodDefault<z.ZodEnum<["debug", "info", "warn", "error"]>>;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV?: "development" | "staging" | "production";
-    LOG_LEVEL?: "error" | "debug" | "info" | "warn";
+    LOG_LEVEL?: "debug" | "info" | "warn" | "error";
 }, {
     NODE_ENV?: "development" | "staging" | "production";
-    LOG_LEVEL?: "error" | "debug" | "info" | "warn";
+    LOG_LEVEL?: "debug" | "info" | "warn" | "error";
 }>;
 export declare const databaseEnvSchema: z.ZodObject<{
     DATABASE_URL: z.ZodString;
@@ -95,7 +95,7 @@ export declare const envSchema: z.ZodObject<{
     CF_ZONE_ID: z.ZodOptional<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     NODE_ENV?: "development" | "staging" | "production";
-    LOG_LEVEL?: "error" | "debug" | "info" | "warn";
+    LOG_LEVEL?: "debug" | "info" | "warn" | "error";
     DATABASE_URL?: string;
     DB_MAX_CONNECTIONS?: number;
     JWT_SECRET?: string;
@@ -112,7 +112,7 @@ export declare const envSchema: z.ZodObject<{
     CF_ZONE_ID?: string;
 }, {
     NODE_ENV?: "development" | "staging" | "production";
-    LOG_LEVEL?: "error" | "debug" | "info" | "warn";
+    LOG_LEVEL?: "debug" | "info" | "warn" | "error";
     DATABASE_URL?: string;
     DB_MAX_CONNECTIONS?: string;
     JWT_SECRET?: string;
@@ -141,7 +141,7 @@ export declare class EnvValidator {
 export declare const envValidator: EnvValidator;
 export declare const validateEnvironment: () => {
     NODE_ENV?: "development" | "staging" | "production";
-    LOG_LEVEL?: "error" | "debug" | "info" | "warn";
+    LOG_LEVEL?: "debug" | "info" | "warn" | "error";
     DATABASE_URL?: string;
     DB_MAX_CONNECTIONS?: number;
     JWT_SECRET?: string;
