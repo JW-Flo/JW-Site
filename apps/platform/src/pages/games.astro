@@ -1,0 +1,64 @@
+---
+const title = "Games Center - AtlasIT";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">AI</span>
+          </div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          <a href="/arcade" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Arcade</a>
+          <a href="/games" class="nav-link px-4 py-2 rounded-lg bg-blue-600 text-white transition-all duration-200">Games</a>
+          <a href="/marketplace" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Marketplace</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="container mx-auto px-6 py-8">
+    <h1 class="text-3xl font-bold mb-4">AtlasIT Games</h1>
+    <p class="text-slate-400 mb-8">Browse and play games available on AtlasIT. Achieve high scores and unlock achievements!</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-slate-800/50 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-2">Asteroids</h2>
+        <p class="text-slate-300 mb-2">Classic arcade shooter. Destroy asteroids and survive as long as possible.</p>
+        <a href="/games/asteroids" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Play Asteroids</a>
+      </div>
+      <div class="bg-slate-800/50 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-2">Coming Soon</h2>
+        <p class="text-slate-300 mb-2">More games will be added soon. Stay tuned!</p>
+      </div>
+    </div>
+  </main>
+  <footer class="glass-effect border-t border-slate-700/50 mt-16">
+    <div class="container mx-auto px-6 py-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center space-x-2 mb-4 md:mb-0">
+          <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded flex items-center justify-center">
+            <span class="text-white font-bold text-xs">AI</span>
+          </div>
+          <span class="text-slate-400">© 2025 AtlasIT. Enterprise IT Automation Platform.</span>
+        </div>
+        <div class="flex space-x-6 text-sm text-slate-400">
+          <a href="#" class="hover:text-slate-300 transition-colors">Privacy</a>
+          <a href="#" class="hover:text-slate-300 transition-colors">Terms</a>
+          <a href="#" class="hover:text-slate-300 transition-colors">Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
