@@ -1,6 +1,50 @@
 import { z } from 'zod';
 import { logger, AtlasITError } from '@atlasit/shared';
+import {
+  buildRegistry,
+  dropboxBusinessConnector,
+  googleWorkspaceConnector,
+  activeDirectoryConnector,
+  microsoft365Connector,
+  paycomManualConnector,
+  slackEnterpriseConnector,
+  jiraCloudConnector,
+  confluenceCloudConnector,
+  retryWithBackoff,
+  type ConnectorRegistry,
+  type FetchLike,
+  type RetryOptions,
+  type ConnectorContext,
+} from '@atlasit/core';
 import { AuthenticationManager } from '../services/authManager';
+import type { ConnectorResourceConfig, ResolvedConnectorResource } from './connectorTypes';
+import {
+  SIMULATED_CONNECTOR_RESOURCES,
+  registerSimulatedConnectorAuth,
+} from '../config/simulatedConnectors';
+
+interface WorkflowEngineOptions {
+  connectors?: ConnectorRegistry;
+  fetchImpl?: FetchLike;
+  connectorResources?: Record<string, ConnectorResourceConfig>;
+}
+
+type WorkflowRetryPolicyConfig = {
+  maxAttempts: number;
+  backoffMs: number;
+  exponential?: boolean;
+};
+
+const defaultConnectorRegistry = buildRegistry(
+  googleWorkspaceConnector,
+  dropboxBusinessConnector,
+  paycomManualConnector,
+  activeDirectoryConnector,
+  microsoft365Connector,
+  slackEnterpriseConnector,
+  jiraCloudConnector,
+  confluenceCloudConnector
+);
 
 export interface WorkflowCard {
   id: string;
@@ -30,7 +74,7 @@ export interface OktaStyleWorkflow {
   version: string;
   resources: {
     idp?: Record<string, string>;
-    connectors?: Record<string, string>;
+    connectors?: Record<string, ConnectorResourceConfig>;
   };
   cards: WorkflowCard[];
   connections: WorkflowConnection[];
@@ -65,9 +109,16 @@ export interface WorkflowExecutionContext {
 export class OktaStyleWorkflowEngine {
   private readonly authManager: AuthenticationManager;
   private readonly circuitBreakers: Map<string, { failures: number; lastFailure: Date; isOpen: boolean }> = new Map();
+  private readonly connectorRegistry: ConnectorRegistry;
+  private readonly fetchImpl?: FetchLike;
+  private readonly defaultConnectorConfigs: Record<string, ConnectorResourceConfig>;
 
-  constructor(tenantId: string) {
+  constructor(tenantId: string, options: WorkflowEngineOptions = {}) {
     this.authManager = new AuthenticationManager(tenantId);
+    registerSimulatedConnectorAuth(this.authManager);
+    this.connectorRegistry = options.connectors ?? defaultConnectorRegistry;
+    this.fetchImpl = options.fetchImpl;
+    this.defaultConnectorConfigs = options.connectorResources ?? SIMULATED_CONNECTOR_RESOURCES;
   }
 
   /**
@@ -357,8 +408,8 @@ export class OktaStyleWorkflowEngine {
   ): Promise<any> {
     const { connector, action, parameters } = card.config;
 
-    // Get connector configuration
-    const connectorConfig = workflow.resources.connectors?.[connector];
+    const connectorConfig =
+      workflow.resources.connectors?.[connector] ?? this.defaultConnectorConfigs[connector];
     if (!connectorConfig) {
       throw new AtlasITError(
         'WORKFLOW-005',
@@ -367,25 +418,32 @@ export class OktaStyleWorkflowEngine {
       );
     }
 
-    // Get authentication headers
-    const authHeaders = await this.authManager.getAuthHeaders(connector);
+    const resolvedConnector = this.resolveConnectorResource(connector, connectorConfig);
+    const authTarget = resolvedConnector.authRef ?? connector;
+    const authHeaders = await this.authManager.getAuthHeaders(authTarget);
 
-    // Interpolate parameters
-    const interpolatedParams = this.interpolateParameters(parameters, context);
+    const interpolatedParams = this.interpolateParameters(parameters ?? {}, context);
 
-    // Execute connector action
     const result = await this.executeConnectorAction(
-      connector,
+      resolvedConnector,
       action,
       interpolatedParams,
       authHeaders,
+      context,
       workflow.errorHandling?.retryPolicy
     );
+
+    const manifestVersion = this.connectorRegistry[resolvedConnector.id]?.manifest.version;
 
     context.cardStates.set(card.id, {
       status: 'completed',
       output: result,
-      executedAt: new Date()
+      executedAt: new Date(),
+      connector: resolvedConnector.id,
+      action,
+      manifestVersion,
+      metadata: resolvedConnector.metadata,
+      authTarget,
     });
 
     return result;
@@ -585,24 +643,157 @@ export class OktaStyleWorkflowEngine {
   }
 
   private async executeConnectorAction(
-    connector: string,
+    resource: ResolvedConnectorResource,
     action: string,
     parameters: Record<string, any>,
     authHeaders: Record<string, string>,
-    retryPolicy?: any
+    executionContext: WorkflowExecutionContext,
+    retryPolicy?: WorkflowRetryPolicyConfig
   ): Promise<any> {
-    // Simplified connector action execution
-    // In real implementation, this would route to specific connector handlers
-    logger.info('Executing connector action', { connector, action, parameters: Object.keys(parameters) });
+    const connector = this.connectorRegistry[resource.id];
+    if (!connector) {
+      throw new AtlasITError(
+        'WORKFLOW-006',
+        `Connector not registered: ${resource.id}`,
+        400,
+        { connector: resource.id }
+      );
+    }
 
-    // Simulate API call
-    return {
-      success: true,
-      action,
-      connector,
-      result: `Executed ${action} on ${connector}`,
-      executedAt: new Date()
+    const handler = connector.actions[action];
+    if (!handler) {
+      throw new AtlasITError(
+        'WORKFLOW-007',
+        `Connector action not supported: ${action}`,
+        400,
+        { connector: resource.id, action }
+      );
+    }
+
+    const retryOptions = this.mergeRetryOptions(
+      this.toRetryOptions(retryPolicy),
+      resource.retry
+    );
+
+    const connectorContext: ConnectorContext = {
+      tenantId: executionContext.tenantId,
+      authHeaders,
+      fetchImpl: this.fetchImpl,
+      retryOptions,
+      metadata: resource.metadata,
     };
+
+    const invokeHandler = async () => {
+      return handler(parameters, connectorContext);
+    };
+
+    logger.info('Executing connector action', {
+      connector: resource.id,
+      action,
+      executionId: executionContext.executionId,
+      parameterKeys: Object.keys(parameters || {}),
+      metadata: resource.metadata,
+    });
+
+    let result: any;
+
+    if (retryOptions) {
+      const { shouldRetry, onRetry, ...retryConfig } = retryOptions;
+      result = await retryWithBackoff(invokeHandler, {
+        ...retryConfig,
+        shouldRetry:
+          shouldRetry ?? ((error, attempt) => this.isRetriableConnectorError(error)),
+        onRetry: (error, attempt, delayMs) => {
+          logger.warn('Retrying connector action', {
+            connector: resource.id,
+            action,
+            attempt,
+            delayMs,
+            executionId: executionContext.executionId,
+            error: (error as Error)?.message,
+          });
+          if (onRetry) {
+            onRetry(error, attempt, delayMs);
+          }
+        },
+      });
+    } else {
+      result = await invokeHandler();
+    }
+
+    logger.info('Connector action completed', {
+      connector: resource.id,
+      action,
+      executionId: executionContext.executionId,
+      metadata: resource.metadata,
+    });
+
+    return result;
+  }
+
+  private resolveConnectorResource(
+    connectorKey: string,
+    resource: ConnectorResourceConfig
+  ): ResolvedConnectorResource {
+    if (typeof resource === 'string') {
+      return { id: resource };
+    }
+
+    if (resource && typeof resource === 'object' && 'id' in resource && typeof resource.id === 'string') {
+      return {
+        id: resource.id,
+        metadata: resource.metadata,
+        authRef: resource.authRef,
+        retry: resource.retry,
+      };
+    }
+
+    throw new AtlasITError(
+      'WORKFLOW-008',
+      `Invalid connector resource configuration for: ${connectorKey}`,
+      400,
+      { resource }
+    );
+  }
+
+  private mergeRetryOptions(base?: RetryOptions, override?: RetryOptions): RetryOptions | undefined {
+    if (!base && !override) {
+      return undefined;
+    }
+
+    return {
+      ...base,
+      ...override,
+    };
+  }
+
+  private toRetryOptions(policy?: WorkflowRetryPolicyConfig): RetryOptions | undefined {
+    if (!policy) {
+      return undefined;
+    }
+
+    return {
+      maxAttempts: policy.maxAttempts,
+      baseDelayMs: policy.backoffMs,
+      factor: policy.exponential ? 2 : 1,
+      jitter: 'full',
+    };
+  }
+
+  private isRetriableConnectorError(error: unknown): boolean {
+    if (error instanceof AtlasITError) {
+      return error.statusCode >= 500;
+    }
+
+    if (error && typeof error === 'object') {
+      const status = (error as { status?: number; statusCode?: number }).status ??
+        (error as { status?: number; statusCode?: number }).statusCode;
+      if (typeof status === 'number') {
+        return status >= 500;
+      }
+    }
+
+    return true;
   }
 
   private async sendNotification(

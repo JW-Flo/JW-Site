@@ -104,7 +104,7 @@ const title = "Security - AtlasIT";
   <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
 
   <!-- Main Content -->
-  <main class="container mx-auto px-6 py-8">
+  <main class="container mx-auto px-6 py-8" id="atlasit-main-content">
     <h1 class="text-3xl font-bold mb-6">Security Center</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -171,13 +171,15 @@ const title = "Security - AtlasIT";
     </div>
   </footer>
 
-  <script>
+  <script type="module">
+    import { trackPageView, trackUserAction } from '../utils/analytics.ts';
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
 
     mobileMenuBtn?.addEventListener('click', () => {
       mobileMenu.classList.toggle('hidden');
+      trackUserAction('mobile_menu_toggle');
     });
 
     // Close mobile menu when clicking outside
@@ -186,6 +188,9 @@ const title = "Security - AtlasIT";
         mobileMenu?.classList.add('hidden');
       }
     });
+
+    // Track page view
+    trackPageView('security_center');
   </script>
 </body>
 </html>

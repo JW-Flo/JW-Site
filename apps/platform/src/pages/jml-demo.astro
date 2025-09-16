@@ -1,0 +1,444 @@
+---
+title: "JML Demo - AtlasIT"
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JML Demo - AtlasIT</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .demo-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .demo-title {
+      font-size: 3rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .scenario-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .scenario-card:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .scenario-active {
+      border-color: rgba(34, 197, 94, 0.7);
+      background: rgba(34, 197, 94, 0.1);
+    }
+    
+    .workflow-container {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .step-list {
+      list-style: none;
+    }
+    
+    .step-item {
+      padding: 1rem;
+      margin: 1rem 0;
+      background: rgba(51, 65, 85, 0.3);
+      border-radius: 0.5rem;
+      border-left: 4px solid #374151;
+    }
+    
+    .step-active {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .step-completed {
+      border-left-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .log-container {
+      background: #111827;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 2rem;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .log-entry {
+      font-family: monospace;
+      font-size: 0.875rem;
+      margin: 0.25rem 0;
+      padding: 0.25rem;
+    }
+    
+    .log-info { color: #60a5fa; }
+    .log-success { color: #34d399; }
+    .log-warning { color: #fbbf24; }
+    .log-error { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <div class="demo-header">
+        <h1 class="demo-title">🚀 JML Lifecycle Demo</h1>
+        <p style="font-size: 1.25rem; opacity: 0.8;">
+          Enterprise IAM Automation: Onboarding, Role Changes & Offboarding
+        </p>
+        <p style="margin-top: 1rem; padding: 1rem; background: rgba(34, 197, 94, 0.1); border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.3);">
+          ✅ <strong>Live Demo:</strong> Paycom HRIS → Okta API → AWS IAM automation workflows
+        </p>
+      </div>
+      
+      <div class="scenario-grid">
+        <div 
+          v-for="scenario in scenarios" 
+          :key="scenario.id"
+          @click="selectScenario(scenario.id)"
+          class="scenario-card"
+          :class="{ 'scenario-active': currentScenario && currentScenario.id === scenario.id }"
+        >
+          <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">
+            {{ scenario.icon }} {{ scenario.title }}
+          </h3>
+          <p style="opacity: 0.8; margin-bottom: 1rem;">{{ scenario.description }}</p>
+          <div style="font-size: 0.875rem; opacity: 0.6;">
+            👤 {{ scenario.employee.firstName }} {{ scenario.employee.lastName }} - {{ scenario.employee.department }}
+          </div>
+        </div>
+      </div>
+      
+      <div v-if="currentScenario" class="workflow-container">
+        <h2 style="font-size: 1.5rem; margin-bottom: 2rem;">
+          Workflow: {{ currentScenario.title }}
+        </h2>
+        
+        <div style="margin-bottom: 2rem;">
+          <button @click="runWorkflow" class="btn btn-primary" :disabled="isRunning">
+            <span v-if="isRunning">⏳ Running...</span>
+            <span v-else>▶️ Start Workflow</span>
+          </button>
+          <button @click="resetWorkflow" class="btn btn-success">
+            🔄 Reset
+          </button>
+        </div>
+        
+        <ul class="step-list">
+          <li 
+            v-for="(step, index) in currentScenario.steps" 
+            :key="index"
+            class="step-item"
+            :class="getStepClass(index)"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>{{ step.title }}</strong>
+                <p style="opacity: 0.8; margin-top: 0.5rem;">{{ step.description }}</p>
+                <div style="font-size: 0.875rem; opacity: 0.6; margin-top: 0.5rem;">
+                  🏢 {{ step.systems.join(', ') }} | ⏱️ {{ step.duration }}
+                </div>
+              </div>
+              <div v-if="index < currentStep" style="color: #10b981; font-size: 1.5rem;">✅</div>
+              <div v-else-if="index === currentStep && isRunning" style="color: #3b82f6; font-size: 1.5rem;">⚙️</div>
+            </div>
+          </li>
+        </ul>
+        
+        <div v-if="logs.length > 0" class="log-container">
+          <h3 style="margin-bottom: 1rem;">📋 Execution Log</h3>
+          <div 
+            v-for="(log, index) in logs" 
+            :key="index"
+            class="log-entry"
+            :class="'log-' + log.type"
+          >
+            [{{ log.timestamp }}] {{ log.message }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    
+    createApp({
+      data() {
+        return {
+          currentScenario: null,
+          currentStep: 0,
+          isRunning: false,
+          logs: [],
+          scenarios: [
+            {
+              id: 'onboarding',
+              icon: '👋',
+              title: 'New Employee Onboarding',
+              description: 'Automated account creation and access provisioning for new hires',
+              employee: {
+                firstName: 'Sarah',
+                lastName: 'Johnson',
+                department: 'Engineering',
+                role: 'Software Engineer'
+              },
+              steps: [
+                {
+                  title: 'HRIS Detection',
+                  description: 'Paycom triggers automated workflow for new employee',
+                  systems: ['Paycom HRIS', 'AtlasIT Orchestrator'],
+                  duration: '~5s'
+                },
+                {
+                  title: 'Microsoft Entra & AD Account Creation',
+                  description: 'Create user in Microsoft Entra ID and Active Directory, sync with Okta',
+                  systems: ['Microsoft Entra', 'Active Directory', 'Okta', 'AtlasIT Identity Engine'],
+                  duration: '~12s'
+                },
+                {
+                  title: 'AWS IAM Provisioning',
+                  description: 'Create AWS account and assign role-based permissions',
+                  systems: ['AWS IAM', 'AtlasIT Cloud Manager'],
+                  duration: '~15s'
+                },
+                {
+                  title: 'Application Access',
+                  description: 'Provision access to required SaaS applications',
+                  systems: ['Slack', 'GitHub', 'Jira', 'GSuite', 'Microsoft 365'],
+                  duration: '~20s'
+                },
+                {
+                  title: 'Compliance Verification',
+                  description: 'Verify all access grants meet compliance requirements',
+                  systems: ['AtlasIT Compliance Engine', 'Audit Logger'],
+                  duration: '~5s'
+                }
+              ]
+            },
+            {
+              id: 'role-change',
+              icon: '🔄',
+              title: 'Role Change Management',
+              description: 'Automated access adjustment for internal role transitions',
+              employee: {
+                firstName: 'Mike',
+                lastName: 'Chen',
+                department: 'Engineering → DevOps',
+                role: 'Senior DevOps Engineer'
+              },
+              steps: [
+                {
+                  title: 'Role Change Detection',
+                  description: 'Paycom detects department/role change and triggers workflow',
+                  systems: ['Paycom HRIS', 'AtlasIT Change Detector'],
+                  duration: '~3s'
+                },
+                {
+                  title: 'Access Review',
+                  description: 'Review current permissions and identify changes needed',
+                  systems: ['AtlasIT Access Analyzer', 'Policy Engine', 'Microsoft Entra', 'Active Directory'],
+                  duration: '~8s'
+                },
+                {
+                  title: 'New Permissions',
+                  description: 'Grant additional AWS, Microsoft 365, and application access for DevOps role',
+                  systems: ['AWS IAM', 'Okta', 'Kubernetes RBAC', 'Microsoft Entra', 'Active Directory', 'Microsoft 365'],
+                  duration: '~12s'
+                },
+                {
+                  title: 'Legacy Access Removal',
+                  description: 'Remove unnecessary permissions from previous role',
+                  systems: ['Various SaaS Apps', 'AWS IAM', 'Active Directory', 'Microsoft Entra'],
+                  duration: '~10s'
+                },
+                {
+                  title: 'Validation & Audit',
+                  description: 'Verify access changes and log for compliance',
+                  systems: ['AtlasIT Audit Trail', 'Compliance Dashboard'],
+                  duration: '~5s'
+                }
+              ]
+            },
+            {
+              id: 'offboarding',
+              icon: '👋',
+              title: 'Employee Offboarding',
+              description: 'Secure and compliant access revocation for departing employees',
+              employee: {
+                firstName: 'Alex',
+                lastName: 'Rodriguez',
+                department: 'Marketing',
+                role: 'Marketing Manager'
+              },
+              steps: [
+                {
+                  title: 'Termination Detection',
+                  description: 'Paycom triggers immediate offboarding workflow',
+                  systems: ['Paycom HRIS', 'AtlasIT Security Orchestrator'],
+                  duration: '~2s'
+                },
+                {
+                  title: 'Account Deactivation',
+                  description: 'Immediately disable Okta, Microsoft Entra, and AD accounts and sessions',
+                  systems: ['Okta', 'Microsoft Entra', 'Active Directory', 'AtlasIT Session Manager'],
+                  duration: '~7s'
+                },
+                {
+                  title: 'AWS Access Revocation',
+                  description: 'Remove all AWS permissions and access keys',
+                  systems: ['AWS IAM', 'AWS API Gateway', 'S3 Buckets'],
+                  duration: '~8s'
+                },
+                {
+                  title: 'Application Cleanup',
+                  description: 'Revoke access from all SaaS applications',
+                  systems: ['Slack', 'GitHub', 'Salesforce', 'GSuite', 'Microsoft 365'],
+                  duration: '~15s'
+                },
+                {
+                  title: 'Data Security & Audit',
+                  description: 'Generate compliance report and secure data transfer',
+                  systems: ['AtlasIT Data Governor', 'Compliance Engine'],
+                  duration: '~10s'
+                }
+              ]
+            }
+          ]
+        };
+      },
+      methods: {
+        selectScenario(id) {
+          this.currentScenario = this.scenarios.find(s => s.id === id);
+          this.resetWorkflow();
+          this.addLog('info', `Selected ${this.currentScenario.title} scenario for ${this.currentScenario.employee.firstName} ${this.currentScenario.employee.lastName}`);
+        },
+        
+        async runWorkflow() {
+          if (this.isRunning) return;
+          
+          this.isRunning = true;
+          this.currentStep = 0;
+          this.logs = [];
+          
+          this.addLog('info', '🚀 Starting workflow execution...');
+          
+          for (let i = 0; i < this.currentScenario.steps.length; i++) {
+            this.currentStep = i;
+            const step = this.currentScenario.steps[i];
+            
+            this.addLog('info', `▶️ Executing: ${step.title}`);
+            this.addLog('info', `📡 Systems: ${step.systems.join(', ')}`);
+            
+            // Simulate step execution
+            await this.delay(2000);
+            
+            this.addLog('success', `✅ Completed: ${step.title}`);
+            
+            // Brief pause between steps
+            await this.delay(500);
+          }
+          
+          this.currentStep = this.currentScenario.steps.length;
+          this.addLog('success', '🎉 Workflow completed successfully!');
+          this.addLog('info', '📊 All systems updated and compliance verified');
+          
+          this.isRunning = false;
+        },
+        
+        resetWorkflow() {
+          this.currentStep = 0;
+          this.isRunning = false;
+          this.logs = [];
+        },
+        
+        getStepClass(index) {
+          if (index < this.currentStep) return 'step-completed';
+          if (index === this.currentStep && this.isRunning) return 'step-active';
+          return '';
+        },
+        
+        addLog(type, message) {
+          this.logs.push({
+            type,
+            message,
+            timestamp: new Date().toLocaleTimeString()
+          });
+        },
+        
+        delay(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

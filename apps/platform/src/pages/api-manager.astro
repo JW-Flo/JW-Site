@@ -14,7 +14,7 @@ title: "API Manager - AtlasIT"
     .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen" id="atlasit-main-content">
     <!-- Header -->
     <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
       <nav class="container mx-auto px-6 py-4">
@@ -205,6 +205,18 @@ title: "API Manager - AtlasIT"
           mobileMenu?.classList.add('hidden');
         }
       });
+    <script type="module">
+      import { trackPageView, trackUserAction } from '../utils/analytics.ts';
+      trackPageView('entra_id_integration');
+      document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', e => {
+          trackUserAction('integration_button_click', { label: btn.textContent });
+        });
+      });
+      document.querySelectorAll('input[type=checkbox], select').forEach(el => {
+        el.addEventListener('change', e => {
+          trackUserAction('integration_pref_change', { name: el.name || el.id, value: el.value });
+        });
+      });
+      // ...existing code...
     </script>
-  </body>
-</html>

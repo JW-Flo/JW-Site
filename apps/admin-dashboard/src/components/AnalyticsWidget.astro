@@ -1,0 +1,19 @@
+---
+// AnalyticsWidget: displays analytics summary for admin dashboard
+const { events = [] } = Astro.props;
+---
+<section class="p-4 bg-white rounded shadow">
+  <h3 class="text-lg font-semibold mb-2">Analytics Events</h3>
+  <ul class="divide-y divide-gray-200">
+    {events.length === 0 ? (
+      <li class="py-2 text-gray-500">No analytics events found.</li>
+    ) : (
+      events.map(event => (
+        <li class="py-2">
+          <span class="font-mono text-xs text-gray-700">{event.type}</span>
+          <span class="ml-2 text-gray-600">{event.timestamp}</span>
+        </li>
+      ))
+    )}
+  </ul>
+</section>

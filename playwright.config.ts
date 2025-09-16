@@ -5,11 +5,12 @@ export default defineConfig({
   timeout: 30 * 1000,
   retries: 1,
   use: {
-  baseURL: 'http://localhost:64670', // Updated to match static server for e2e
+  baseURL: 'https://www.atlasit.pro',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+  screenshot: 'only-on-failure',
+  video: 'retain-on-failure',
   },
+  reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
   projects: [
     {
       name: 'chromium',
