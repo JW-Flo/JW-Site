@@ -1,0 +1,311 @@
+---
+const title = "Security Incident Response Workflow - AtlasIT";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  
+  <style>
+    .nav-link { transition: all 0.2s ease; }
+    .nav-link:hover { transform: translateY(-1px); }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .input-field { transition: all 0.2s ease; }
+    .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
+    .severity-high { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
+    .severity-medium { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; }
+    .severity-low { background: rgba(34, 197, 94, 0.2); border-color: #22c55e; }
+    .response-step { opacity: 0.7; transform: translateY(10px); transition: all 0.3s ease; }
+    .response-step.active { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+  <!-- Header -->
+  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">AI</span>
+          </div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="hidden md:flex items-center space-x-2 text-sm text-slate-400">
+          <a href="/dashboard" class="hover:text-slate-300 transition-colors">Dashboard</a>
+          <span>›</span>
+          <a href="/orchestrator" class="hover:text-slate-300 transition-colors">Orchestrator</a>
+          <span>›</span>
+          <span class="text-slate-100">Security Response</span>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg bg-blue-600 text-white transition-all duration-200">Orchestrator</a>
+          <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 py-8">
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">Security Incident Response</h1>
+          <p class="text-slate-400">Automated response to security alerts and incidents</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="px-3 py-1 bg-red-600/20 text-red-300 rounded-lg text-sm">High Priority</span>
+          <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+            Activate Workflow
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left Column: Response Configuration -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Threat Detection -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h2 class="text-xl font-semibold mb-6 flex items-center">
+            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            Threat Detection & Classification
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="severity-high border rounded-lg p-4 text-center">
+              <div class="text-2xl mb-2">🚨</div>
+              <h3 class="font-medium mb-2 text-red-300">Critical</h3>
+              <p class="text-sm text-slate-400">Data breach, system compromise</p>
+            </div>
+            
+            <div class="severity-medium border rounded-lg p-4 text-center">
+              <div class="text-2xl mb-2">⚠️</div>
+              <h3 class="font-medium mb-2 text-yellow-300">Medium</h3>
+              <p class="text-sm text-slate-400">Suspicious activity, failed logins</p>
+            </div>
+            
+            <div class="severity-low border rounded-lg p-4 text-center">
+              <div class="text-2xl mb-2">ℹ️</div>
+              <h3 class="font-medium mb-2 text-green-300">Low</h3>
+              <p class="text-sm text-slate-400">Policy violations, warnings</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Detection Sources</label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> SIEM Alerts</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> Network Monitoring</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> Endpoint Detection</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2"> Email Security</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Response Actions -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h2 class="text-xl font-semibold mb-6">Automated Response Actions</h2>
+
+          <div class="space-y-4">
+            <!-- Immediate Response -->
+            <div class="response-step active bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="text-white font-bold text-sm">1</span>
+                  </div>
+                  <h3 class="font-medium">Immediate Containment</h3>
+                </div>
+                <span class="text-xs text-slate-400">< 1 min</span>
+              </div>
+              <ul class="text-sm text-slate-400 ml-11 space-y-1">
+                <li>• Isolate affected systems</li>
+                <li>• Block suspicious IP addresses</li>
+                <li>• Disable compromised accounts</li>
+                <li>• Alert security team</li>
+              </ul>
+            </div>
+
+            <!-- Investigation -->
+            <div class="response-step bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="text-white font-bold text-sm">2</span>
+                  </div>
+                  <h3 class="font-medium">Evidence Collection</h3>
+                </div>
+                <span class="text-xs text-slate-400">5-15 min</span>
+              </div>
+              <ul class="text-sm text-slate-400 ml-11 space-y-1">
+                <li>• Capture system snapshots</li>
+                <li>• Collect network logs</li>
+                <li>• Document timeline</li>
+                <li>• Preserve evidence</li>
+              </ul>
+            </div>
+
+            <!-- Eradication -->
+            <div class="response-step bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="text-white font-bold text-sm">3</span>
+                  </div>
+                  <h3 class="font-medium">Threat Eradication</h3>
+                </div>
+                <span class="text-xs text-slate-400">15-30 min</span>
+              </div>
+              <ul class="text-sm text-slate-400 ml-11 space-y-1">
+                <li>• Remove malware</li>
+                <li>• Patch vulnerabilities</li>
+                <li>• Update security rules</li>
+                <li>• Reset credentials</li>
+              </ul>
+            </div>
+
+            <!-- Recovery -->
+            <div class="response-step bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="text-white font-bold text-sm">4</span>
+                  </div>
+                  <h3 class="font-medium">System Recovery</h3>
+                </div>
+                <span class="text-xs text-slate-400">30-60 min</span>
+              </div>
+              <ul class="text-sm text-slate-400 ml-11 space-y-1">
+                <li>• Restore from clean backups</li>
+                <li>• Verify system integrity</li>
+                <li>• Re-enable services</li>
+                <li>• Monitor for recurrence</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notification Configuration -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h2 class="text-xl font-semibold mb-6">Notification & Escalation</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Immediate Alerts</label>
+              <div class="space-y-2 text-sm">
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> SOC Team</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> CISO</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2"> Legal Team</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2"> External Forensics</label>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Escalation Timeline</label>
+              <div class="space-y-2 text-sm text-slate-400">
+                <div>• Critical: Immediate (< 5 min)</div>
+                <div>• High: 15 minutes</div>
+                <div>• Medium: 1 hour</div>
+                <div>• Low: 4 hours</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Incident Dashboard -->
+      <div class="space-y-6">
+        <!-- Current Status -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Current Status</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Threat Level</span>
+              <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Normal</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Active Incidents</span>
+              <span class="text-xs text-slate-400">0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Response Time</span>
+              <span class="text-xs text-green-300">2.3 min avg</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Resolution Rate</span>
+              <span class="text-xs text-green-300">98%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Incidents -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Recent Incidents</h3>
+          <div class="space-y-3">
+            <div class="p-3 bg-slate-800/30 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">Suspicious Login</span>
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Resolved</span>
+              </div>
+              <div class="text-xs text-slate-400">2 hours ago • Auto-blocked IP</div>
+            </div>
+            <div class="p-3 bg-slate-800/30 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">Malware Detection</span>
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Resolved</span>
+              </div>
+              <div class="text-xs text-slate-400">6 hours ago • Quarantined file</div>
+            </div>
+            <div class="p-3 bg-slate-800/30 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">Data Exfiltration Attempt</span>
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Resolved</span>
+              </div>
+              <div class="text-xs text-slate-400">1 day ago • Network blocked</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+          <div class="space-y-2">
+            <button class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm">
+              Manual Incident Response
+            </button>
+            <button class="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm">
+              Threat Hunt
+            </button>
+            <button class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm">
+              View Forensics
+            </button>
+            <button class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm">
+              Export Reports
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

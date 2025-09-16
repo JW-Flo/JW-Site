@@ -198,6 +198,7 @@ To map the custom domain `atlasit.pro` to the `atlasit-platform` project:
    - Status should show "Active" in the Custom domains tab
 
 4. **Post-Setup Redeploy:**
+
    ```bash
    # Redeploy to update SITE_URL metadata
    npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform
@@ -206,17 +207,20 @@ To map the custom domain `atlasit.pro` to the `atlasit-platform` project:
 ### Troubleshooting Domain Issues
 
 **SSL Handshake Failed (Error 525):**
+
 - Check that the custom domain is mapped to the correct Pages project
 - Ensure SSL/TLS mode is set to "Full" (not "Full (Strict)")
 - Verify no conflicting DNS records (A/AAAA pointing to legacy servers)
 - Remove any Cloudflare Tunnel routes that might conflict
 
 **404 on Custom Domain:**
+
 - Verify the domain is mapped to the correct project (`atlasit-platform`, not `jw-site`)
 - Check that the latest deployment is successful
 - Ensure the build output directory matches the expected structure
 
 **Domain Points to Wrong Project:**
+
 - Remove the custom domain from the old project first
 - Add it to the correct project (`atlasit-platform`)
 - Wait for DNS propagation (up to 24 hours, usually 5-10 minutes)
@@ -253,12 +257,14 @@ Manually spot-check `/dashboard`, `/onboarding`, persona switching, and the rese
 ### Current Deployment Status
 
 **Platform URLs:**
-- **Production:** https://atlasit.pro (custom domain)
-- **Preview:** https://1d9d5ba0.atlasit-platform.pages.dev (latest deployment)
-- **Dashboard:** https://atlasit.pro/dashboard/
-- **Onboarding:** https://atlasit.pro/onboarding/
+
+- **Production:** <https://atlasit.pro> (custom domain)
+- **Preview:** <https://1d9d5ba0.atlasit-platform.pages.dev> (latest deployment)
+- **Dashboard:** <https://atlasit.pro/dashboard/>
+- **Onboarding:** <https://atlasit.pro/onboarding/>
 
 **Quick Verification:**
+
 ```bash
 # Verify platform is live
 curl -I https://atlasit.pro/dashboard/
@@ -476,6 +482,7 @@ Run after staging & before promoting to production:
 10. **Deployment Status:** Verify latest commit hash matches deployment
 
 **Quick Deployment Commands:**
+
 ```bash
 # Full deployment
 npm run build
@@ -487,6 +494,7 @@ curl -I https://1d9d5ba0.atlasit-platform.pages.dev/dashboard/
 ```
 
 **Troubleshooting:**
+
 - If SSL handshake fails (525): Check domain mapping and SSL/TLS mode
 - If 404 on custom domain: Verify correct project mapping
 - If dashboard not loading: Check build output and deployment logs

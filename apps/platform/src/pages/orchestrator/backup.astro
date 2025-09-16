@@ -1,0 +1,386 @@
+---
+const title = "Backup Schedule Workflow - AtlasIT";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  
+  <style>
+    .nav-link { transition: all 0.2s ease; }
+    .nav-link:hover { transform: translateY(-1px); }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .input-field { transition: all 0.2s ease; }
+    .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
+    .backup-type { cursor: pointer; transition: all 0.2s ease; }
+    .backup-type:hover { background: rgba(59, 130, 246, 0.1); border-color: #3b82f6; }
+    .backup-type.selected { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+  <!-- Header -->
+  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">AI</span>
+          </div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="hidden md:flex items-center space-x-2 text-sm text-slate-400">
+          <a href="/dashboard" class="hover:text-slate-300 transition-colors">Dashboard</a>
+          <span>›</span>
+          <a href="/orchestrator" class="hover:text-slate-300 transition-colors">Orchestrator</a>
+          <span>›</span>
+          <span class="text-slate-100">Backup Schedule</span>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg bg-blue-600 text-white transition-all duration-200">Orchestrator</a>
+          <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 py-8">
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">Backup Schedule</h1>
+          <p class="text-slate-400">Daily automated backups with verification</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="px-3 py-1 bg-green-600/20 text-green-300 rounded-lg text-sm">Active</span>
+          <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+            Run Backup Now
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left Column: Backup Configuration -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Backup Types -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h2 class="text-xl font-semibold mb-6">Backup Types & Schedule</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="backup-type border border-slate-600 rounded-lg p-4 text-center selected" data-type="full">
+              <div class="text-2xl mb-2">💾</div>
+              <h3 class="font-medium mb-2">Full Backup</h3>
+              <p class="text-sm text-slate-400">Complete system backup</p>
+              <div class="text-xs text-blue-300 mt-2">Weekly - Sundays 2 AM</div>
+            </div>
+            
+            <div class="backup-type border border-slate-600 rounded-lg p-4 text-center selected" data-type="incremental">
+              <div class="text-2xl mb-2">📊</div>
+              <h3 class="font-medium mb-2">Incremental</h3>
+              <p class="text-sm text-slate-400">Changed files only</p>
+              <div class="text-xs text-blue-300 mt-2">Daily - 1 AM</div>
+            </div>
+            
+            <div class="backup-type border border-slate-600 rounded-lg p-4 text-center" data-type="differential">
+              <div class="text-2xl mb-2">📈</div>
+              <h3 class="font-medium mb-2">Differential</h3>
+              <p class="text-sm text-slate-400">Changes since last full</p>
+              <div class="text-xs text-slate-400 mt-2">Disabled</div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Retention Period</label>
+                <select class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 focus:outline-none">
+                  <option value="30">30 days</option>
+                  <option value="90" selected>90 days</option>
+                  <option value="365">1 year</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Compression Level</label>
+                <select class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 focus:outline-none">
+                  <option value="none">No Compression</option>
+                  <option value="low">Low (Fast)</option>
+                  <option value="medium" selected>Medium (Balanced)</option>
+                  <option value="high">High (Slow)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Backup Locations</label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> Local Storage</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> AWS S3</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2" checked> Azure Blob</label>
+                <label class="flex items-center"><input type="checkbox" class="mr-2"> Google Cloud</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Sources -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h2 class="text-xl font-semibold mb-6">Data Sources</h2>
+
+          <div class="space-y-4">
+            <!-- Database Backups -->
+            <div class="bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Database Systems</h3>
+                    <p class="text-sm text-slate-400">PostgreSQL, MySQL, MongoDB</p>
+                  </div>
+                </div>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" checked>
+                  <span class="text-sm">Enabled</span>
+                </label>
+              </div>
+              <div class="text-xs text-slate-500 ml-11">Last backup: 2 hours ago • Size: 2.3 GB</div>
+            </div>
+
+            <!-- File Systems -->
+            <div class="bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">File Systems</h3>
+                    <p class="text-sm text-slate-400">/home, /var, /etc directories</p>
+                  </div>
+                </div>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" checked>
+                  <span class="text-sm">Enabled</span>
+                </label>
+              </div>
+              <div class="text-xs text-slate-500 ml-11">Last backup: 18 hours ago • Size: 45.2 GB</div>
+            </div>
+
+            <!-- Virtual Machines -->
+            <div class="bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Virtual Machines</h3>
+                    <p class="text-sm text-slate-400">VMware, Hyper-V snapshots</p>
+                  </div>
+                </div>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" checked>
+                  <span class="text-sm">Enabled</span>
+                </label>
+              </div>
+              <div class="text-xs text-slate-500 ml-11">Last backup: 6 hours ago • Size: 120 GB</div>
+            </div>
+
+            <!-- Cloud Applications -->
+            <div class="bg-slate-800/30 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">Cloud Applications</h3>
+                    <p class="text-sm text-slate-400">Office 365, Google Workspace</p>
+                  </div>
+                </div>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" checked>
+                  <span class="text-sm">Enabled</span>
+                </label>
+              </div>
+              <div class="text-xs text-slate-500 ml-11">Last backup: 4 hours ago • Size: 8.7 GB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification & Testing -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h2 class="text-xl font-semibold mb-6">Verification & Testing</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Verification Method</label>
+              <select class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 focus:outline-none">
+                <option value="checksum">Checksum Verification</option>
+                <option value="restore_test" selected>Test Restore</option>
+                <option value="both">Both Methods</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Test Frequency</label>
+              <select class="input-field w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-slate-100 focus:outline-none">
+                <option value="weekly">Weekly</option>
+                <option value="monthly" selected>Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <label class="flex items-center">
+              <input type="checkbox" class="mr-2" checked>
+              <span class="text-sm text-slate-300">Send verification reports</span>
+            </label>
+            <label class="flex items-center mt-2">
+              <input type="checkbox" class="mr-2" checked>
+              <span class="text-sm text-slate-300">Alert on backup failures</span>
+            </label>
+            <label class="flex items-center mt-2">
+              <input type="checkbox" class="mr-2">
+              <span class="text-sm text-slate-300">Auto-retry failed backups</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Backup Status -->
+      <div class="space-y-6">
+        <!-- Status Overview -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Backup Status</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Next Backup</span>
+              <span class="text-xs text-slate-400">Tonight 1:00 AM</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Last Success</span>
+              <span class="text-xs text-green-300">2 hours ago</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Success Rate</span>
+              <span class="text-xs text-green-300">99.2%</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Total Storage</span>
+              <span class="text-xs text-slate-400">176.2 GB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Backups -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Recent Backups</h3>
+          <div class="space-y-3">
+            <div class="p-3 bg-slate-800/30 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">Incremental</span>
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Success</span>
+              </div>
+              <div class="text-xs text-slate-400">2 hours ago • 2.3 GB</div>
+            </div>
+            <div class="p-3 bg-slate-800/30 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">Incremental</span>
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Success</span>
+              </div>
+              <div class="text-xs text-slate-400">1 day ago • 1.8 GB</div>
+            </div>
+            <div class="p-3 bg-slate-800/30 rounded-lg">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium">Full</span>
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Success</span>
+              </div>
+              <div class="text-xs text-slate-400">3 days ago • 176.2 GB</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Storage Usage -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Storage Usage</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Local Storage</span>
+                <span>75%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>AWS S3</span>
+                <span>45%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-green-600 h-2 rounded-full" style="width: 45%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Azure Blob</span>
+                <span>32%</span>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-purple-600 h-2 rounded-full" style="width: 32%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+          <div class="space-y-2">
+            <button class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm">
+              Start Manual Backup
+            </button>
+            <button class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">
+              Test Restore
+            </button>
+            <button class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm">
+              View Backup Reports
+            </button>
+            <button class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm">
+              Configure Storage
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
