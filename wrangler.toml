@@ -25,6 +25,12 @@ binding = "MEDIA"
 bucket_name = "jw-site-media"
 preview_bucket_name = "jw-site-media-preview"
 
+# D1 database for JML demo data (separate from existing guestbook)
+[[d1_databases]]
+binding = "JML_DB"
+database_name = "jml_demo"
+database_id = "placeholder-will-be-created"
+
 # Turnstile environment variables (set in Pages dashboard, not stored here):
 # - TURNSTILE_SECRET_KEY (Secret)
 # - PUBLIC_TURNSTILE_SITE_KEY (Build variable)
@@ -67,8 +73,12 @@ preview_bucket_name = "jw-site-media-preview"
 vars = { SITE_URL = "https://atlasit.pro" }
 [[env.production.d1_databases]]
 binding = "DB"
-database_name = "guestbook_demo"
+database_name = "atlasit_jml_demo"
 database_id = "40c9d6ea-ccb2-4fce-a2d7-339199841004"
+[[env.production.d1_databases]]
+binding = "JML_DB"
+database_name = "jml_demo"
+database_id = "placeholder-will-be-created"
 [[env.production.r2_buckets]]
 binding = "MEDIA"
 bucket_name = "jw-site-media"

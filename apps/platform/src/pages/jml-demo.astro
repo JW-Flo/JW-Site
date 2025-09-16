@@ -605,52 +605,52 @@ title: "JML Lifecycle Demo - AtlasIT"
                 },
                 steps: [
                   {
-                    title: 'HRIS Employee Created',
-                    description: 'HR creates new employee record in BambooHR with system access requirements',
-                    systems: ['BambooHR'],
+                    title: 'Paycom Employee Created',
+                    description: 'HR creates new employee record in Paycom with role requirements',
+                    systems: ['Paycom'],
                     duration: '~30s',
-                    apiCall: 'POST /api/hris/employees',
-                    payload: 'Employee data with role requirements'
+                    apiCall: 'POST /api/paycom/employees',
+                    payload: 'Employee data with security role requirements'
                   },
                   {
-                    title: 'HRIS Webhook Triggered',
-                    description: 'HRIS sends employee.created webhook to AtlasIT API Manager',
-                    systems: ['BambooHR', 'API Manager'],
+                    title: 'Paycom Webhook Triggered',
+                    description: 'Paycom sends employee.created webhook to AtlasIT API Manager',
+                    systems: ['Paycom', 'API Manager'],
                     duration: '~5s',
                     apiCall: 'POST /api/webhooks/employee-created',
-                    payload: 'Employee lifecycle event'
+                    payload: 'Employee lifecycle event data'
                   },
                   {
                     title: 'Okta User Creation',
-                    description: 'API Manager calls Okta API to create user account with department-based groups',
+                    description: 'API Manager calls Okta API to create user account with security group assignments',
                     systems: ['API Manager', 'Okta'],
                     duration: '~15s',
                     apiCall: 'POST /api/v1/users',
-                    payload: 'User profile and group assignments'
+                    payload: 'User profile and security group memberships'
                   },
                   {
-                    title: 'AWS IAM Terraform Execution',
-                    description: 'Terraform creates AWS IAM role with security engineer permissions',
-                    systems: ['Terraform', 'AWS IAM'],
-                    duration: '~45s',
-                    apiCall: 'terraform apply',
-                    payload: 'IAM role and policy definitions'
+                    title: 'AWS IAM Role Creation',
+                    description: 'AtlasIT creates AWS IAM role with security engineer permissions via direct API',
+                    systems: ['AtlasIT', 'AWS IAM'],
+                    duration: '~20s',
+                    apiCall: 'POST /api/aws/iam/roles',
+                    payload: 'Security engineer role and policy definitions'
                   },
                   {
                     title: 'CloudTrail Monitoring Setup',
-                    description: 'Lambda function configures CloudTrail monitoring for new user activities',
-                    systems: ['AWS Lambda', 'CloudTrail'],
-                    duration: '~20s',
-                    apiCall: 'PUT /trails/user-monitoring',
-                    payload: 'Monitoring configuration'
+                    description: 'Automated CloudTrail configuration for new user activity monitoring',
+                    systems: ['AtlasIT', 'AWS CloudTrail'],
+                    duration: '~10s',
+                    apiCall: 'PUT /api/aws/cloudtrail/monitoring',
+                    payload: 'User monitoring configuration'
                   },
                   {
-                    title: 'Welcome Email & Credentials',
-                    description: 'Automated welcome email sent with temporary credentials and onboarding checklist',
+                    title: 'Welcome Notification',
+                    description: 'Automated welcome email with temporary credentials and security checklist',
                     systems: ['Email Service', 'Okta'],
-                    duration: '~10s',
+                    duration: '~5s',
                     apiCall: 'POST /api/notifications/welcome',
-                    payload: 'Welcome template and credentials'
+                    payload: 'Welcome template with security guidelines'
                   }
                 ]
               },
