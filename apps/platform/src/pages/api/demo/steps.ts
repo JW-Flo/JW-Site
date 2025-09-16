@@ -13,8 +13,8 @@ interface StepResult {
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    // Get R2 bucket from Cloudflare environment
-    const bucket = (locals as any).runtime?.env?.DEMO_BUCKET;
+    // Use existing MEDIA R2 bucket
+    const bucket = (locals as any).runtime?.env?.MEDIA;
     if (!bucket) {
       return new Response(JSON.stringify({ error: 'R2 bucket not available' }), {
         status: 500,
@@ -24,32 +24,47 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const stepResult: StepResult = await request.json();
     
-    // Create unique key for the step result
-    const key = `steps/${stepResult.scenarioId}/${stepResult.stepIndex}-${Date.now()}.json`;
+    // Create unique key for Paycom step result in existing bucket
+    const key = `paycom-demo/steps/${stepResult.scenarioId}/${stepResult.stepIndex}-${Date.now()}.json`;
     
-    // Save to R2 bucket
-    await bucket.put(key, JSON.stringify({
+    // Enhanced step result with Paycom-specific context
+    const paycomStepResult = {
       ...stepResult,
+      hrisSystem: 'Paycom',
+      complianceNote: 'Paycom does not support XaaS - all integrations are API-based',
+      apiIntegration: {
+        type: 'REST API',
+        authentication: 'OAuth 2.0',
+        dataFormat: 'JSON',
+        webhookSupport: true,
+        realTimeSync: false // Paycom limitation
+      },
       savedAt: new Date().toISOString()
-    }), {
+    };
+    
+    // Save to existing R2 bucket under paycom-demo prefix
+    await bucket.put(key, JSON.stringify(paycomStepResult), {
       customMetadata: {
         scenarioId: stepResult.scenarioId,
         stepIndex: stepResult.stepIndex.toString(),
-        employeeId: stepResult.employee?.employeeId || 'unknown'
+        employeeId: stepResult.employee?.employeeId || 'unknown',
+        hrisSystem: 'Paycom',
+        integrationLimitation: 'no-xaas-support'
       }
     });
 
     return new Response(JSON.stringify({ 
       success: true, 
       key: key,
-      message: 'Step result saved to R2' 
+      message: 'Paycom step result saved to existing R2 bucket',
+      hrisNote: 'Configured for Paycom API limitations'
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error saving step result:', error);
-    return new Response(JSON.stringify({ error: 'Failed to save step result' }), {
+    console.error('Error saving Paycom step result:', error);
+    return new Response(JSON.stringify({ error: 'Failed to save Paycom step result' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -58,7 +73,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 export const GET: APIRoute = async ({ url, locals }) => {
   try {
-    const bucket = (locals as any).runtime?.env?.DEMO_BUCKET;
+    const bucket = (locals as any).runtime?.env?.MEDIA;
     if (!bucket) {
       return new Response(JSON.stringify({ error: 'R2 bucket not available' }), {
         status: 500,
@@ -74,8 +89,8 @@ export const GET: APIRoute = async ({ url, locals }) => {
       });
     }
 
-    // List objects for the scenario
-    const objects = await bucket.list({ prefix: `steps/${scenarioId}/` });
+    // List objects for the Paycom scenario
+    const objects = await bucket.list({ prefix: `paycom-demo/steps/${scenarioId}/` });
     const results: any[] = [];
 
     for (const object of objects.objects) {
@@ -88,14 +103,16 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     return new Response(JSON.stringify({ 
       scenarioId,
+      hrisSystem: 'Paycom',
+      integrationNote: 'API-based integration - XaaS not supported',
       steps: results.sort((a: any, b: any) => a.stepIndex - b.stepIndex)
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error getting step results:', error);
-    return new Response(JSON.stringify({ error: 'Failed to get step results' }), {
+    console.error('Error getting Paycom step results:', error);
+    return new Response(JSON.stringify({ error: 'Failed to get Paycom step results' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
