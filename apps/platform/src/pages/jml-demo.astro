@@ -1,0 +1,929 @@
+---
+title: "JML Demo - AtlasIT"
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JML Demo - AtlasIT</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .glass-effect {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+    
+    .nav-link {
+      text-decoration: none;
+    }
+    
+    .demo-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .demo-title {
+      font-size: 3rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .scenario-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .scenario-card:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .scenario-active {
+      border-color: rgba(34, 197, 94, 0.7);
+      background: rgba(34, 197, 94, 0.1);
+    }
+    
+    .workflow-container {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .step-list {
+      list-style: none;
+    }
+    
+    .step-item {
+      padding: 1.5rem;
+      margin: 1rem 0;
+      background: rgba(51, 65, 85, 0.3);
+      border-radius: 0.5rem;
+      border-left: 4px solid #374151;
+      transition: all 0.3s ease;
+    }
+    
+    .step-active {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .step-completed {
+      border-left-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin: 0.5rem;
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn:hover {
+      background: #2563eb;
+    }
+    
+    .btn:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
+    
+    .btn-success {
+      background: #10b981;
+    }
+    
+    .btn-success:hover {
+      background: #059669;
+    }
+    
+    .log-container {
+      background: #111827;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 2rem;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+    
+    .log-entry {
+      margin: 0.25rem 0;
+      padding: 0.25rem;
+    }
+    
+    .system-badge {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      margin: 0.125rem;
+    }
+    
+    .demo-banner {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      text-align: center;
+      padding: 1rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- AtlasIT Header Navigation -->
+  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">AI</span>
+          </div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          <a href="/onboarding" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Onboarding</a>
+          <a href="/marketplace" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Marketplace</a>
+          <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Orchestrator</a>
+          <a href="/api-manager" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">API Manager</a>
+          <a href="/jml-demo" class="nav-link px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white">JML Demo</a>
+
+          <!-- IT Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              IT <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/it/policies" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Policies</a>
+              <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50">Backup & Recovery</a>
+            </div>
+          </div>
+
+          <!-- Security Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              Security <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Security Center</a>
+              <a href="/enhanced-security-scanner" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-b-lg">Scanner</a>
+            </div>
+          </div>
+
+          <!-- Governance Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              Governance <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
+            </div>
+          </div>
+
+          <div class="w-px h-6 bg-slate-600 mx-2"></div>
+          <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
+          <a href="/register" class="nav-link px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-all duration-200">Register</a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden text-slate-300 hover:text-white p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <div id="app">
+    <div class="demo-banner">
+      🚀 Interactive JML Lifecycle Demo - Paycom HRIS Integration with Enterprise IAM Automation
+    </div>
+    
+    <div class="container">
+      <div class="demo-header">
+        <h1 class="demo-title">JML Lifecycle Demo</h1>
+        <p style="font-size: 1.25rem; opacity: 0.8; margin-bottom: 1rem;">
+          Experience automated onboarding, role changes, and offboarding workflows powered by Paycom HRIS integration, Okta API, and AWS IAM automation
+        </p>
+        <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 0.5rem; padding: 1rem; max-width: 600px; margin: 0 auto;">
+          <strong>✅ Live Paycom Integration:</strong> Real-time employee lifecycle events from Paycom HRIS trigger automated provisioning workflows
+        </div>
+      </div>
+
+      <!-- Demo Controls -->
+      <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
+        <div class="flex flex-wrap justify-center gap-4">
+          <button @click="resetDemo" class="btn btn-secondary">
+            🔄 Reset Demo
+          </button>
+          <button @click="runFullDemo" class="btn btn-primary" :disabled="demoRunning">
+            <span v-if="demoRunning">⏳ Running...</span>
+            <span v-else>🚀 Run Complete Demo</span>
+          </button>
+          <button @click="toggleAutoAdvance" class="btn" :class="autoAdvance ? 'btn-success' : 'btn-secondary'">
+            <span v-if="autoAdvance">⏸️ Pause Auto</span>
+            <span v-else>▶️ Auto Advance</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scenario Selection -->
+      <div class="scenario-grid">
+        <div 
+          v-for="scenario in scenarios" 
+          :key="scenario.id"
+          @click="selectScenario(scenario.id)"
+          class="scenario-card cursor-pointer"
+          :class="{ 'scenario-active': currentScenario && currentScenario.id === scenario.id }"
+        >
+          <div class="flex items-center mb-3">
+            <div class="text-3xl mr-3">{{ scenario.icon }}</div>
+            <div>
+              <h3 class="text-xl font-semibold">{{ scenario.title }}</h3>
+              <p class="text-sm opacity-60">{{ scenario.subtitle }}</p>
+            </div>
+          </div>
+          <p class="text-slate-300 mb-3">{{ scenario.description }}</p>
+          <div class="text-sm opacity-60">
+            <div><strong>Employee:</strong> {{ scenario.employee.firstName }} {{ scenario.employee.lastName }}</div>
+            <div><strong>Role:</strong> {{ scenario.employee.title }}</div>
+            <div><strong>Department:</strong> {{ scenario.employee.department }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Workflow Execution -->
+      <div v-if="currentScenario" class="workflow-container">
+        <h2 class="text-2xl font-semibold mb-6">
+          {{ currentScenario.title }} - {{ currentScenario.employee.firstName }} {{ currentScenario.employee.lastName }}
+        </h2>
+        
+        <!-- Controls -->
+        <div class="mb-6">
+          <div class="flex gap-3">
+            <button 
+              @click="previousStep" 
+              v-if="currentStepIndex > 0" 
+              class="btn btn-secondary"
+            >
+              ← Previous
+            </button>
+            <button 
+              @click="nextStep" 
+              v-if="currentStepIndex < currentScenario.steps.length - 1 && !demoRunning" 
+              class="btn btn-primary"
+            >
+              Next →
+            </button>
+            <button 
+              @click="completeWorkflow" 
+              v-if="currentStepIndex === currentScenario.steps.length - 1 && !workflowComplete" 
+              class="btn btn-success"
+            >
+              ✅ Complete Workflow
+            </button>
+          </div>
+        </div>
+
+        <!-- Workflow Steps -->
+        <div class="space-y-6">
+          <div 
+            v-for="(step, index) in currentScenario.steps" 
+            :key="index" 
+            class="flex items-start space-x-6"
+          >
+            <div class="flex flex-col items-center">
+              <div 
+                class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold"
+                :style="getStepIndicatorStyle(index)"
+              >
+                <span v-if="index < currentStepIndex">✓</span>
+                <span v-else-if="index === currentStepIndex && demoRunning">⏳</span>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <div 
+                v-if="index < currentScenario.steps.length - 1"
+                class="w-1 h-20 mt-3 rounded"
+                :style="{ backgroundColor: index < currentStepIndex ? '#10b981' : '#64748b' }"
+              ></div>
+            </div>
+            
+            <div class="flex-1">
+              <h3 class="text-xl font-semibold mb-2 flex items-center">
+                {{ step.title }}
+                <span v-if="index === currentStepIndex && demoRunning" class="ml-2 text-blue-400 animate-spin">⚙️</span>
+              </h3>
+              <p class="text-slate-300 mb-4">{{ step.description }}</p>
+              
+              <!-- Systems Involved -->
+              <div v-if="step.systems && step.systems.length > 0" class="mb-4">
+                <div class="text-sm font-medium text-slate-400 mb-2">Systems Involved:</div>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="system in step.systems" 
+                    :key="system" 
+                    class="system-badge"
+                  >
+                    {{ system }}
+                  </span>
+                </div>
+              </div>
+              
+              <div v-if="step.duration" class="text-sm text-slate-400 mb-4">
+                ⏱️ Estimated Duration: {{ step.duration }}
+              </div>
+              
+              <!-- Real-time Step Logs -->
+              <div v-if="stepLogs[index] && stepLogs[index].length > 0" class="space-y-2">
+                <div class="text-sm font-medium text-slate-400 mb-2">📋 Execution Log:</div>
+                <div 
+                  v-for="(log, logIndex) in stepLogs[index]" 
+                  :key="logIndex" 
+                  class="log-entry"
+                  style="background: rgba(31, 41, 55, 0.5); border-radius: 0.25rem; padding: 0.5rem;"
+                >
+                  <div class="flex justify-between items-start mb-1">
+                    <span class="text-xs text-slate-500">{{ log.timestamp }}</span>
+                    <span class="text-xs" :style="{ color: getStatusColor(log.type) }">{{ log.type.toUpperCase() }}</span>
+                  </div>
+                  <div class="text-sm text-slate-200">{{ log.message }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Activity Monitor -->
+      <div v-if="currentScenario" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+        <!-- Global Activity Log -->
+        <div class="workflow-visual">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <span class="mr-2">📊</span> Real-time Activity Monitor
+          </h2>
+          <div v-if="globalLogs.length === 0" class="text-slate-400 text-center py-8">
+            Select a scenario and begin workflow execution to see real-time logs
+          </div>
+          <div v-else class="log-container">
+            <div 
+              v-for="(log, index) in globalLogs" 
+              :key="index"
+              class="log-entry"
+              :style="{ color: getStatusColor(log.type) }"
+            >
+              [{{ log.timestamp }}] {{ log.system }}: {{ log.message }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Paycom Integration Status -->
+        <div class="workflow-visual">
+          <h2 class="text-xl font-semibold mb-4 flex items-center">
+            <span class="mr-2">🏢</span> Paycom HRIS Integration
+          </h2>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center p-3 rounded" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+              <span>Connection Status</span>
+              <span style="color: #22c55e;">✅ Connected</span>
+            </div>
+            <div class="flex justify-between items-center p-3 rounded" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+              <span>Webhook Endpoint</span>
+              <span style="color: #3b82f6;">🔗 Active</span>
+            </div>
+            <div class="flex justify-between items-center p-3 rounded" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3);">
+              <span>Employee Events</span>
+              <span style="color: #a855f7;">📡 Monitoring</span>
+            </div>
+            <div v-if="currentScenario" class="p-3 rounded" style="background: rgba(71, 85, 105, 0.3);">
+              <div class="text-sm font-medium mb-2">Current Employee:</div>
+              <div class="text-xs space-y-1">
+                <div>ID: {{ currentScenario.employee.employeeId }}</div>
+                <div>Name: {{ currentScenario.employee.firstName }} {{ currentScenario.employee.lastName }}</div>
+                <div>Department: {{ currentScenario.employee.department }}</div>
+                <div>Status: {{ currentScenario.employee.status }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    const { createApp } = Vue;
+    
+    createApp({
+      data() {
+        return {
+          currentScenario: null,
+          currentEmployee: null,
+          currentStepIndex: 0,
+          workflowComplete: false,
+          demoRunning: false,
+          autoAdvance: false,
+          stepLogs: {},
+          globalLogs: [],
+          scenarios: [
+            {
+              id: 'joiner',
+              icon: '👋',
+              title: 'New Employee',
+              subtitle: 'Joiner Workflow',
+              description: 'Jordan Miles joins as Security Engineer. Watch automated provisioning across Paycom, Okta and AWS.',
+              progress: 0,
+              employee: {
+                employeeId: 'EMP001',
+                firstName: 'Jordan',
+                lastName: 'Miles',
+                email: 'jordan.miles@atlasit.pro',
+                title: 'Security Engineer',
+                department: 'Security',
+                manager: 'security-lead@atlasit.pro',
+                employeeType: 'fulltime',
+                status: 'active',
+                startDate: '2025-01-15'
+              },
+              steps: [
+                {
+                  title: 'Paycom Employee Created',
+                  description: 'HR creates new employee record in Paycom with role requirements and triggers automated workflow',
+                  systems: ['Paycom HRIS', 'AtlasIT Orchestrator'],
+                  duration: '~5s',
+                  apiCall: 'POST /api/paycom/employees',
+                  payload: 'Employee data with security role requirements'
+                },
+                {
+                  title: 'Okta User Creation',
+                  description: 'API Manager calls Okta API to create user account with security group assignments',
+                  systems: ['AtlasIT API Manager', 'Okta'],
+                  duration: '~15s',
+                  apiCall: 'POST /api/v1/users',
+                  payload: 'User profile and security group memberships'
+                },
+                {
+                  title: 'AWS IAM Role Creation',
+                  description: 'AtlasIT creates AWS IAM role with security engineer permissions via direct API',
+                  systems: ['AtlasIT', 'AWS IAM'],
+                  duration: '~20s',
+                  apiCall: 'POST /api/aws/iam/roles',
+                  payload: 'Security engineer role and policy definitions'
+                },
+                {
+                  title: 'Application Access Provisioning',
+                  description: 'Automated provisioning of security tools and applications based on role requirements',
+                  systems: ['Slack', 'GitHub', 'AWS Console', 'Security Tools'],
+                  duration: '~25s',
+                  apiCall: 'POST /api/applications/provision',
+                  payload: 'Application access matrix for security role'
+                },
+                {
+                  title: 'Compliance Verification',
+                  description: 'Verify all access grants meet SOC2, ISO27001 and company security policies',
+                  systems: ['AtlasIT Compliance Engine', 'Audit Logger'],
+                  duration: '~10s',
+                  apiCall: 'POST /api/compliance/verify',
+                  payload: 'Access verification and compliance check results'
+                }
+              ]
+            },
+            {
+              id: 'mover',
+              icon: '🔄',
+              title: 'Role Change',
+              subtitle: 'Mover Workflow',
+              description: 'Sarah Chen transfers from Engineering to DevOps team. Watch automated access adjustments.',
+              progress: 0,
+              employee: {
+                employeeId: 'EMP002',
+                firstName: 'Sarah',
+                lastName: 'Chen',
+                email: 'sarah.chen@atlasit.pro',
+                title: 'Senior DevOps Engineer',
+                department: 'DevOps',
+                manager: 'devops-lead@atlasit.pro',
+                employeeType: 'fulltime',
+                status: 'active',
+                transferDate: '2025-01-20'
+              },
+              steps: [
+                {
+                  title: 'Paycom Role Update',
+                  description: 'Paycom detects department transfer and triggers role change workflow',
+                  systems: ['Paycom HRIS', 'AtlasIT Change Detector'],
+                  duration: '~3s',
+                  apiCall: 'PUT /api/paycom/employees/role-change',
+                  payload: 'Updated role and department information'
+                },
+                {
+                  title: 'Access Review',
+                  description: 'AtlasIT analyzes current permissions and identifies changes needed for DevOps role',
+                  systems: ['AtlasIT Access Analyzer', 'Policy Engine'],
+                  duration: '~8s',
+                  apiCall: 'POST /api/access/review',
+                  payload: 'Current vs required access comparison'
+                },
+                {
+                  title: 'New Permissions',
+                  description: 'Grant additional AWS and Kubernetes access required for DevOps role',
+                  systems: ['AWS IAM', 'Okta', 'Kubernetes RBAC'],
+                  duration: '~12s',
+                  apiCall: 'POST /api/permissions/grant',
+                  payload: 'DevOps role permissions and AWS policies'
+                },
+                {
+                  title: 'Legacy Access Removal',
+                  description: 'Remove engineering-specific permissions no longer needed',
+                  systems: ['Various Applications', 'AWS IAM', 'Active Directory'],
+                  duration: '~10s',
+                  apiCall: 'DELETE /api/permissions/revoke',
+                  payload: 'Deprecated access permissions list'
+                },
+                {
+                  title: 'Validation and Audit',
+                  description: 'Verify access changes and generate compliance audit trail',
+                  systems: ['AtlasIT Audit Trail', 'Compliance Dashboard'],
+                  duration: '~5s',
+                  apiCall: 'POST /api/audit/role-change',
+                  payload: 'Role change validation and audit log'
+                }
+              ]
+            },
+            {
+              id: 'leaver',
+              icon: '👋',
+              title: 'Employee Exit',
+              subtitle: 'Leaver Workflow',
+              description: 'Mike Rodriguez leaves the company. Watch secure offboarding and access revocation.',
+              progress: 0,
+              employee: {
+                employeeId: 'EMP003',
+                firstName: 'Mike',
+                lastName: 'Rodriguez',
+                email: 'mike.rodriguez@atlasit.pro',
+                title: 'Marketing Manager',
+                department: 'Marketing',
+                manager: 'marketing-director@atlasit.pro',
+                employeeType: 'fulltime',
+                status: 'terminated',
+                lastWorkDate: '2025-01-25'
+              },
+              steps: [
+                {
+                  title: 'Paycom Termination Event',
+                  description: 'Paycom triggers immediate offboarding workflow upon termination',
+                  systems: ['Paycom HRIS', 'AtlasIT Security Orchestrator'],
+                  duration: '~2s',
+                  apiCall: 'POST /api/paycom/termination',
+                  payload: 'Termination event with security requirements'
+                },
+                {
+                  title: 'Account Deactivation',
+                  description: 'Immediately disable Okta account and terminate all active sessions',
+                  systems: ['Okta', 'AtlasIT Session Manager'],
+                  duration: '~5s',
+                  apiCall: 'POST /api/okta/deactivate',
+                  payload: 'User deactivation and session termination'
+                },
+                {
+                  title: 'AWS Access Revocation',
+                  description: 'Remove all AWS permissions, access keys, and disable IAM user',
+                  systems: ['AWS IAM', 'AWS API Gateway', 'S3 Buckets'],
+                  duration: '~8s',
+                  apiCall: 'DELETE /api/aws/access',
+                  payload: 'Complete AWS access revocation request'
+                },
+                {
+                  title: 'Application Cleanup',
+                  description: 'Revoke access from all SaaS applications and collaboration tools',
+                  systems: ['Slack', 'GitHub', 'Salesforce', 'Google Workspace'],
+                  duration: '~15s',
+                  apiCall: 'POST /api/applications/revoke-all',
+                  payload: 'Application access revocation batch request'
+                },
+                {
+                  title: 'Data Security and Audit',
+                  description: 'Generate compliance report and ensure secure data transfer to manager',
+                  systems: ['AtlasIT Data Governor', 'Compliance Engine'],
+                  duration: '~10s',
+                  apiCall: 'POST /api/compliance/offboard-audit',
+                  payload: 'Offboarding compliance report and data transfer confirmation'
+                }
+              ]
+            }
+          ]
+        };
+      },
+      methods: {
+        async selectScenario(id) {
+          this.currentScenario = this.scenarios.find(s => s.id === id);
+          this.currentEmployee = this.currentScenario.employee;
+          this.currentStepIndex = 0;
+          this.workflowComplete = false;
+          this.stepLogs = {};
+          this.globalLogs = [];
+          
+          this.addGlobalLog('info', 'Demo System', `🎯 Selected ${this.currentScenario.title} scenario for ${this.currentEmployee.firstName} ${this.currentEmployee.lastName}`);
+          this.addGlobalLog('info', 'Paycom HRIS', `📋 Employee record loaded: ${this.currentEmployee.employeeId}`);
+          
+          // Save demo state
+          await this.saveDemoState();
+        },
+        
+        async nextStep() {
+          if (this.currentStepIndex < this.currentScenario.steps.length - 1) {
+            await this.executeStep(this.currentStepIndex);
+            this.currentStepIndex++;
+            this.updateProgress();
+            await this.saveDemoState();
+          }
+        },
+        
+        async previousStep() {
+          if (this.currentStepIndex > 0) {
+            this.currentStepIndex--;
+            this.updateProgress();
+            await this.saveDemoState();
+          }
+        },
+        
+        async executeStep(stepIndex) {
+          const step = this.currentScenario.steps[stepIndex];
+          
+          this.addStepLog(stepIndex, `🚀 Executing: ${step.title}`);
+          this.addGlobalLog('info', step.systems[0], `▶️ Starting: ${step.title}`);
+          
+          // Simulate API call with Paycom integration
+          await this.delay(200);
+          this.addStepLog(stepIndex, `📡 API Call: ${step.apiCall}`);
+          
+          // Add Paycom-specific API simulation
+          if (step.title.includes('Paycom')) {
+            this.addStepLog(stepIndex, `🏢 Paycom API: Processing employee data...`);
+            await this.delay(500);
+            this.addStepLog(stepIndex, `✅ Paycom: Employee record updated - ID: ${this.currentEmployee.employeeId}`);
+            this.addStepLog(stepIndex, `📋 Event Type: ${this.getPaycomEventType(step.title)}`);
+          }
+          
+          this.addStepLog(stepIndex, `📦 Payload: ${step.payload}`);
+          
+          // Simulate processing time based on step duration
+          const processingTime = parseInt(step.duration.match(/\d+/)[0]) * 100;
+          await this.delay(processingTime);
+          this.addStepLog(stepIndex, `⚙️ Processing: ${step.description}`);
+          
+          // Simulate step-specific responses
+          if (step.title.includes('Okta')) {
+            await this.delay(300);
+            this.addStepLog(stepIndex, `🔐 Okta Response: User account processed successfully`);
+            this.addStepLog(stepIndex, `👤 Username: ${this.currentEmployee.firstName.toLowerCase()}.${this.currentEmployee.lastName.toLowerCase()}`);
+            this.addStepLog(stepIndex, `📧 Email: ${this.currentEmployee.email}`);
+          } else if (step.title.includes('AWS')) {
+            await this.delay(400);
+            this.addStepLog(stepIndex, `☁️ AWS Response: IAM operations completed`);
+            this.addStepLog(stepIndex, `🔑 Role: ${this.currentEmployee.department}${this.currentEmployee.title.replace(/\s+/g, '')}`);
+            this.addStepLog(stepIndex, `🏷️ Tags: Department=${this.currentEmployee.department}`);
+          } else if (step.title.includes('Application')) {
+            await this.delay(600);
+            const apps = step.systems.filter(s => !s.includes('AtlasIT'));
+            this.addStepLog(stepIndex, `📱 Applications: ${apps.length} systems processed`);
+            apps.forEach(app => {
+              this.addStepLog(stepIndex, `  ✓ ${app} access configured`);
+            });
+          } else if (step.title.includes('Compliance') || step.title.includes('Audit')) {
+            await this.delay(300);
+            this.addStepLog(stepIndex, `📋 Compliance: All operations meet policy requirements`);
+            this.addStepLog(stepIndex, `🔍 Audit Trail: Generated and stored with ID: ${Date.now()}`);
+          }
+          
+          // Simulate completion
+          await this.delay(500);
+          this.addStepLog(stepIndex, `✅ ${step.title} completed successfully`);
+          this.addGlobalLog('success', step.systems[step.systems.length - 1], `✅ Completed: ${step.title} (${step.duration})`);
+          
+          // Save step execution
+          await this.saveStepResult(stepIndex, step);
+        },
+        
+        async completeWorkflow() {
+          this.workflowComplete = true;
+          this.currentScenario.progress = 100;
+          await this.executeStep(this.currentStepIndex);
+          this.addGlobalLog('success', 'Demo System', `🎉 ${this.currentScenario.title} workflow completed for ${this.currentEmployee.firstName} ${this.currentEmployee.lastName}`);
+          this.addGlobalLog('info', 'Paycom HRIS', `📊 Employee lifecycle event processed successfully`);
+          await this.saveDemoState();
+        },
+        
+        async runFullDemo() {
+          if (!this.currentScenario || this.demoRunning) return;
+          
+          this.demoRunning = true;
+          this.currentStepIndex = 0;
+          this.workflowComplete = false;
+          this.stepLogs = {};
+          this.globalLogs = [];
+          
+          this.addGlobalLog('info', 'Demo System', `🚀 Starting full ${this.currentScenario.title} demonstration`);
+          
+          for (let i = 0; i < this.currentScenario.steps.length; i++) {
+            this.currentStepIndex = i;
+            await this.executeStep(i);
+            await this.delay(1000); // Brief pause between steps
+          }
+          
+          this.workflowComplete = true;
+          this.currentScenario.progress = 100;
+          this.addGlobalLog('success', 'Demo System', `🎉 Full demonstration completed successfully!`);
+          this.demoRunning = false;
+        },
+        
+        resetDemo() {
+          if (this.currentScenario) {
+            this.currentStepIndex = 0;
+            this.workflowComplete = false;
+            this.currentScenario.progress = 0;
+            this.stepLogs = {};
+            this.globalLogs = [];
+            this.demoRunning = false;
+            this.addGlobalLog('info', 'Demo System', `🔄 Demo reset for ${this.currentScenario.title}`);
+          }
+        },
+        
+        toggleAutoAdvance() {
+          this.autoAdvance = !this.autoAdvance;
+          this.addGlobalLog('info', 'Demo System', `${this.autoAdvance ? '▶️ Auto-advance enabled' : '⏸️ Auto-advance disabled'}`);
+        },
+        
+        addStepLog(stepIndex, message) {
+          if (!this.stepLogs[stepIndex]) {
+            this.stepLogs[stepIndex] = [];
+          }
+          this.stepLogs[stepIndex].push({
+            timestamp: new Date().toLocaleTimeString(),
+            message,
+            type: this.getLogType(message)
+          });
+        },
+        
+        addGlobalLog(type, system, message) {
+          this.globalLogs.push({
+            timestamp: new Date().toLocaleTimeString(),
+            type,
+            system,
+            message
+          });
+          
+          // Keep only recent logs
+          if (this.globalLogs.length > 50) {
+            this.globalLogs = this.globalLogs.slice(-40);
+          }
+        },
+        
+        getLogType(message) {
+          if (message.includes('✅') || message.includes('completed')) return 'success';
+          if (message.includes('🚀') || message.includes('▶️')) return 'info';
+          if (message.includes('📡') || message.includes('Processing')) return 'processing';
+          if (message.includes('⚠️') || message.includes('Warning')) return 'warning';
+          if (message.includes('❌') || message.includes('Error')) return 'error';
+          return 'info';
+        },
+        
+        getStatusColor(type) {
+          const colors = {
+            'success': '#10b981',
+            'info': '#3b82f6',
+            'processing': '#f59e0b',
+            'warning': '#f59e0b',
+            'error': '#ef4444'
+          };
+          return colors[type] || '#94a3b8';
+        },
+        
+        getStepIndicatorStyle(index) {
+          if (index < this.currentStepIndex) {
+            return { backgroundColor: '#10b981', color: 'white' };
+          } else if (index === this.currentStepIndex) {
+            return { backgroundColor: '#3b82f6', color: 'white' };
+          } else {
+            return { backgroundColor: '#64748b', color: 'white' };
+          }
+        },
+        
+        getPaycomEventType(stepTitle) {
+          if (stepTitle.includes('Created')) return 'EMPLOYEE_HIRE';
+          if (stepTitle.includes('Update') || stepTitle.includes('Role')) return 'EMPLOYEE_UPDATE';
+          if (stepTitle.includes('Termination')) return 'EMPLOYEE_TERMINATION';
+          return 'EMPLOYEE_EVENT';
+        },
+        
+        updateProgress() {
+          if (this.currentScenario) {
+            this.currentScenario.progress = Math.round((this.currentStepIndex / this.currentScenario.steps.length) * 100);
+          }
+        },
+        
+        async saveDemoState() {
+          try {
+            const state = {
+              scenario: this.currentScenario ? this.currentScenario.id : null,
+              employee: this.currentEmployee,
+              stepIndex: this.currentStepIndex,
+              progress: this.currentScenario ? (this.currentScenario.progress || 0) : 0,
+              timestamp: new Date().toISOString(),
+              logs: this.globalLogs.slice(0, 10)
+            };
+            
+            // Simulate API call to save state
+            await fetch('/api/demo/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(state)
+            });
+            
+            console.log('📀 Demo state saved');
+          } catch (error) {
+            console.error('Failed to save demo state:', error);
+          }
+        },
+        
+        async saveStepResult(stepIndex, step) {
+          try {
+            const stepResult = {
+              stepIndex,
+              stepTitle: step.title,
+              duration: step.duration,
+              systems: step.systems,
+              employee: this.currentEmployee,
+              timestamp: new Date().toISOString(),
+              logs: this.stepLogs[stepIndex] || []
+            };
+            
+            // Simulate API call to save step result
+            await fetch('/api/demo/step', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(stepResult)
+            });
+            
+            console.log(`📋 Step ${stepIndex + 1} result saved`);
+          } catch (error) {
+            console.error('Failed to save step result:', error);
+          }
+        },
+        
+        delay(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

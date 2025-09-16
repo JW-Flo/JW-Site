@@ -1,109 +1,4 @@
 ---
-const title = "IT Policies - AtlasIT";
----
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IT Policies - AtlasIT</title>
-  
-  <style>
-    .nav-link { transition: all 0.2s ease; }
-    .nav-link:hover { transform: translateY(-1px); }
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
-    .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
-  </style>
-</head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
-  <!-- Header -->
-  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
-    <nav class="container mx-auto px-6 py-4">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center space-x-2">
-          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-sm">AI</span>
-          </div>
-          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
-        </div>
-
-        <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center space-x-1">
-          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
-          <a href="/onboarding" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Onboarding</a>
-          <a href="/marketplace" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Marketplace</a>
-          <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Orchestrator</a>
-          <a href="/api-manager" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">API Manager</a>
-
-          <!-- IT Dropdown -->
-          <div class="relative group">
-            <button class="nav-link px-4 py-2 rounded-lg bg-blue-600 text-white transition-all duration-200 flex items-center">
-              IT <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
-              <a href="/it/policies" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Policies</a>
-              <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50">Backup & Recovery</a>
-            </div>
-          </div>
-
-          <!-- Security Dropdown -->
-          <div class="relative group">
-            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
-              Security <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
-              <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Security Center</a>
-              <a href="/enhanced-security-scanner" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-b-lg">Scanner</a>
-            </div>
-          </div>
-
-          <!-- Governance Dropdown -->
-          <div class="relative group">
-            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
-              Governance <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
-              <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
-            </div>
-          </div>
-
-          <div class="w-px h-6 bg-slate-600 mx-2"></div>
-          <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
-          <a href="/register" class="nav-link px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-all duration-200">Register</a>
-        </div>
-
-        <!-- Mobile Menu Button -->
-        <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white p-2">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Mobile Menu -->
-      <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 space-y-2 border-t border-slate-700 pt-4">
-        <a href="/dashboard" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Dashboard</a>
-        <a href="/onboarding" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Onboarding</a>
-        <a href="/marketplace" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Marketplace</a>
-        <a href="/orchestrator" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Orchestrator</a>
-        <a href="/api-manager" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">API Manager</a>
-        <a href="/it/policies" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">IT Policies</a>
-        <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Backup & Recovery</a>
-        <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Security Center</a>
-        <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
-        <div class="pt-2 border-t border-slate-700 mt-4">
-          <a href="/login" class="block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-center mb-2">Login</a>
-          <a href="/register" class="block px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-center">Register</a>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
-
----
 const title = "Auto-Generated IT Policies - AtlasIT";
 ---
 
@@ -263,6 +158,18 @@ const title = "Auto-Generated IT Policies - AtlasIT";
           
           <div class="space-y-4">
             <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Tenant ID</label>
+              <input 
+                type="text" 
+                id="tenant-id"
+                value="HWCO-2025"
+                class="input-field w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded text-slate-100 text-sm"
+                placeholder="Unique tenant identifier"
+              >
+              <p class="text-xs text-slate-400 mt-1">Unique identifier for your organization in the AtlasIT platform</p>
+            </div>
+            
+            <div>
               <label class="block text-sm font-medium text-slate-300 mb-2">Company Name</label>
               <input 
                 type="text" 
@@ -327,6 +234,10 @@ const title = "Auto-Generated IT Policies - AtlasIT";
           <h3 class="text-lg font-semibold mb-4">Generation Status</h3>
           
           <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Tenant ID</span>
+              <span class="text-xs text-blue-300">HWCO-2025</span>
+            </div>
             <div class="flex items-center justify-between">
               <span class="text-sm text-slate-300">Last Generated</span>
               <span class="text-xs text-slate-400">2 hours ago</span>
@@ -844,6 +755,7 @@ ${config.industry === 'healthcare' ? '• Medical device network segmentation<br
     // Get current configuration
     function getCurrentConfig() {
       return {
+        tenantId: document.getElementById('tenant-id').value,
         companyName: document.getElementById('company-name').value,
         industry: document.getElementById('industry').value,
         companySize: document.getElementById('company-size').value,
@@ -950,7 +862,7 @@ ${config.industry === 'healthcare' ? '• Medical device network segmentation<br
     });
 
     // Auto-update policies when configuration changes
-    ['company-name', 'industry', 'company-size'].forEach(id => {
+    ['tenant-id', 'company-name', 'industry', 'company-size'].forEach(id => {
       document.getElementById(id)?.addEventListener('change', () => {
         // Could trigger auto-regeneration here if desired
         console.log('Configuration changed - policies may need regeneration');

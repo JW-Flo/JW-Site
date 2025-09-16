@@ -1,0 +1,403 @@
+---
+title: "JML Demo - AtlasIT"
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JML Demo - AtlasIT</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .glass-effect {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+    
+    .nav-link {
+      text-decoration: none;
+    }
+    
+    .demo-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .demo-title {
+      font-size: 3rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+    
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .scenario-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .scenario-card:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .workflow-container {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .step-list {
+      list-style: none;
+    }
+    
+    .step-item {
+      padding: 1rem;
+      margin: 1rem 0;
+      background: rgba(51, 65, 85, 0.3);
+      border-radius: 0.5rem;
+      border-left: 4px solid #374151;
+    }
+    
+    .step-active {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .step-completed {
+      border-left-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .highlight {
+      border-left-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin: 0.5rem;
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .btn:hover {
+      background: #2563eb;
+    }
+    
+    .btn:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
+    
+    .log-container {
+      background: #111827;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-top: 2rem;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- AtlasIT Header Navigation -->
+  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">AI</span>
+          </div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          <a href="/onboarding" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Onboarding</a>
+          <a href="/marketplace" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Marketplace</a>
+          <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Orchestrator</a>
+          <a href="/api-manager" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">API Manager</a>
+          <a href="/jml-basic" class="nav-link px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white">JML Demo</a>
+
+          <!-- IT Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              IT <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/it/policies" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Policies</a>
+              <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50">Backup & Recovery</a>
+            </div>
+          </div>
+
+          <!-- Security Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              Security <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Security Center</a>
+              <a href="/enhanced-security-scanner" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-b-lg">Scanner</a>
+            </div>
+          </div>
+
+          <!-- Governance Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              Governance <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
+            </div>
+          </div>
+
+          <div class="w-px h-6 bg-slate-600 mx-2"></div>
+          <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
+          <a href="/register" class="nav-link px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition-all duration-200">Register</a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden text-slate-300 hover:text-white p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="demo-header">
+      <h1 class="demo-title">🚀 JML Lifecycle Demo</h1>
+      <p style="font-size: 1.25rem; opacity: 0.8;">
+        Enterprise IAM Automation: Onboarding, Role Changes & Offboarding
+      </p>
+      <p style="margin-top: 1rem; padding: 1rem; background: rgba(34, 197, 94, 0.1); border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.3);">
+        ✅ <strong>Demo Ready:</strong> Paycom HRIS → Okta API → AWS IAM automation workflows
+      </p>
+    </div>
+    
+    <div class="scenario-grid">
+      <div class="scenario-card" onclick="showWorkflow('onboarding')">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">
+          👋 New Employee Onboarding
+        </h3>
+        <p style="opacity: 0.8; margin-bottom: 1rem;">Automated account creation and access provisioning for new hires</p>
+        <div style="font-size: 0.875rem; opacity: 0.6;">
+          👤 Sarah Johnson - Engineering Department
+        </div>
+      </div>
+      
+      <div class="scenario-card" onclick="showWorkflow('role-change')">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">
+          🔄 Role Change Management
+        </h3>
+        <p style="opacity: 0.8; margin-bottom: 1rem;">Automated access adjustment for internal role transitions</p>
+        <div style="font-size: 0.875rem; opacity: 0.6;">
+          👤 Mike Chen - Engineering → DevOps
+        </div>
+      </div>
+      
+      <div class="scenario-card" onclick="showWorkflow('offboarding')">
+        <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">
+          👋 Employee Offboarding
+        </h3>
+        <p style="opacity: 0.8; margin-bottom: 1rem;">Secure and compliant access revocation for departing employees</p>
+        <div style="font-size: 0.875rem; opacity: 0.6;">
+          👤 Alex Rodriguez - Marketing Manager
+        </div>
+      </div>
+    </div>
+    
+    <div id="workflow-container" class="workflow-container" style="display: none;">
+      <h2 id="workflow-title" style="font-size: 1.5rem; margin-bottom: 2rem;"></h2>
+      
+      <div style="margin-bottom: 2rem;">
+        <button class="btn" onclick="runDemo()" id="runButton">▶️ Start Workflow Demo</button>
+        <button class="btn" onclick="resetDemo()">🔄 Reset</button>
+      </div>
+      
+      <ul id="step-list" class="step-list"></ul>
+      
+      <div id="demo-log" class="log-container" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    const workflows = {
+      onboarding: {
+        title: 'New Employee Onboarding Workflow',
+        steps: [
+          'HRIS Detection: Paycom triggers automated workflow for new employee (⏱️ ~5s)',
+          'Okta Account Creation: Create user account with appropriate group memberships (⏱️ ~10s)',
+          'AWS IAM Provisioning: Create AWS account and assign role-based permissions (⏱️ ~15s)',
+          'Application Access: Provision access to required SaaS applications (⏱️ ~20s)',
+          'Compliance Verification: Verify all access grants meet compliance requirements (⏱️ ~5s)'
+        ]
+      },
+      'role-change': {
+        title: 'Role Change Management Workflow',
+        steps: [
+          'Role Change Detection: Paycom detects department/role change and triggers workflow (⏱️ ~3s)',
+          'Access Review: Review current permissions and identify changes needed (⏱️ ~8s)',
+          'New Permissions: Grant additional AWS and application access for DevOps role (⏱️ ~12s)',
+          'Legacy Access Removal: Remove unnecessary permissions from previous role (⏱️ ~10s)',
+          'Validation & Audit: Verify access changes and log for compliance (⏱️ ~5s)'
+        ]
+      },
+      offboarding: {
+        title: 'Employee Offboarding Workflow',
+        steps: [
+          'Termination Detection: Paycom triggers immediate offboarding workflow (⏱️ ~2s)',
+          'Account Deactivation: Immediately disable Okta account and sessions (⏱️ ~5s)',
+          'AWS Access Revocation: Remove all AWS permissions and access keys (⏱️ ~8s)',
+          'Application Cleanup: Revoke access from all SaaS applications (⏱️ ~15s)',
+          'Data Security & Audit: Generate compliance report and secure data transfer (⏱️ ~10s)'
+        ]
+      }
+    };
+    
+    let currentWorkflow = null;
+    let isRunning = false;
+    
+    function showWorkflow(workflowId) {
+      currentWorkflow = workflows[workflowId];
+      const container = document.getElementById('workflow-container');
+      const title = document.getElementById('workflow-title');
+      const stepList = document.getElementById('step-list');
+      
+      container.style.display = 'block';
+      title.textContent = currentWorkflow.title;
+      
+      stepList.innerHTML = '';
+      
+      currentWorkflow.steps.forEach((step, index) => {
+        const li = document.createElement('li');
+        li.className = 'step-item';
+        li.id = `step-${index}`;
+        li.innerHTML = `<strong>Step ${index + 1}:</strong> ${step}`;
+        stepList.appendChild(li);
+      });
+      
+      resetDemo();
+      
+      // Scroll to workflow section
+      container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    async function runDemo() {
+      if (isRunning || !currentWorkflow) return;
+      
+      isRunning = true;
+      const log = document.getElementById('demo-log');
+      const runButton = document.getElementById('runButton');
+      
+      log.style.display = 'block';
+      log.innerHTML = '<div style="color: #60a5fa;">[' + new Date().toLocaleTimeString() + '] 🚀 Starting workflow execution...</div>';
+      runButton.innerHTML = '⏳ Running...';
+      runButton.disabled = true;
+      
+      for (let i = 0; i < currentWorkflow.steps.length; i++) {
+        const stepElement = document.getElementById(`step-${i}`);
+        stepElement.classList.add('highlight');
+        
+        log.innerHTML += `<div style="color: #60a5fa;">[${new Date().toLocaleTimeString()}] ▶️ Executing step ${i + 1}...</div>`;
+        log.innerHTML += `<div style="color: #f59e0b;">[${new Date().toLocaleTimeString()}] 📡 API calls in progress...</div>`;
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        stepElement.style.borderLeftColor = '#10b981';
+        stepElement.style.background = 'rgba(16, 185, 129, 0.1)';
+        stepElement.innerHTML += ' <span style="color: #10b981; float: right;">✅</span>';
+        
+        log.innerHTML += `<div style="color: #34d399;">[${new Date().toLocaleTimeString()}] ✅ Step ${i + 1} completed successfully</div>`;
+        log.scrollTop = log.scrollHeight;
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      log.innerHTML += `<div style="color: #34d399;">[${new Date().toLocaleTimeString()}] 🎉 Workflow completed successfully!</div>`;
+      log.innerHTML += `<div style="color: #60a5fa;">[${new Date().toLocaleTimeString()}] 📊 All systems updated and compliance verified</div>`;
+      log.innerHTML += `<div style="color: #8b5cf6;">[${new Date().toLocaleTimeString()}] 📋 Audit trail generated and stored</div>`;
+      log.scrollTop = log.scrollHeight;
+      
+      runButton.innerHTML = '✅ Demo Complete';
+      setTimeout(() => {
+        runButton.innerHTML = '▶️ Start Workflow Demo';
+        runButton.disabled = false;
+        isRunning = false;
+      }, 3000);
+    }
+    
+    function resetDemo() {
+      if (!currentWorkflow) return;
+      
+      currentWorkflow.steps.forEach((step, index) => {
+        const stepElement = document.getElementById(`step-${index}`);
+        if (stepElement) {
+          stepElement.className = 'step-item';
+          stepElement.style.borderLeftColor = '#374151';
+          stepElement.style.background = 'rgba(51, 65, 85, 0.3)';
+          stepElement.innerHTML = `<strong>Step ${index + 1}:</strong> ${step}`;
+        }
+      });
+      
+      const log = document.getElementById('demo-log');
+      log.innerHTML = '';
+      log.style.display = 'none';
+      isRunning = false;
+      
+      const runButton = document.getElementById('runButton');
+      if (runButton) {
+        runButton.innerHTML = '▶️ Start Workflow Demo';
+        runButton.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -108,7 +108,7 @@ title: "Dashboard - AtlasIT"
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
       </svg>
-      <span>Loading demo metrics…</span>
+      <span>Loading demo metrics...</span>
     </div>
       <div id="user-info" class="mb-8"></div>
 
@@ -124,7 +124,7 @@ title: "Dashboard - AtlasIT"
           <div class="flex items-center justify-between">
             <div>
               <p class="text-slate-400 text-sm">Active Users</p>
-              <p class="text-2xl font-bold text-blue-400" data-metric="active-users">—</p>
+              <p class="text-2xl font-bold text-blue-400" data-metric="active-users">-</p>
             </div>
             <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@ title: "Dashboard - AtlasIT"
           <div class="flex items-center justify-between">
             <div>
               <p class="text-slate-400 text-sm">Pending Access Requests</p>
-              <p class="text-2xl font-bold text-amber-400" data-metric="pending-requests">—</p>
+              <p class="text-2xl font-bold text-amber-400" data-metric="pending-requests">-</p>
             </div>
             <div class="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +152,7 @@ title: "Dashboard - AtlasIT"
           <div class="flex items-center justify-between">
             <div>
               <p class="text-slate-400 text-sm">Connected Systems</p>
-              <p class="text-2xl font-bold text-green-400" data-metric="connected-systems">—</p>
+              <p class="text-2xl font-bold text-green-400" data-metric="connected-systems">-</p>
             </div>
             <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@ title: "Dashboard - AtlasIT"
           <div class="flex items-center justify-between">
             <div>
               <p class="text-slate-400 text-sm">Security Score</p>
-              <p class="text-2xl font-bold text-yellow-400" data-metric="security-score">—</p>
+              <p class="text-2xl font-bold text-yellow-400" data-metric="security-score">-</p>
             </div>
             <div class="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +182,7 @@ title: "Dashboard - AtlasIT"
           <div class="flex items-center justify-between">
             <div>
               <p class="text-slate-400 text-sm">Active Workflows</p>
-              <p class="text-2xl font-bold text-purple-400" data-metric="active-workflows">—</p>
+              <p class="text-2xl font-bold text-purple-400" data-metric="active-workflows">-</p>
             </div>
             <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,8 +196,8 @@ title: "Dashboard - AtlasIT"
           <div class="flex items-center justify-between">
             <div>
               <p class="text-slate-400 text-sm">Automation Coverage</p>
-              <p class="text-2xl font-bold text-cyan-400" data-metric="automation-coverage">—%</p>
-              <p class="text-slate-400 text-xs mt-1">Avg provisioning time: <span data-metric="avg-provisioning">—</span></p>
+              <p class="text-2xl font-bold text-cyan-400" data-metric="automation-coverage">-%</p>
+              <p class="text-slate-400 text-xs mt-1">Avg provisioning time: <span data-metric="avg-provisioning">-</span></p>
             </div>
             <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center">
               <svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,9 +216,9 @@ title: "Dashboard - AtlasIT"
               <h3 class="text-lg font-semibold text-slate-100">Directory Users</h3>
               <p class="text-slate-400 text-xs">Source of truth: Okta demo directory</p>
             </div>
-            <span id="iam-users-pill" class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-200">— users</span>
+            <span id="iam-users-pill" class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-200">- users</span>
           </div>
-          <div id="iam-users-loading" class="text-sm text-slate-400">Loading directory users…</div>
+          <div id="iam-users-loading" class="text-sm text-slate-400">Loading directory users...</div>
           <div id="iam-users-error" class="hidden text-sm text-amber-400">Unable to load directory users.</div>
           <table class="min-w-full text-left text-sm hidden" id="iam-users-table">
             <thead class="text-slate-400 uppercase tracking-wide text-xs">
@@ -238,9 +238,9 @@ title: "Dashboard - AtlasIT"
               <h3 class="text-lg font-semibold text-slate-100">Active IAM Workflows</h3>
               <p class="text-slate-400 text-xs">Joiner/Mover flows from Okta</p>
             </div>
-            <span id="iam-workflows-pill" class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-200">— workflows</span>
+            <span id="iam-workflows-pill" class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-200">- workflows</span>
           </div>
-          <div id="iam-workflows-loading" class="text-sm text-slate-400">Loading workflows…</div>
+          <div id="iam-workflows-loading" class="text-sm text-slate-400">Loading workflows...</div>
           <div id="iam-workflows-error" class="hidden text-sm text-amber-400">Unable to load workflows.</div>
           <div id="iam-workflows-empty" class="hidden text-sm text-slate-400">No active workflows. Start a demo from onboarding.</div>
           <ul id="iam-workflows-list" class="hidden space-y-3 text-sm"></ul>
@@ -252,9 +252,9 @@ title: "Dashboard - AtlasIT"
               <h3 class="text-lg font-semibold text-slate-100">Connected Integrations</h3>
               <p class="text-slate-400 text-xs">Okta-driven provisioning targets</p>
             </div>
-            <span id="iam-integrations-pill" class="text-xs px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-200">— integrations</span>
+            <span id="iam-integrations-pill" class="text-xs px-2 py-1 rounded-full bg-cyan-500/20 text-cyan-200">- integrations</span>
           </div>
-          <div id="iam-integrations-loading" class="text-sm text-slate-400">Loading integration catalog…</div>
+          <div id="iam-integrations-loading" class="text-sm text-slate-400">Loading integration catalog...</div>
           <div id="iam-integrations-error" class="hidden text-sm text-amber-400">Unable to load integrations.</div>
           <ul id="iam-integrations-list" class="hidden space-y-3 text-sm"></ul>
         </div>
@@ -360,7 +360,7 @@ title: "Dashboard - AtlasIT"
             </div>
             <div class="text-right">
               <span class="text-xs uppercase tracking-wide text-slate-500">Pending</span>
-              <p class="text-2xl font-bold text-amber-300" data-metric="pending-requests">—</p>
+              <p class="text-2xl font-bold text-amber-300" data-metric="pending-requests">-</p>
             </div>
           </div>
           <ul id="dashboard-demo-requests" class="space-y-4 text-sm"></ul>
@@ -375,7 +375,7 @@ title: "Dashboard - AtlasIT"
             </div>
             <div class="text-right">
               <span class="text-xs uppercase tracking-wide text-slate-500">Active</span>
-              <p class="text-2xl font-bold text-blue-300" data-metric="active-users">—</p>
+              <p class="text-2xl font-bold text-blue-300" data-metric="active-users">-</p>
             </div>
           </div>
           <div class="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
@@ -387,23 +387,23 @@ title: "Dashboard - AtlasIT"
           <div id="dashboard-persona-preview" class="hidden border border-slate-700/60 bg-slate-900/70 rounded-lg p-4 mb-4 text-sm text-slate-200">
             <div class="flex justify-between items-start mb-2">
               <div>
-                <p id="dashboard-preview-name" class="font-semibold">—</p>
-                <p id="dashboard-preview-role" class="text-slate-400 text-xs">—</p>
+                <p id="dashboard-preview-name" class="font-semibold">-</p>
+                <p id="dashboard-preview-role" class="text-slate-400 text-xs">-</p>
               </div>
-              <span id="dashboard-preview-status" class="text-xs px-2 py-1 rounded-full bg-slate-600/40">—</span>
+              <span id="dashboard-preview-status" class="text-xs px-2 py-1 rounded-full bg-slate-600/40">-</span>
             </div>
             <dl class="grid grid-cols-2 gap-3 text-xs text-slate-300">
               <div>
                 <dt class="text-slate-500">Last Active</dt>
-                <dd id="dashboard-preview-last-active">—</dd>
+                <dd id="dashboard-preview-last-active">-</dd>
               </div>
               <div>
                 <dt class="text-slate-500">Risk Level</dt>
-                <dd id="dashboard-preview-risk">—</dd>
+                <dd id="dashboard-preview-risk">-</dd>
               </div>
               <div class="col-span-2">
                 <dt class="text-slate-500">Persona Focus</dt>
-                <dd id="dashboard-preview-persona" class="mt-1">—</dd>
+                <dd id="dashboard-preview-persona" class="mt-1">-</dd>
               </div>
             </dl>
           </div>
@@ -715,7 +715,7 @@ title: "Dashboard - AtlasIT"
       function updatePersonaPreview(user) {
         if (!personaPreview) return;
         personaPreview.classList.remove('hidden');
-        if (previewName) previewName.textContent = `${user.name} — ${user.company}`;
+        if (previewName) previewName.textContent = `${user.name} - ${user.company}`;
         if (previewRole) previewRole.textContent = `${user.role} • ${user.department}`;
         if (previewStatus) {
           previewStatus.textContent = `${user.status}`;
@@ -723,25 +723,25 @@ title: "Dashboard - AtlasIT"
         }
         if (previewLastActive) previewLastActive.textContent = formatDateTime(user.lastActive);
         if (previewRisk) previewRisk.textContent = user.riskLevel;
-        if (previewPersona) previewPersona.textContent = `${user.persona} — Managed by ${user.manager} (${user.location})`;
+        if (previewPersona) previewPersona.textContent = `${user.persona} - Managed by ${user.manager} (${user.location})`;
       }
 
       function clearPersonaPreview() {
         if (!personaPreview) return;
         personaPreview.classList.add('hidden');
-        if (previewName) previewName.textContent = '—';
-        if (previewRole) previewRole.textContent = '—';
+        if (previewName) previewName.textContent = '-';
+        if (previewRole) previewRole.textContent = '-';
         if (previewStatus) {
-          previewStatus.textContent = '—';
+          previewStatus.textContent = '-';
           previewStatus.className = 'text-xs px-2 py-1 rounded-full bg-slate-600/40';
         }
-        if (previewLastActive) previewLastActive.textContent = '—';
-        if (previewRisk) previewRisk.textContent = '—';
-        if (previewPersona) previewPersona.textContent = '—';
+        if (previewLastActive) previewLastActive.textContent = '-';
+        if (previewRisk) previewRisk.textContent = '-';
+        if (previewPersona) previewPersona.textContent = '-';
       }
 
       async function hydrateIam() {
-        if (iamUsersLoading) iamUsersLoading.textContent = 'Loading directory users…';
+        if (iamUsersLoading) iamUsersLoading.textContent = 'Loading directory users...';
         show(iamUsersLoading, true);
         show(iamUsersError, false);
         show(iamIntegrationsLoading, true);
@@ -799,13 +799,13 @@ title: "Dashboard - AtlasIT"
           const requests = data.requests || [];
           const activity = data.activity || [];
 
-          applyMetric('active-users', metrics.activeUsers ?? '—');
-          applyMetric('pending-requests', metrics.pendingRequests ?? '—');
-          applyMetric('connected-systems', metrics.connectedSystems ?? '—');
-          applyMetric('security-score', metrics.securityScore != null ? metrics.securityScore + '%' : '—');
-          applyMetric('active-workflows', metrics.activeWorkflows ?? '—');
-          applyMetric('automation-coverage', metrics.automationCoverage != null ? metrics.automationCoverage + '%' : '—');
-          applyMetric('avg-provisioning', metrics.avgProvisioningTimeMinutes != null ? metrics.avgProvisioningTimeMinutes + ' min' : '—');
+          applyMetric('active-users', metrics.activeUsers ?? '-');
+          applyMetric('pending-requests', metrics.pendingRequests ?? '-');
+          applyMetric('connected-systems', metrics.connectedSystems ?? '-');
+          applyMetric('security-score', metrics.securityScore != null ? metrics.securityScore + '%' : '-');
+          applyMetric('active-workflows', metrics.activeWorkflows ?? '-');
+          applyMetric('automation-coverage', metrics.automationCoverage != null ? metrics.automationCoverage + '%' : '-');
+          applyMetric('avg-provisioning', metrics.avgProvisioningTimeMinutes != null ? metrics.avgProvisioningTimeMinutes + ' min' : '-');
 
           dashboardUsers = users;
           selectedPersonaId = '';
@@ -870,7 +870,7 @@ title: "Dashboard - AtlasIT"
 
         try {
           resetButton.setAttribute('disabled', 'true');
-          resetButton.textContent = 'Resetting…';
+          resetButton.textContent = 'Resetting...';
           resetStatus?.classList.add('hidden');
 
           const response = await fetch('/api/demo/reset', { method: 'POST' });
