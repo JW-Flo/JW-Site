@@ -7,7 +7,6 @@ title: "JML Lifecycle Demo - AtlasIT"
     <title>JML Lifecycle Demo - AtlasIT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
     <style>
       .nav-link { transition: all 0.2s ease; }
@@ -42,94 +41,6 @@ title: "JML Lifecycle Demo - AtlasIT"
       .scenario-active {
         border-color: rgba(34, 197, 94, 0.7) !important;
         background: rgba(34, 197, 94, 0.1);
-      }
-      
-      .step-indicator {
-        width: 2rem;
-        height: 2rem;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 0.875rem;
-      }
-      
-      .step-complete {
-        background: rgb(34, 197, 94);
-        color: white;
-      }
-      
-      .step-current {
-        background: rgb(59, 130, 246);
-        color: white;
-      }
-      
-      .step-pending {
-        background: rgba(71, 85, 105, 0.5);
-        color: rgb(148, 163, 184);
-      }
-      
-      .progress-bar {
-        height: 2px;
-        background: rgba(71, 85, 105, 0.3);
-        border-radius: 1px;
-        overflow: hidden;
-      }
-      
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(to right, rgb(34, 197, 94), rgb(59, 130, 246));
-        transition: width 0.5s ease;
-      }
-      
-      .log-entry {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(71, 85, 105, 0.3);
-        border-radius: 0.5rem;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
-      }
-      
-      .btn {
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-      }
-      
-      .btn-primary {
-        background: rgb(59, 130, 246);
-        color: white;
-      }
-      
-      .btn-primary:hover {
-        background: rgb(37, 99, 235);
-      }
-      
-      .btn-primary:disabled {
-        background: rgba(71, 85, 105, 0.5);
-        cursor: not-allowed;
-      }
-      
-      .btn-secondary {
-        background: rgba(71, 85, 105, 0.5);
-        color: rgb(203, 213, 225);
-      }
-      
-      .btn-secondary:hover {
-        background: rgba(71, 85, 105, 0.7);
-      }
-      
-      .btn-success {
-        background: rgb(34, 197, 94);
-        color: white;
-      }
-      
-      .btn-success:hover {
-        background: rgb(22, 163, 74);
       }
     </style>
   </head>
@@ -201,558 +112,149 @@ title: "JML Lifecycle Demo - AtlasIT"
       </nav>
     </header>
 
-    <div id="app">
-      <div class="demo-banner">
-        � Interactive JML Lifecycle Demo - Enterprise IAM Automation
-      </div>
-      
-      <div class="container mx-auto px-4 py-8">
-        <div class="text-center mb-12">
-          <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
-            JML Lifecycle Demo
-          </h1>
-          <p class="text-xl text-slate-300 max-w-3xl mx-auto">
-            Experience automated onboarding, role changes, and offboarding workflows powered by HRIS integration, Okta API, and AWS IAM automation
-          </p>
-        </div>
-
-        <!-- Demo Controls -->
-        <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
-          <div class="flex justify-center space-x-4">
-            <button @click="resetDemo" class="btn btn-secondary">
-              🔄 Reset Demo
-            </button>
-            <button @click="runFullDemo" class="btn btn-primary" :disabled="demoRunning">
-              🚀 Run Complete Demo
-            </button>
-            <button @click="toggleAutoAdvance" class="btn" :class="autoAdvance ? 'btn-success' : 'btn-secondary'">
-              <span v-if="autoAdvance">⏸️ Pause Auto</span>
-              <span v-else>▶️ Auto Advance</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Scenario Selection -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div 
-            v-for="scenario in scenarios" 
-            :key="scenario.id"
-            @click="selectScenario(scenario.id)"
-            class="scenario-card cursor-pointer p-6 rounded-xl"
-            :class="{ 'scenario-active': currentScenario && currentScenario.id === scenario.id }"
-          >
-            <div class="flex items-center mb-3">
-              <div class="text-2xl mr-3">{{ scenario.icon }}</div>
-              <div>
-                <h3 class="text-lg font-semibold">{{ scenario.title }}</h3>
-                <p class="text-sm text-slate-400">{{ scenario.subtitle }}</p>
-              </div>
-            </div>
-            <p class="text-slate-300 mb-4">{{ scenario.description }}</p>
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: scenario.progress + '%' }"></div>
-            </div>
-            <div class="text-xs text-slate-400 mt-2">{{ scenario.progress }}% Complete</div>
-          </div>
-        </div>
-
+    <div class="demo-banner">
+      🚀 Interactive JML Lifecycle Demo - Enterprise IAM Automation
     </div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+          JML Lifecycle Demo
+        </h1>
+        <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+          Experience automated onboarding, role changes, and offboarding workflows powered by HRIS integration, Okta API, and AWS IAM automation
+        </p>
+      </div>
 
-        <!-- Employee Details -->
-        <div v-if="currentEmployee" class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
-          <h2 class="text-2xl font-semibold mb-4 flex items-center">
-            <span class="mr-2">👤</span> Employee Profile
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Scenario Selection -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="scenario-card p-6 rounded-xl cursor-pointer">
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">👋</div>
             <div>
-              <div class="mb-2"><strong>Name:</strong> {{ currentEmployee.firstName }} {{ currentEmployee.lastName }}</div>
-              <div class="mb-2"><strong>Employee ID:</strong> {{ currentEmployee.employeeId }}</div>
-              <div class="mb-2"><strong>Email:</strong> {{ currentEmployee.email }}</div>
-              <div class="mb-2"><strong>Department:</strong> {{ currentEmployee.department }}</div>
-              <div class="mb-2"><strong>Title:</strong> {{ currentEmployee.title }}</div>
-              <div v-if="currentEmployee.endDate" class="mb-2"><strong>End Date:</strong> {{ currentEmployee.endDate }}</div>
+              <h3 class="text-lg font-semibold">New Employee</h3>
+              <p class="text-sm text-slate-400">Joiner Workflow</p>
             </div>
-            <div>
-              <div class="mb-2"><strong>Manager:</strong> {{ currentEmployee.manager }}</div>
-              <div class="mb-2"><strong>Employment Type:</strong> {{ currentEmployee.employeeType }}</div>
-              <div class="mb-2"><strong>Status:</strong> {{ currentEmployee.status }}</div>
-              <div class="mb-2"><strong>Start Date:</strong> {{ currentEmployee.startDate }}</div>
-              <div v-if="currentEmployee.systemAccess" class="mb-2">
-                <strong>System Access:</strong>
-                <div class="flex flex-wrap gap-2 mt-1">
-                  <span v-for="system in currentEmployee.systemAccess" :key="system" class="px-2 py-1 bg-blue-600 rounded text-xs">{{ system }}</span>
-                </div>
-              </div>
+          </div>
+          <p class="text-slate-300 mb-4">Jordan Miles joins as Security Engineer. Watch automated provisioning across Okta and AWS.</p>
+          <div class="space-y-2">
+            <div class="text-sm font-medium">Workflow Steps:</div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <div>• HRIS Employee Creation</div>
+              <div>• Okta User Provisioning</div>
+              <div>• AWS IAM Role Creation</div>
+              <div>• CloudTrail Monitoring Setup</div>
+              <div>• Welcome Email & Credentials</div>
             </div>
           </div>
         </div>
 
-        <!-- Workflow Steps -->
-        <div v-if="currentScenario" class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-semibold">{{ currentScenario.title }} Workflow</h2>
-            <div class="flex space-x-2">
-              <button 
-                @click="previousStep" 
-                v-if="currentStepIndex > 0" 
-                class="btn btn-secondary"
-              >
-                ← Previous
-              </button>
-              <button 
-                @click="nextStep" 
-                v-if="currentStepIndex < currentScenario.steps.length - 1" 
-                class="btn btn-primary"
-              >
-                Next →
-              </button>
-              <button 
-                @click="completeWorkflow" 
-                v-if="currentStepIndex === currentScenario.steps.length - 1 && !workflowComplete" 
-                class="btn btn-success"
-              >
-                Complete Workflow
-              </button>
+        <div class="scenario-card p-6 rounded-xl cursor-pointer">
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">🔄</div>
+            <div>
+              <h3 class="text-lg font-semibold">Role Change</h3>
+              <p class="text-sm text-slate-400">Mover Workflow</p>
             </div>
           </div>
-
-          <!-- Steps Timeline -->
-          <div class="space-y-6">
-            <div 
-              v-for="(step, index) in currentScenario.steps" 
-              :key="index" 
-              class="flex items-start space-x-4"
-            >
-              <div class="flex flex-col items-center">
-                <div 
-                  class="step-indicator"
-                  :class="{
-                    'step-complete': index < currentStepIndex,
-                    'step-current': index === currentStepIndex,
-                    'step-pending': index > currentStepIndex
-                  }"
-                >
-                  <span v-if="index < currentStepIndex">✓</span>
-                  <span v-else>{{ index + 1 }}</span>
-                </div>
-                <div 
-                  v-if="index < currentScenario.steps.length - 1"
-                  class="w-px h-16 mt-2"
-                  :class="index < currentStepIndex ? 'bg-green-500' : 'bg-slate-600'"
-                ></div>
-              </div>
-              
-              <div class="flex-1">
-                <h3 class="text-lg font-semibold mb-2">{{ step.title }}</h3>
-                <p class="text-slate-300 mb-3">{{ step.description }}</p>
-                <span v-if="step.duration" class="text-sm text-slate-400">{{ step.duration }}</span>
-                
-                <!-- Systems Involved -->
-                <div v-if="step.systems && step.systems.length > 0" class="mb-3">
-                  <div class="text-sm text-slate-400 mb-1">Systems Involved:</div>
-                  <div class="flex flex-wrap gap-2">
-                    <span 
-                      v-for="system in step.systems" 
-                      :key="system" 
-                      class="px-2 py-1 bg-slate-700 rounded text-xs border border-slate-600"
-                    >
-                      {{ system }}
-                    </span>
-                  </div>
-                </div>
-                
-                <!-- Step Logs -->
-                <div v-if="index === currentStepIndex && stepLogs[index]" class="space-y-2">
-                  <div class="text-sm text-slate-400 mb-2">Execution Log:</div>
-                  <div 
-                    v-for="(log, logIndex) in stepLogs[index]" 
-                    :key="logIndex" 
-                    class="log-entry"
-                  >
-                    <div class="text-xs text-slate-500">{{ log.timestamp }}</div>
-                    <div class="text-sm">{{ log.message }}</div>
-                  </div>
-                </div>
-              </div>
+          <p class="text-slate-300 mb-4">Alex Chen moves from Developer to DevOps Lead. See automated permission updates.</p>
+          <div class="space-y-2">
+            <div class="text-sm font-medium">Workflow Steps:</div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <div>• HRIS Role Update</div>
+              <div>• Okta Group Membership Changes</div>
+              <div>• AWS IAM Role Migration</div>
+              <div>• Access Review Trigger</div>
+              <div>• Team Notifications</div>
             </div>
           </div>
         </div>
 
-        <!-- Global Activity Log -->
-        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
-          <h2 class="text-2xl font-semibold mb-4 flex items-center">
-            <span class="mr-2">📋</span> Activity Log
-          </h2>
-          <div v-if="globalLogs.length === 0" class="text-slate-400 text-center py-8">
-            No activity yet. Select a scenario and run the demo to see real-time logs.
+        <div class="scenario-card p-6 rounded-xl cursor-pointer">
+          <div class="flex items-center mb-3">
+            <div class="text-2xl mr-3">👋</div>
+            <div>
+              <h3 class="text-lg font-semibold">Employee Exit</h3>
+              <p class="text-sm text-slate-400">Leaver Workflow</p>
+            </div>
           </div>
-          <div v-else class="space-y-2 max-h-64 overflow-y-auto">
-            <div 
-              v-for="(log, index) in globalLogs" 
-              :key="index" 
-              class="log-entry"
-            >
-              <div class="flex justify-between items-start mb-1">
-                <span class="font-medium" :class="{
-                  'text-green-400': log.type === 'success',
-                  'text-blue-400': log.type === 'info',
-                  'text-yellow-400': log.type === 'warning',
-                  'text-red-400': log.type === 'error'
-                }">{{ log.system }}</span>
-                <span class="text-xs text-slate-500">{{ log.timestamp }}</span>
-              </div>
-              <div class="text-sm text-slate-300">{{ log.message }}</div>
+          <p class="text-slate-300 mb-4">Sam Taylor departs the company. Witness complete access deprovisioning and audit trail.</p>
+          <div class="space-y-2">
+            <div class="text-sm font-medium">Workflow Steps:</div>
+            <div class="text-xs text-slate-400 space-y-1">
+              <div>• HRIS Termination Recording</div>
+              <div>• Immediate Okta Suspension</div>
+              <div>• AWS IAM Deprovisioning</div>
+              <div>• Final Audit & Backup</div>
+              <div>• Manager Notifications</div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Key Features -->
+      <div class="glass-effect p-8 rounded-xl border border-slate-700/50 mb-8">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Enterprise IAM Automation Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div class="text-3xl mb-2">🏢</div>
+            <h3 class="font-semibold mb-1">HRIS Integration</h3>
+            <p class="text-sm text-slate-400">BambooHR as source of truth</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">🔐</div>
+            <h3 class="font-semibold mb-1">Okta API</h3>
+            <p class="text-sm text-slate-400">User lifecycle management</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">☁️</div>
+            <h3 class="font-semibold mb-1">AWS IAM</h3>
+            <p class="text-sm text-slate-400">Terraform automation</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl mb-2">📊</div>
+            <h3 class="font-semibold mb-1">Compliance</h3>
+            <p class="text-sm text-slate-400">Audit trails & reporting</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Integration Overview -->
+      <div class="glass-effect p-8 rounded-xl border border-slate-700/50">
+        <h2 class="text-2xl font-semibold mb-6 text-center">API Integration Flow</h2>
+        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">HR</span>
+            </div>
+            <span class="text-slate-300">BambooHR</span>
+          </div>
+          <div class="text-slate-400">→</div>
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">API</span>
+            </div>
+            <span class="text-slate-300">AtlasIT</span>
+          </div>
+          <div class="text-slate-400">→</div>
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">ID</span>
+            </div>
+            <span class="text-slate-300">Okta</span>
+          </div>
+          <div class="text-slate-400">→</div>
+          <div class="flex items-center space-x-2">
+            <div class="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center">
+              <span class="text-white font-bold">AWS</span>
+            </div>
+            <span class="text-slate-300">IAM</span>
+          </div>
+        </div>
+        <p class="text-center text-slate-400 mt-6">
+          Seamless integration from HRIS to cloud infrastructure with full audit trail
+        </p>
+      </div>
     </div>
-
-    <script>
-      const { createApp } = Vue;
-
-      createApp({
-        data() {
-          return {
-            currentScenario: null,
-            currentEmployee: null,
-            currentStepIndex: 0,
-            workflowComplete: false,
-            demoRunning: false,
-            autoAdvance: false,
-            stepLogs: {},
-            globalLogs: [],
-            
-            scenarios: [
-              {
-                id: 'joiner',
-                icon: '👋',
-                title: 'New Employee',
-                subtitle: 'Joiner Workflow',
-                description: 'Jordan Miles joins as Security Engineer. Watch automated provisioning across Okta and AWS.',
-                progress: 0,
-                employee: {
-                  employeeId: 'EMP001',
-                  firstName: 'Jordan',
-                  lastName: 'Miles',
-                  email: 'jordan.miles@atlasit.pro',
-                  title: 'Security Engineer',
-                  department: 'Security',
-                  manager: 'security-lead@atlasit.pro',
-                  employeeType: 'fulltime',
-                  status: 'active',
-                  startDate: '2025-01-15',
-                  systemAccess: ['HRIS', 'Okta', 'AWS IAM', 'CloudTrail']
-                },
-                steps: [
-                  {
-                    title: 'HRIS Employee Created',
-                    description: 'HR creates new employee record in BambooHR with system access requirements',
-                    systems: ['BambooHR'],
-                    duration: '~1 min'
-                  },
-                  {
-                    title: 'HRIS Webhook Triggered',
-                    description: 'HRIS sends employee.created webhook to AtlasIT API Manager',
-                    systems: ['BambooHR', 'API Manager'],
-                    duration: '~5 sec'
-                  },
-                  {
-                    title: 'Okta User Creation',
-                    description: 'API Manager calls Okta API to create user account with department-based groups',
-                    systems: ['API Manager', 'Okta'],
-                    duration: '~10 sec'
-                  },
-                  {
-                    title: 'AWS IAM Terraform Execution',
-                    description: 'Terraform creates AWS IAM role with security engineer permissions',
-                    systems: ['Terraform', 'AWS IAM'],
-                    duration: '~30 sec'
-                  },
-                  {
-                    title: 'CloudTrail Monitoring Setup',
-                    description: 'Lambda function configures CloudTrail monitoring for new user activities',
-                    systems: ['AWS Lambda', 'CloudTrail'],
-                    duration: '~15 sec'
-                  },
-                  {
-                    title: 'Welcome Email & Credentials',
-                    description: 'Automated welcome email sent with temporary credentials and onboarding checklist',
-                    systems: ['Email Service', 'Okta'],
-                    duration: '~5 sec'
-                  }
-                ]
-              },
-              {
-                id: 'mover',
-                icon: '🔄',
-                title: 'Role Change',
-                subtitle: 'Mover Workflow',
-                description: 'Alex Chen moves from Developer to DevOps Lead. See automated permission updates.',
-                progress: 0,
-                employee: {
-                  employeeId: 'EMP002',
-                  firstName: 'Alex',
-                  lastName: 'Chen',
-                  email: 'alex.chen@atlasit.pro',
-                  title: 'DevOps Lead',
-                  department: 'Engineering',
-                  manager: 'engineering-director@atlasit.pro',
-                  employeeType: 'fulltime',
-                  status: 'active',
-                  startDate: '2023-03-10',
-                  systemAccess: ['HRIS', 'Okta', 'AWS IAM', 'GitHub', 'Docker Registry']
-                },
-                steps: [
-                  {
-                    title: 'HRIS Role Update',
-                    description: 'HR updates employee record with new title and reporting structure',
-                    systems: ['BambooHR'],
-                    duration: '~2 min'
-                  },
-                  {
-                    title: 'HRIS Webhook - Role Change',
-                    description: 'HRIS sends employee.updated webhook to AtlasIT API Manager',
-                    systems: ['BambooHR', 'API Manager'],
-                    duration: '~5 sec'
-                  },
-                  {
-                    title: 'Okta Group Membership Update',
-                    description: 'API Manager updates Okta groups: removes Developer, adds DevOps Lead permissions',
-                    systems: ['API Manager', 'Okta'],
-                    duration: '~15 sec'
-                  },
-                  {
-                    title: 'AWS IAM Role Migration',
-                    description: 'Terraform updates AWS IAM with elevated DevOps permissions (EC2, Lambda, CloudFormation)',
-                    systems: ['Terraform', 'AWS IAM'],
-                    duration: '~45 sec'
-                  },
-                  {
-                    title: 'Access Review Trigger',
-                    description: 'Automated access review created for manager approval of new elevated permissions',
-                    systems: ['Compliance Engine', 'Email Service'],
-                    duration: '~10 sec'
-                  },
-                  {
-                    title: 'Team Notification',
-                    description: 'Slack notification sent to DevOps team about new team lead',
-                    systems: ['Slack API', 'Team Management'],
-                    duration: '~5 sec'
-                  }
-                ]
-              },
-              {
-                id: 'leaver',
-                icon: '👋',
-                title: 'Employee Exit',
-                subtitle: 'Leaver Workflow',
-                description: 'Sam Taylor departs the company. Witness complete access deprovisioning and audit trail.',
-                progress: 0,
-                employee: {
-                  employeeId: 'EMP003',
-                  firstName: 'Sam',
-                  lastName: 'Taylor',
-                  email: 'sam.taylor@atlasit.pro',
-                  title: 'Marketing Manager',
-                  department: 'Marketing',
-                  manager: 'marketing-director@atlasit.pro',
-                  employeeType: 'fulltime',
-                  status: 'terminated',
-                  startDate: '2022-06-15',
-                  endDate: '2025-01-20',
-                  systemAccess: ['HRIS', 'Okta (Disabled)', 'AWS IAM (Revoked)', 'Audit Trail']
-                },
-                steps: [
-                  {
-                    title: 'HRIS Termination Recorded',
-                    description: 'HR sets employee status to terminated with last working day',
-                    systems: ['BambooHR'],
-                    duration: '~1 min'
-                  },
-                  {
-                    title: 'HRIS Webhook - Termination',
-                    description: 'HRIS sends employee.terminated webhook to AtlasIT API Manager',
-                    systems: ['BambooHR', 'API Manager'],
-                    duration: '~5 sec'
-                  },
-                  {
-                    title: 'Immediate Okta Account Suspension',
-                    description: 'API Manager immediately suspends Okta account to prevent further access',
-                    systems: ['API Manager', 'Okta'],
-                    duration: '~10 sec'
-                  },
-                  {
-                    title: 'AWS IAM Deprovisioning',
-                    description: 'Terraform removes all AWS IAM roles and policies associated with user',
-                    systems: ['Terraform', 'AWS IAM'],
-                    duration: '~30 sec'
-                  },
-                  {
-                    title: 'CloudTrail Final Audit',
-                    description: 'Lambda generates final access report with complete audit trail for compliance',
-                    systems: ['AWS Lambda', 'CloudTrail', 'S3'],
-                    duration: '~20 sec'
-                  },
-                  {
-                    title: 'Data Backup & Account Deletion',
-                    description: 'Personal data backed up for retention policy, Okta account scheduled for deletion',
-                    systems: ['Backup Service', 'Okta', 'Compliance'],
-                    duration: '~60 sec'
-                  },
-                  {
-                    title: 'Manager & IT Notification',
-                    description: 'Automated notifications sent confirming successful deprovisioning',
-                    systems: ['Email Service', 'Compliance Dashboard'],
-                    duration: '~5 sec'
-                  }
-                ]
-              }
-            ]
-          };
-        },
-        methods: {
-          selectScenario(id) {
-            this.currentScenario = this.scenarios.find(s => s.id === id);
-            this.currentEmployee = this.currentScenario.employee;
-            this.currentStepIndex = 0;
-            this.workflowComplete = false;
-            this.stepLogs = {};
-            this.addGlobalLog('info', 'Demo System', `Selected ${this.currentScenario.title} scenario for ${this.currentEmployee.firstName} ${this.currentEmployee.lastName}`);
-          },
-          
-          nextStep() {
-            if (this.currentStepIndex < this.currentScenario.steps.length - 1) {
-              this.executeStep(this.currentStepIndex);
-              this.currentStepIndex++;
-              this.updateProgress();
-            }
-          },
-          
-          previousStep() {
-            if (this.currentStepIndex > 0) {
-              this.currentStepIndex--;
-              this.updateProgress();
-            }
-          },
-          
-          async executeStep(stepIndex) {
-            const step = this.currentScenario.steps[stepIndex];
-            
-            this.addStepLog(stepIndex, `Executing: ${step.title}`);
-            this.addGlobalLog('info', step.systems[0], `Starting: ${step.title}`);
-            
-            // Simulate step execution with realistic delays
-            await this.delay(500);
-            this.addStepLog(stepIndex, `Processing ${step.description}`);
-            
-            await this.delay(1000);
-            this.addStepLog(stepIndex, `✅ ${step.title} completed successfully`);
-            this.addGlobalLog('success', step.systems[step.systems.length - 1], `Completed: ${step.title}`);
-          },
-          
-          async completeWorkflow() {
-            this.workflowComplete = true;
-            this.currentScenario.progress = 100;
-            await this.executeStep(this.currentStepIndex);
-            this.addGlobalLog('success', 'Demo System', `${this.currentScenario.title} workflow completed for ${this.currentEmployee.firstName} ${this.currentEmployee.lastName}`);
-          },
-          
-          resetDemo() {
-            this.currentScenario = null;
-            this.currentEmployee = null;
-            this.currentStepIndex = 0;
-            this.workflowComplete = false;
-            this.demoRunning = false;
-            this.autoAdvance = false;
-            this.stepLogs = {};
-            this.globalLogs = [];
-            
-            // Reset progress for all scenarios
-            this.scenarios.forEach(scenario => {
-              scenario.progress = 0;
-            });
-            
-            this.addGlobalLog('info', 'Demo System', 'Demo reset - ready for new scenario');
-          },
-          
-          async runFullDemo() {
-            if (!this.currentScenario) {
-              this.addGlobalLog('warning', 'Demo System', 'Please select a scenario first');
-              return;
-            }
-            
-            this.demoRunning = true;
-            this.currentStepIndex = 0;
-            this.workflowComplete = false;
-            
-            for (let i = 0; i < this.currentScenario.steps.length; i++) {
-              this.currentStepIndex = i;
-              await this.executeStep(i);
-              this.updateProgress();
-              
-              if (i < this.currentScenario.steps.length - 1) {
-                await this.delay(1500); // Pause between steps
-              }
-            }
-            
-            await this.completeWorkflow();
-            this.demoRunning = false;
-          },
-          
-          toggleAutoAdvance() {
-            this.autoAdvance = !this.autoAdvance;
-            if (this.autoAdvance) {
-              this.autoAdvanceSteps();
-            }
-          },
-          
-          async autoAdvanceSteps() {
-            while (this.autoAdvance && this.currentScenario && this.currentStepIndex < this.currentScenario.steps.length - 1) {
-              await this.delay(3000);
-              if (this.autoAdvance) {
-                this.nextStep();
-              }
-            }
-          },
-          
-          updateProgress() {
-            const progress = Math.round(((this.currentStepIndex + 1) / this.currentScenario.steps.length) * 100);
-            this.currentScenario.progress = progress;
-          },
-          
-          addStepLog(stepIndex, message) {
-            if (!this.stepLogs[stepIndex]) {
-              this.stepLogs[stepIndex] = [];
-            }
-            
-            this.stepLogs[stepIndex].push({
-              timestamp: new Date().toLocaleTimeString(),
-              message: message
-            });
-          },
-          
-          addGlobalLog(type, system, message) {
-            this.globalLogs.unshift({
-              timestamp: new Date().toLocaleTimeString(),
-              type: type,
-              system: system,
-              message: message
-            });
-            
-            // Keep only last 50 logs
-            if (this.globalLogs.length > 50) {
-              this.globalLogs = this.globalLogs.slice(0, 50);
-            }
-          },
-          
-          delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-          }
-        }
-      }).mount('#app');
-    </script>
-  </body>
-</html>
   </body>
 </html>
