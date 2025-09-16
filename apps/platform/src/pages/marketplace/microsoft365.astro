@@ -1,0 +1,45 @@
+---
+const title = "Microsoft 365 Integration - AtlasIT Marketplace";
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+  <main class="container mx-auto px-6 py-8">
+    <h1 class="text-3xl font-bold mb-6">Microsoft 365 Integration</h1>
+    <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Quick Integration Walkthrough</h2>
+      <ol class="list-decimal ml-6 space-y-3">
+        <li>Authorize AtlasIT to access your Microsoft 365, Microsoft Entra ID, and Active Directory accounts <button class="px-4 py-2 bg-blue-600 text-white rounded-lg ml-2">Connect to Microsoft 365 & Entra</button></li>
+        <li>Configure which services to sync:
+          <div class="mt-2">
+            <label class="block mb-1">Select Services:</label>
+            <select class="input-field w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded text-slate-100 text-sm">
+              <option value="">Choose...</option>
+              <option value="outlook">Outlook</option>
+              <option value="teams">Teams</option>
+              <option value="sharepoint">SharePoint</option>
+              <option value="onedrive">OneDrive</option>
+              <option value="entra">Microsoft Entra ID</option>
+              <option value="ad">Active Directory</option>
+            </select>
+          </div>
+        </li>
+        <li>Set notification preferences:
+          <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> Calendar Events</label>
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> Security Alerts</label>
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> File Changes</label>
+            <label class="flex items-center"><input type="checkbox" class="mr-2"> User Onboarding</label>
+          </div>
+        </li>
+        <li>Finish setup and test integration <button class="px-4 py-2 bg-green-600 text-white rounded-lg ml-2">Test Integration</button></li>
+      </ol>
+    </div>
+  </main>
+</body>
+</html>
