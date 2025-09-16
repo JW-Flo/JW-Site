@@ -12,7 +12,7 @@ This platform and all planning, architecture, and feature development are rigoro
 All roadmap decisions, architectural choices, and feature prioritization are referenced to these reports. Please consult them for rationale, data, and ongoing alignment
 ---
 
-**Primary Domain:** atlasit.pro  
+**Primary Domain:** <https://www.atlasit.pro>  
 **Branding:** See monorepo root for generated logo options and taglines.  
 **Migration Guide:** See `/docs/# AtlasIT Platform Consolidation & Migra.md`
 
@@ -137,7 +137,7 @@ npx wrangler pages deployment list --project-name=atlasit-platform
 
 Expected projects:
 
-- `atlasit-platform` - Main AtlasIT platform (target for atlasit.pro)
+- `atlasit-platform` - Main AtlasIT platform (temporary canonical target for <https://www.atlasit.pro> while apex DNS is pending)
 - `jw-site` - Personal portfolio site
 
 ### One-time (UI)
@@ -164,7 +164,7 @@ npx wrangler pages deploy apps/jw-immersive/dist --project-name=jw-site
 npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform --branch=preview
 
 # Production deploy (scripted helper)
-CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main DEPLOY_HEALTHCHECK_URL=https://atlasit.pro/health npm run deploy:production
+CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main DEPLOY_HEALTHCHECK_URL=https://www.atlasit.pro/health npm run deploy:production
 
 # Dry-run validation (safe)
 CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main npm run deploy:production -- --dry-run
@@ -176,28 +176,31 @@ CF_PAGES_PROJECT=atlasit-platform CF_PAGES_BRANCH=main npm run deploy:production
 #   CONSENT_ADMIN_KEY, TURNSTILE_SECRET_KEY, SITE_URL, optional scanner API keys.
 ```
 
-### Custom Domain Setup (atlasit.pro)
+### Custom Domain Setup (www.atlasit.pro)
 
-To map the custom domain `atlasit.pro` to the `atlasit-platform` project:
+To map the custom domain `www.atlasit.pro` to the `atlasit-platform` project (apex `atlasit.pro` will be added later or redirected once DNS is configured):
 
 1. **In Cloudflare Dashboard:**
-   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → Pages
-   - Select the `atlasit-platform` project
-   - Go to **Custom domains** tab
-   - Click **Set up a custom domain**
-   - Enter `atlasit.pro`
-   - Follow verification instructions (CNAME or TXT record)
 
-2. **DNS Configuration:**
-   - If Cloudflare manages your DNS: Records are added automatically
-   - If external DNS: Add the CNAME record provided by Cloudflare
-   - Example: `atlasit.pro CNAME atlasit-platform.pages.dev`
+- Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → Pages
+- Select the `atlasit-platform` project
+- Go to **Custom domains** tab
+- Click **Set up a custom domain**
+- Enter `www.atlasit.pro`
+- Follow verification instructions (CNAME or TXT record)
 
-3. **Verification:**
-   - Wait for domain verification (usually 1-5 minutes)
-   - Status should show "Active" in the Custom domains tab
+1. **DNS Configuration:**
 
-4. **Post-Setup Redeploy:**
+- If Cloudflare manages your DNS: Records are added automatically
+- If external DNS: Add the CNAME record provided by Cloudflare
+- Example: `www.atlasit.pro CNAME atlasit-platform.pages.dev`
+
+1. **Verification:**
+
+- Wait for domain verification (usually 1-5 minutes)
+- Status should show "Active" in the Custom domains tab
+
+1. **Post-Setup Redeploy:**
 
    ```bash
    # Redeploy to update SITE_URL metadata
@@ -235,15 +238,15 @@ After successful deployment and domain mapping, verify the deployment:
 
 ```bash
 # Check domain resolution and SSL
-curl -I https://atlasit.pro/
+curl -I https://www.atlasit.pro/
 
 # Health check (if health endpoint exists)
-curl -sfS https://atlasit.pro/health | jq '.status'
+curl -sfS https://www.atlasit.pro/health | jq '.status'
 
 # Test key platform endpoints
-curl -I https://atlasit.pro/dashboard/
-curl -I https://atlasit.pro/onboarding/
-curl -sfS https://atlasit.pro/api/demo/data | jq '.requestId'
+curl -I https://www.atlasit.pro/dashboard/
+curl -I https://www.atlasit.pro/onboarding/
+curl -sfS https://www.atlasit.pro/api/demo/data | jq '.requestId'
 ```
 
 Expected responses:
@@ -258,16 +261,16 @@ Manually spot-check `/dashboard`, `/onboarding`, persona switching, and the rese
 
 **Platform URLs:**
 
-- **Production:** <https://atlasit.pro> (custom domain)
+- **Production:** <https://www.atlasit.pro> (temporary canonical custom domain)
 - **Preview:** <https://1d9d5ba0.atlasit-platform.pages.dev> (latest deployment)
-- **Dashboard:** <https://atlasit.pro/dashboard/>
-- **Onboarding:** <https://atlasit.pro/onboarding/>
+- **Dashboard:** <https://www.atlasit.pro/dashboard/>
+- **Onboarding:** <https://www.atlasit.pro/onboarding/>
 
 **Quick Verification:**
 
 ```bash
 # Verify platform is live
-curl -I https://atlasit.pro/dashboard/
+curl -I https://www.atlasit.pro/dashboard/
 
 # Test new deployment
 curl -I https://1d9d5ba0.atlasit-platform.pages.dev/dashboard/
@@ -471,13 +474,13 @@ All architectural decisions and future enhancements are mapped to findings and r
 Run after staging & before promoting to production:
 
 1. **Build & Deploy:** `npm run build && npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform`
-2. **Domain Mapping:** Verify `atlasit.pro` points to `atlasit-platform` project in Cloudflare Dashboard
-3. **SSL/TLS:** Check domain resolves with valid certificate: `curl -I https://atlasit.pro/`
-4. **Platform Access:** Verify dashboard loads: `curl -I https://atlasit.pro/dashboard/` → 200 OK
-5. **API Endpoints:** Test demo data: `curl -sfS https://atlasit.pro/api/demo/data | jq '.requestId'`
-6. **Health Check:** If health endpoint exists: `curl -sfS https://atlasit.pro/health | jq '.status'`
+2. **Domain Mapping:** Verify `www.atlasit.pro` points to `atlasit-platform` project in Cloudflare Dashboard
+3. **SSL/TLS:** Check domain resolves with valid certificate: `curl -I https://www.atlasit.pro/`
+4. **Platform Access:** Verify dashboard loads: `curl -I https://www.atlasit.pro/dashboard/` → 200 OK
+5. **API Endpoints:** Test demo data: `curl -sfS https://www.atlasit.pro/api/demo/data | jq '.requestId'`
+6. **Health Check:** If health endpoint exists: `curl -sfS https://www.atlasit.pro/health | jq '.status'`
 7. **Onboarding Flow:** Manual check of `/onboarding` form and persona switching
-8. **Security Headers:** `curl -I https://atlasit.pro/dashboard/` → confirm CSP, HSTS, Frame deny
+8. **Security Headers:** `curl -I https://www.atlasit.pro/dashboard/` → confirm CSP, HSTS, Frame deny
 9. **Rate Limits:** Hit API endpoints repeatedly → should receive 429 with RateLimit headers
 10. **Deployment Status:** Verify latest commit hash matches deployment
 
@@ -489,7 +492,7 @@ npm run build
 npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform
 
 # Verify deployment
-curl -I https://atlasit.pro/dashboard/
+curl -I https://www.atlasit.pro/dashboard/
 curl -I https://1d9d5ba0.atlasit-platform.pages.dev/dashboard/
 ```
 

@@ -102,9 +102,9 @@
 
 ## Demo Links
 
-- **AtlasIT**: <https://atlasit.pro>
-- **JW-Site**: <https://atlasit.pro/team/jw/immersive>
-- **AWhittleWandering**: <https://atlasit.pro/team/jw/immersive/projects/awhittlewandering>
+- **AtlasIT**: <https://www.atlasit.pro>
+- **JW-Site**: <https://www.atlasit.pro/team/jw/immersive>
+- **AWhittleWandering**: <https://www.atlasit.pro/team/jw/immersive/projects/awhittlewandering>
 
 ---
 

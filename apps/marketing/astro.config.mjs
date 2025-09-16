@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 
-const SITE_URL = process.env.SITE_URL || "https://atlasit.pro";
+const SITE_URL = process.env.SITE_URL || "https://www.atlasit.pro";
 
 export default defineConfig({
   site: SITE_URL,

@@ -6,5 +6,5 @@ export default defineConfig({
   integrations: [tailwind()],
   output: "server",
   adapter: cloudflare(),
-  site: "https://atlasit.pro",
+  site: "https://www.atlasit.pro",
 });

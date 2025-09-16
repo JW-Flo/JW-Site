@@ -6,7 +6,7 @@ pages_build_output_dir = "dist"
 
 [vars]
 # Production site URL - update this with your custom domain later
-SITE_URL = "https://atlasit.pro"
+SITE_URL = "https://www.atlasit.pro"
 # Feature flags & admin keys (set securely in dashboard for production)
 # FEATURE_CONSENT_D1 = "true"  # Enable consent D1 persistence
 # FEATURE_GEO_CLASSIFICATION = "true" # Enable geo hashing output
@@ -65,7 +65,7 @@ preview_bucket_name = "jw-site-media-preview"
 
 
 [env.production]
-vars = { SITE_URL = "https://atlasit.pro" }
+vars = { SITE_URL = "https://www.atlasit.pro" }
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "guestbook_demo"
