@@ -1,0 +1,7 @@
+tunnel: c463b1fd-b6a3-4ab4-b2fe-50d5415f03cb
+credentials-file: /Users/jw/.cloudflared/c463b1fd-b6a3-4ab4-b2fe-50d5415f03cb.json
+
+ingress:
+  - hostname: mcp.atlasit.pro
+    service: http://localhost:3000
+  - service: http_status:404
