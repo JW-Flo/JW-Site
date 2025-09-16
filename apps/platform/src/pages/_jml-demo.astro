@@ -985,10 +985,10 @@ title: "JML Lifecycle Demo - AtlasIT"
           async saveDemoState() {
             try {
               const state = {
-                scenario: this.currentScenario?.id,
+                scenario: this.currentScenario ? this.currentScenario.id : null,
                 employee: this.currentEmployee,
                 stepIndex: this.currentStepIndex,
-                progress: this.currentScenario?.progress || 0,
+                progress: this.currentScenario ? (this.currentScenario.progress || 0) : 0,
                 timestamp: new Date().toISOString(),
                 logs: this.globalLogs.slice(0, 10) // Save recent logs
               };
