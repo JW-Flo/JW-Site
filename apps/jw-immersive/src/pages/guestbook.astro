@@ -5,16 +5,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="Guestbook" description="Sign the guestbook after playing games and leave your mark!">
   <div class="max-w-4xl mx-auto">
     <!-- Hero Section -->
-    <div class="text-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 bg-clip-text text-transparent">
+    <div class="mb-12 text-center">
+      <h1 class="mb-6 text-4xl font-bold text-transparent md:text-5xl bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 bg-clip-text">
         Digital Guestbook
       </h1>
-      <p class="text-xl text-slate-300 mb-4">
+      <p class="mb-4 text-xl text-slate-300">
         Leave your mark after demonstrating your gaming skills!
       </p>
-      <div class="bg-blue-500/10 border border-blue-400/30 rounded-lg p-4 max-w-2xl mx-auto">
-        <p class="text-blue-300 font-semibold">🎮 Game Requirement:</p>
-                <p class="text-slate-300 text-lg leading-relaxed max-w-3xl mx-auto">
+      <div class="max-w-2xl p-4 mx-auto border rounded-lg bg-blue-500/10 border-blue-400/30">
+        <p class="font-semibold text-blue-300">🎮 Game Requirement:</p>
+                <p class="max-w-3xl mx-auto text-lg leading-relaxed text-slate-300">
           Sign the guestbook after showcasing your gaming skills! Score 100+ points in any arcade game
           to unlock the ability to leave your mark. Your high scores prove you've experienced
           the interactive portfolio firsthand.
@@ -23,12 +23,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
 
     <!-- Guestbook Form -->
-    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-8 mb-8">
-      <h2 class="text-2xl font-bold text-blue-400 mb-6">Sign the Guestbook</h2>
+    <div class="p-8 mb-8 border bg-slate-800/50 backdrop-blur-sm border-slate-600 rounded-xl">
+      <h2 class="mb-6 text-2xl font-bold text-blue-400">Sign the Guestbook</h2>
       
       <form id="guestbook-form" class="space-y-6">
         <div>
-          <label for="name" class="block text-sm font-medium text-slate-300 mb-2">
+          <label for="name" class="block mb-2 text-sm font-medium text-slate-300">
             Your Name (or Gaming Handle)
           </label>
           <input 
@@ -36,14 +36,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             id="name" 
             name="name" 
             maxlength="40"
-            class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            class="w-full px-4 py-3 text-white transition-all duration-200 border rounded-lg bg-slate-700/50 border-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter your name..."
             required
           />
         </div>
 
         <div>
-          <label for="message" class="block text-sm font-medium text-slate-300 mb-2">
+          <label for="message" class="block mb-2 text-sm font-medium text-slate-300">
             Your Message
           </label>
           <textarea 
@@ -51,11 +51,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             name="message" 
             rows="4" 
             maxlength="500"
-            class="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            class="w-full px-4 py-3 text-white transition-all duration-200 border rounded-lg bg-slate-700/50 border-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Share your thoughts about the site, games, or anything else..."
             required
           ></textarea>
-          <div class="text-right text-xs text-slate-400 mt-1">
+          <div class="mt-1 text-xs text-right text-slate-400">
             <span id="char-count">0</span>/500 characters
           </div>
         </div>
@@ -66,36 +66,36 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <button 
           type="submit" 
           id="submit-btn"
-          class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full px-6 py-3 font-semibold text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Sign Guestbook
         </button>
       </form>
 
       <!-- Feedback Messages -->
-      <div id="feedback" class="mt-4 hidden"></div>
+      <div id="feedback" class="hidden mt-4"></div>
     </div>
 
     <!-- Guestbook Entries -->
-    <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-600 rounded-xl p-8">
-      <h2 class="text-2xl font-bold text-blue-400 mb-6 flex items-center">
+    <div class="p-8 border bg-slate-800/50 backdrop-blur-sm border-slate-600 rounded-xl">
+      <h2 class="flex items-center mb-6 text-2xl font-bold text-blue-400">
         <span class="mr-3">💬</span>
         Recent Entries
       </h2>
       
       <div id="guestbook-entries" class="space-y-6" data-state="loading">
-        <div id="guestbook-loading" class="text-center text-slate-400 py-8">
+        <div id="guestbook-loading" class="py-8 text-center text-slate-400">
           Loading entries...
         </div>
         <!-- E2E fallback: forcibly render a .guestbook-entry for Playwright Test User in any non-production, test, static, or E2E mode for test reliability, even if JS or API fails. Never in production. -->
         {((import.meta.env && import.meta.env.MODE !== 'production') ||
           (typeof window !== 'undefined' && (window.Playwright || window.Cypress))) && (
-          <div class="guestbook-entry bg-slate-700/30 rounded-lg p-6 border border-slate-600/50" id="e2e-fallback-entry" style="display:;">
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-blue-300 font-semibold text-lg">Playwright Test User</h3>
-              <span class="text-slate-400 text-sm">SSR Fallback</span>
+          <div class="p-6 border rounded-lg guestbook-entry bg-slate-700/30 border-slate-600/50" id="e2e-fallback-entry" style="display:;">
+            <div class="flex items-start justify-between mb-3">
+              <h3 class="text-lg font-semibold text-blue-300">Playwright Test User</h3>
+              <span class="text-sm text-slate-400">SSR Fallback</span>
             </div>
-            <p class="text-slate-200 leading-relaxed">This is a test message from Playwright.</p>
+            <p class="leading-relaxed text-slate-200">This is a test message from Playwright.</p>
           </div>
         )}
       </div>
@@ -164,11 +164,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         newFallback.className = 'guestbook-entry bg-slate-700/30 rounded-lg p-6 border border-slate-600/50';
         newFallback.id = 'e2e-fallback-entry';
         newFallback.innerHTML = `
-          <div class="flex justify-between items-start mb-3">
-            <h3 class="text-blue-300 font-semibold text-lg">Playwright Test User</h3>
-            <span class="text-slate-400 text-sm">SSR Fallback</span>
+          <div class="flex items-start justify-between mb-3">
+            <h3 class="text-lg font-semibold text-blue-300">Playwright Test User</h3>
+            <span class="text-sm text-slate-400">SSR Fallback</span>
           </div>
-          <p class="text-slate-200 leading-relaxed">This is a test message from Playwright.</p>
+          <p class="leading-relaxed text-slate-200">This is a test message from Playwright.</p>
         `;
         container?.appendChild(newFallback);
       }
@@ -209,11 +209,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           newFallback.className = 'guestbook-entry bg-slate-700/30 rounded-lg p-6 border border-slate-600/50';
           newFallback.id = 'e2e-fallback-entry';
           newFallback.innerHTML = `
-            <div class="flex justify-between items-start mb-3">
-              <h3 class="text-blue-300 font-semibold text-lg">Playwright Test User</h3>
-              <span class="text-slate-400 text-sm">SSR Fallback</span>
+            <div class="flex items-start justify-between mb-3">
+              <h3 class="text-lg font-semibold text-blue-300">Playwright Test User</h3>
+              <span class="text-sm text-slate-400">SSR Fallback</span>
             </div>
-            <p class="text-slate-200 leading-relaxed">This is a test message from Playwright.</p>
+            <p class="leading-relaxed text-slate-200">This is a test message from Playwright.</p>
           `;
           container?.appendChild(newFallback);
         }
@@ -324,17 +324,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     container.dataset.state = 'loaded';
     
     if (!entries || entries.length === 0) {
-      container.innerHTML = '<div class="text-center text-slate-400 py-8">No entries yet. Be the first to sign!</div>';
+      container.innerHTML = '<div class="py-8 text-center text-slate-400">No entries yet. Be the first to sign!</div>';
       return;
     }
     
     container.innerHTML = entries.map(entry => `
-      <div class="guestbook-entry bg-slate-700/30 rounded-lg p-6 border border-slate-600/50">
-        <div class="flex justify-between items-start mb-3">
-          <h3 class="text-blue-300 font-semibold text-lg">${escapeHtml(entry.name)}</h3>
-          <span class="text-slate-400 text-sm">${formatDate(entry.created_at)}</span>
+      <div class="p-6 border rounded-lg guestbook-entry bg-slate-700/30 border-slate-600/50">
+        <div class="flex items-start justify-between mb-3">
+          <h3 class="text-lg font-semibold text-blue-300">${escapeHtml(entry.name)}</h3>
+          <span class="text-sm text-slate-400">${formatDate(entry.created_at)}</span>
         </div>
-        <p class="text-slate-200 leading-relaxed">${escapeHtml(entry.message)}</p>
+        <p class="leading-relaxed text-slate-200">${escapeHtml(entry.message)}</p>
       </div>
     `).join('');
   }

@@ -103,44 +103,548 @@ const title = "IT Policies - AtlasIT";
 
   <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
 
+---
+const title = "Auto-Generated IT Policies - AtlasIT";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  
+  <style>
+    .nav-link { transition: all 0.2s ease; }
+    .nav-link:hover { transform: translateY(-1px); }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .input-field { transition: all 0.2s ease; }
+    .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
+    .policy-card { transition: all 0.2s ease; }
+    .policy-card:hover { transform: translateY(-2px); }
+    .policy-preview { 
+      max-height: 200px; 
+      overflow-y: auto; 
+      font-family: 'Courier New', monospace; 
+      font-size: 0.875rem; 
+      line-height: 1.4; 
+    }
+    .policy-preview::-webkit-scrollbar { width: 4px; }
+    .policy-preview::-webkit-scrollbar-track { background: rgba(51, 65, 85, 0.5); }
+    .policy-preview::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); border-radius: 2px; }
+    .generation-progress {
+      background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+      height: 3px;
+      border-radius: 2px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
+  <!-- Header -->
+  <header class="glass-effect border-b border-slate-700/50 sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">AI</span>
+          </div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">AtlasIT</h1>
+        </div>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="hidden md:flex items-center space-x-2 text-sm text-slate-400">
+          <a href="/dashboard" class="hover:text-slate-300 transition-colors">Dashboard</a>
+          <span>›</span>
+          <span class="text-slate-100">IT Policies</span>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/dashboard" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Dashboard</a>
+          <a href="/onboarding" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Onboarding</a>
+          <a href="/marketplace" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Marketplace</a>
+          <a href="/orchestrator" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">Orchestrator</a>
+          <a href="/api-manager" class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200">API Manager</a>
+
+          <!-- IT Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg bg-blue-600 text-white transition-all duration-200 flex items-center">
+              IT <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/it/policies" class="block px-4 py-2 text-white bg-slate-700/50 rounded-t-lg">Policies</a>
+              <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50">Backup & Recovery</a>
+            </div>
+          </div>
+
+          <!-- Security Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              Security <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-t-lg">Security Center</a>
+              <a href="/enhanced-security-scanner" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-b-lg">Scanner</a>
+            </div>
+          </div>
+
+          <!-- Governance Dropdown -->
+          <div class="relative group">
+            <button class="nav-link px-4 py-2 rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex items-center">
+              Governance <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-1 w-48 bg-slate-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-700">
+              <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
+            </div>
+          </div>
+
+          <div class="w-px h-6 bg-slate-600 mx-2"></div>
+          <a href="/login" class="nav-link px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">Login</a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="md:hidden text-slate-300 hover:text-white p-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 space-y-2 border-t border-slate-700 pt-4">
+        <a href="/dashboard" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Dashboard</a>
+        <a href="/onboarding" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Onboarding</a>
+        <a href="/marketplace" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Marketplace</a>
+        <a href="/orchestrator" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Orchestrator</a>
+        <a href="/api-manager" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">API Manager</a>
+        <a href="/it/policies" class="block px-4 py-2 text-white bg-slate-700/50 rounded-lg">IT Policies</a>
+        <a href="/it/backup" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Backup & Recovery</a>
+        <a href="/security" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Security Center</a>
+        <a href="/governance/compliance" class="block px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg">Compliance</a>
+        <div class="pt-2 border-t border-slate-700 mt-4">
+          <a href="/login" class="block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-center mb-2">Login</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="demo-banner">Demo Mode · Sample data resets regularly and is not production</div>
+
   <!-- Main Content -->
   <main class="container mx-auto px-6 py-8">
-    <h1 class="text-3xl font-bold mb-6">IT Policies</h1>
-
-    <div class="mb-6">
-      <button class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
-        Create Policy
-      </button>
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">Auto-Generated IT Policies</h1>
+          <p class="text-slate-400">Intelligent policy generation based on tenant configuration and industry standards</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button id="regenerate-all" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+            Regenerate All
+          </button>
+          <button id="export-policies" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+            Export Policies
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="glass-effect rounded-xl border border-slate-700/50 overflow-hidden">
-      <table class="w-full">
-        <thead class="bg-slate-800/50">
-          <tr>
-            <th class="px-4 py-3 text-left text-slate-100 font-semibold">Name</th>
-            <th class="px-4 py-3 text-left text-slate-100 font-semibold">Type</th>
-            <th class="px-4 py-3 text-left text-slate-100 font-semibold">Status</th>
-            <th class="px-4 py-3 text-left text-slate-100 font-semibold">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="border-t border-slate-700">
-            <td class="px-4 py-3 text-slate-300">Password Policy</td>
-            <td class="px-4 py-3 text-slate-300">Security</td>
-            <td class="px-4 py-3">
-              <span class="bg-green-600 text-white px-2 py-1 rounded text-sm">Active</span>
-            </td>
-            <td class="px-4 py-3 space-x-2">
-              <button class="bg-slate-600 hover:bg-slate-500 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
-                Edit
-              </button>
-              <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors duration-200">
-                Execute
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left Column: Tenant Configuration -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Tenant Information -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Tenant Configuration</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Company Name</label>
+              <input 
+                type="text" 
+                id="company-name"
+                value="HardWorkCo"
+                class="input-field w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded text-slate-100 text-sm"
+              >
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Industry</label>
+              <select id="industry" class="input-field w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded text-slate-100 text-sm">
+                <option value="technology">Technology</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="finance">Finance</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="retail">Retail</option>
+                <option value="education">Education</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Company Size</label>
+              <select id="company-size" class="input-field w-full px-3 py-2 bg-slate-800/50 border border-slate-600 rounded text-slate-100 text-sm">
+                <option value="small">Small (1-50 employees)</option>
+                <option value="medium" selected>Medium (51-200 employees)</option>
+                <option value="large">Large (201-1000 employees)</option>
+                <option value="enterprise">Enterprise (1000+ employees)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Compliance Requirements</label>
+              <div class="space-y-2 text-sm">
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" id="gdpr" checked>
+                  <span>GDPR</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" id="sox">
+                  <span>SOX</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" id="hipaa">
+                  <span>HIPAA</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="checkbox" class="mr-2" id="iso27001" checked>
+                  <span>ISO 27001</span>
+                </label>
+              </div>
+            </div>
+
+            <button id="update-config" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm">
+              Update Configuration
+            </button>
+          </div>
+        </div>
+
+        <!-- Generation Status -->
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Generation Status</h3>
+          
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Last Generated</span>
+              <span class="text-xs text-slate-400">2 hours ago</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Policies Created</span>
+              <span class="text-xs text-green-300">5/5</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Compliance Score</span>
+              <span class="text-xs text-green-300">94%</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-300">Auto-Update</span>
+              <span class="text-xs text-blue-300">Enabled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Generated Policies -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Policy Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="policies-grid">
+          
+          <!-- Acceptable Use Policy -->
+          <div class="policy-card glass-effect p-6 rounded-xl border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium">Acceptable Use Policy</h3>
+                  <p class="text-xs text-slate-400">Last updated: 2 hours ago</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Active</span>
+                <button class="text-slate-400 hover:text-slate-300" onclick="regeneratePolicy('acceptable-use')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="policy-preview bg-slate-900/50 rounded p-3 mb-4 text-slate-300" id="acceptable-use-preview">
+              <strong>HARDWORKCO ACCEPTABLE USE POLICY</strong><br><br>
+              
+              <strong>1. PURPOSE</strong><br>
+              This policy defines acceptable use of HardWorkCo's information technology resources, including computers, networks, email, and internet access.<br><br>
+              
+              <strong>2. SCOPE</strong><br>
+              This policy applies to all employees, contractors, and third parties with access to HardWorkCo systems.<br><br>
+              
+              <strong>3. ACCEPTABLE USE</strong><br>
+              • Use systems only for business purposes<br>
+              • Protect confidential information<br>
+              • Report security incidents immediately<br>
+              • Use strong passwords (minimum 12 characters)<br><br>
+              
+              <strong>4. PROHIBITED ACTIVITIES</strong><br>
+              • Personal use of company resources<br>
+              • Installing unauthorized software<br>
+              • Accessing inappropriate content<br>
+              • Sharing credentials with others<br><br>
+              
+              <strong>5. COMPLIANCE</strong><br>
+              Violations may result in disciplinary action up to and including termination.
+            </div>
+            
+            <div class="flex space-x-2 text-sm">
+              <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded">View Full</button>
+              <button class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded">Download</button>
+              <button class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded">Customize</button>
+            </div>
+          </div>
+
+          <!-- Data Retention Policy -->
+          <div class="policy-card glass-effect p-6 rounded-xl border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium">Data Retention Policy</h3>
+                  <p class="text-xs text-slate-400">Last updated: 2 hours ago</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Active</span>
+                <button class="text-slate-400 hover:text-slate-300" onclick="regeneratePolicy('data-retention')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="policy-preview bg-slate-900/50 rounded p-3 mb-4 text-slate-300" id="data-retention-preview">
+              <strong>HARDWORKCO DATA RETENTION POLICY</strong><br><br>
+              
+              <strong>1. PURPOSE</strong><br>
+              This policy establishes guidelines for the retention and disposal of HardWorkCo data in compliance with legal and regulatory requirements.<br><br>
+              
+              <strong>2. RETENTION SCHEDULES</strong><br>
+              • Employee Records: 7 years after termination<br>
+              • Financial Records: 7 years (SOX compliance)<br>
+              • Customer Data: 3 years after last interaction<br>
+              • Email Communications: 3 years<br>
+              • System Logs: 1 year<br><br>
+              
+              <strong>3. DATA CLASSIFICATION</strong><br>
+              • Public: No retention requirements<br>
+              • Internal: 3-7 years depending on type<br>
+              • Confidential: 7 years minimum<br>
+              • Restricted: As required by regulation<br><br>
+              
+              <strong>4. DISPOSAL PROCEDURES</strong><br>
+              All data must be securely deleted using approved methods when retention period expires.
+            </div>
+            
+            <div class="flex space-x-2 text-sm">
+              <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded">View Full</button>
+              <button class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded">Download</button>
+              <button class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded">Customize</button>
+            </div>
+          </div>
+
+          <!-- Malware Protection Policy -->
+          <div class="policy-card glass-effect p-6 rounded-xl border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium">Malware Protection Policy</h3>
+                  <p class="text-xs text-slate-400">Last updated: 2 hours ago</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Active</span>
+                <button class="text-slate-400 hover:text-slate-300" onclick="regeneratePolicy('malware-protection')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="policy-preview bg-slate-900/50 rounded p-3 mb-4 text-slate-300" id="malware-protection-preview">
+              <strong>HARDWORKCO MALWARE PROTECTION POLICY</strong><br><br>
+              
+              <strong>1. PURPOSE</strong><br>
+              This policy establishes requirements for protecting HardWorkCo systems and data from malicious software threats.<br><br>
+              
+              <strong>2. ANTIVIRUS REQUIREMENTS</strong><br>
+              • All workstations must have approved antivirus software<br>
+              • Real-time scanning must be enabled<br>
+              • Automatic updates must be configured<br>
+              • Weekly full system scans required<br><br>
+              
+              <strong>3. EMAIL SECURITY</strong><br>
+              • Email filtering for malicious attachments<br>
+              • Quarantine suspicious emails<br>
+              • User training on phishing recognition<br><br>
+              
+              <strong>4. INCIDENT RESPONSE</strong><br>
+              • Immediately isolate infected systems<br>
+              • Report incidents to IT Security<br>
+              • Document and analyze all incidents<br>
+              • Restore from clean backups when necessary
+            </div>
+            
+            <div class="flex space-x-2 text-sm">
+              <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded">View Full</button>
+              <button class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded">Download</button>
+              <button class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded">Customize</button>
+            </div>
+          </div>
+
+          <!-- Hardware Asset Policy -->
+          <div class="policy-card glass-effect p-6 rounded-xl border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium">Hardware Asset Policy</h3>
+                  <p class="text-xs text-slate-400">Last updated: 2 hours ago</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Active</span>
+                <button class="text-slate-400 hover:text-slate-300" onclick="regeneratePolicy('hardware-asset')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="policy-preview bg-slate-900/50 rounded p-3 mb-4 text-slate-300" id="hardware-asset-preview">
+              <strong>HARDWORKCO HARDWARE ASSET POLICY</strong><br><br>
+              
+              <strong>1. PURPOSE</strong><br>
+              This policy governs the management, tracking, and secure disposal of all HardWorkCo hardware assets.<br><br>
+              
+              <strong>2. ASSET INVENTORY</strong><br>
+              • All hardware must be tagged and registered<br>
+              • Annual physical inventory required<br>
+              • Asset database must be maintained<br>
+              • Location changes must be documented<br><br>
+              
+              <strong>3. EMPLOYEE RESPONSIBILITIES</strong><br>
+              • Report lost or stolen equipment immediately<br>
+              • Use equipment only for business purposes<br>
+              • Return equipment upon termination<br>
+              • Maintain equipment in good condition<br><br>
+              
+              <strong>4. SECURE DISPOSAL</strong><br>
+              • Data wiping required before disposal<br>
+              • Physical destruction for sensitive devices<br>
+              • Environmental compliance for e-waste<br>
+              • Certificate of destruction required
+            </div>
+            
+            <div class="flex space-x-2 text-sm">
+              <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded">View Full</button>
+              <button class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded">Download</button>
+              <button class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded">Customize</button>
+            </div>
+          </div>
+
+          <!-- Network Security Policy -->
+          <div class="policy-card glass-effect p-6 rounded-xl border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium">Network Security Policy</h3>
+                  <p class="text-xs text-slate-400">Last updated: 2 hours ago</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 bg-green-600/20 text-green-300 rounded text-xs">Active</span>
+                <button class="text-slate-400 hover:text-slate-300" onclick="regeneratePolicy('network-security')">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="policy-preview bg-slate-900/50 rounded p-3 mb-4 text-slate-300" id="network-security-preview">
+              <strong>HARDWORKCO NETWORK SECURITY POLICY</strong><br><br>
+              
+              <strong>1. PURPOSE</strong><br>
+              This policy defines security requirements for HardWorkCo's network infrastructure and user access controls.<br><br>
+              
+              <strong>2. ACCESS CONTROLS</strong><br>
+              • Multi-factor authentication required<br>
+              • VPN required for remote access<br>
+              • Role-based access controls (RBAC)<br>
+              • Regular access reviews required<br><br>
+              
+              <strong>3. NETWORK MONITORING</strong><br>
+              • 24/7 network monitoring enabled<br>
+              • Intrusion detection systems active<br>
+              • Log all network access attempts<br>
+              • Alert on suspicious activities<br><br>
+              
+              <strong>4. WIRELESS SECURITY</strong><br>
+              • WPA3 encryption required<br>
+              • Guest network isolation<br>
+              • Regular password rotation<br>
+              • Device registration required
+            </div>
+            
+            <div class="flex space-x-2 text-sm">
+              <button class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded">View Full</button>
+              <button class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded">Download</button>
+              <button class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded">Customize</button>
+            </div>
+          </div>
+
+          <!-- Quick Add Policy Card -->
+          <div class="glass-effect p-6 rounded-xl border border-dashed border-slate-600 flex flex-col items-center justify-center text-center min-h-[400px]">
+            <div class="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </div>
+            <h3 class="font-medium mb-2">Generate New Policy</h3>
+            <p class="text-sm text-slate-400 mb-4">Create additional policies based on your specific requirements</p>
+            <button id="create-custom-policy" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm">
+              Create Custom Policy
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -178,6 +682,288 @@ const title = "IT Policies - AtlasIT";
         mobileMenu?.classList.add('hidden');
       }
     });
+
+    // Policy generation data templates
+    const policyTemplates = {
+      'acceptable-use': {
+        title: 'Acceptable Use Policy',
+        generateContent: (config) => `
+<strong>${config.companyName.toUpperCase()} ACCEPTABLE USE POLICY</strong><br><br>
+
+<strong>1. PURPOSE</strong><br>
+This policy defines acceptable use of ${config.companyName}'s information technology resources, including computers, networks, email, and internet access.<br><br>
+
+<strong>2. SCOPE</strong><br>
+This policy applies to all employees, contractors, and third parties with access to ${config.companyName} systems.<br><br>
+
+<strong>3. ACCEPTABLE USE</strong><br>
+• Use systems only for business purposes<br>
+• Protect confidential information<br>
+• Report security incidents immediately<br>
+• Use strong passwords (minimum ${config.industry === 'finance' ? '16' : '12'} characters)<br>
+${config.companySize === 'enterprise' ? '• Complete annual security training<br>' : ''}
+${config.compliance.includes('gdpr') ? '• Comply with GDPR data protection requirements<br>' : ''}
+${config.compliance.includes('hipaa') ? '• Follow HIPAA privacy and security rules<br>' : ''}<br>
+
+<strong>4. PROHIBITED ACTIVITIES</strong><br>
+• Personal use of company resources<br>
+• Installing unauthorized software<br>
+• Accessing inappropriate content<br>
+• Sharing credentials with others<br>
+${config.industry === 'healthcare' ? '• Unauthorized access to patient data<br>' : ''}
+${config.industry === 'finance' ? '• Unauthorized financial transactions<br>' : ''}<br>
+
+<strong>5. COMPLIANCE</strong><br>
+Violations may result in disciplinary action up to and including termination.
+${config.compliance.includes('sox') ? ' SOX compliance violations will be reported to regulatory authorities.' : ''}
+        `.trim()
+      },
+      'data-retention': {
+        title: 'Data Retention Policy',
+        generateContent: (config) => `
+<strong>${config.companyName.toUpperCase()} DATA RETENTION POLICY</strong><br><br>
+
+<strong>1. PURPOSE</strong><br>
+This policy establishes guidelines for the retention and disposal of ${config.companyName} data in compliance with legal and regulatory requirements.<br><br>
+
+<strong>2. RETENTION SCHEDULES</strong><br>
+• Employee Records: ${config.industry === 'healthcare' ? '10' : '7'} years after termination<br>
+• Financial Records: ${config.compliance.includes('sox') ? '7' : '5'} years${config.compliance.includes('sox') ? ' (SOX compliance)' : ''}<br>
+• Customer Data: ${config.compliance.includes('gdpr') ? '3' : '5'} years after last interaction<br>
+• Email Communications: ${config.companySize === 'enterprise' ? '5' : '3'} years<br>
+• System Logs: ${config.industry === 'finance' ? '2' : '1'} year${config.industry === 'finance' ? 's' : ''}<br>
+${config.compliance.includes('hipaa') ? '• Medical Records: 30 years (HIPAA requirement)<br>' : ''}
+${config.industry === 'education' ? '• Student Records: As required by FERPA<br>' : ''}<br>
+
+<strong>3. DATA CLASSIFICATION</strong><br>
+• Public: No retention requirements<br>
+• Internal: 3-7 years depending on type<br>
+• Confidential: ${config.compliance.includes('iso27001') ? '7' : '5'} years minimum<br>
+• Restricted: As required by regulation<br><br>
+
+<strong>4. DISPOSAL PROCEDURES</strong><br>
+All data must be securely deleted using ${config.companySize === 'enterprise' ? 'NIST 800-88' : 'approved'} methods when retention period expires.
+${config.compliance.includes('gdpr') ? ' GDPR right to erasure requests must be processed within 30 days.' : ''}
+        `.trim()
+      },
+      'malware-protection': {
+        title: 'Malware Protection Policy',
+        generateContent: (config) => `
+<strong>${config.companyName.toUpperCase()} MALWARE PROTECTION POLICY</strong><br><br>
+
+<strong>1. PURPOSE</strong><br>
+This policy establishes requirements for protecting ${config.companyName} systems and data from malicious software threats.<br><br>
+
+<strong>2. ANTIVIRUS REQUIREMENTS</strong><br>
+• All workstations must have approved antivirus software<br>
+• Real-time scanning must be enabled<br>
+• Automatic updates must be configured<br>
+• ${config.companySize === 'enterprise' ? 'Daily' : 'Weekly'} full system scans required<br>
+${config.industry === 'healthcare' ? '• HIPAA-compliant endpoint protection required<br>' : ''}
+${config.industry === 'finance' ? '• Advanced threat protection for financial systems<br>' : ''}<br>
+
+<strong>3. EMAIL SECURITY</strong><br>
+• Email filtering for malicious attachments<br>
+• Quarantine suspicious emails<br>
+• User training on phishing recognition<br>
+${config.companySize === 'enterprise' ? '• Advanced persistent threat (APT) monitoring<br>' : ''}
+${config.compliance.includes('iso27001') ? '• ISO 27001 incident response procedures<br>' : ''}<br>
+
+<strong>4. INCIDENT RESPONSE</strong><br>
+• Immediately isolate infected systems<br>
+• Report incidents to IT Security within ${config.companySize === 'enterprise' ? '15 minutes' : '1 hour'}<br>
+• Document and analyze all incidents<br>
+• Restore from clean backups when necessary<br>
+${config.compliance.includes('gdpr') ? '• Report data breaches to authorities within 72 hours<br>' : ''}
+        `.trim()
+      },
+      'hardware-asset': {
+        title: 'Hardware Asset Policy',
+        generateContent: (config) => `
+<strong>${config.companyName.toUpperCase()} HARDWARE ASSET POLICY</strong><br><br>
+
+<strong>1. PURPOSE</strong><br>
+This policy governs the management, tracking, and secure disposal of all ${config.companyName} hardware assets.<br><br>
+
+<strong>2. ASSET INVENTORY</strong><br>
+• All hardware must be tagged and registered<br>
+• ${config.companySize === 'enterprise' ? 'Quarterly' : 'Annual'} physical inventory required<br>
+• Asset database must be maintained<br>
+• Location changes must be documented<br>
+${config.industry === 'healthcare' ? '• Medical device inventory tracking<br>' : ''}
+${config.compliance.includes('sox') ? '• SOX compliance asset controls<br>' : ''}<br>
+
+<strong>3. EMPLOYEE RESPONSIBILITIES</strong><br>
+• Report lost or stolen equipment immediately<br>
+• Use equipment only for business purposes<br>
+• Return equipment upon termination<br>
+• Maintain equipment in good condition<br>
+${config.companySize === 'enterprise' ? '• Complete asset accountability training<br>' : ''}<br>
+
+<strong>4. SECURE DISPOSAL</strong><br>
+• ${config.industry === 'finance' ? 'DoD 5220.22-M' : 'NIST 800-88'} data wiping required before disposal<br>
+• Physical destruction for ${config.compliance.includes('hipaa') ? 'PHI-containing' : 'sensitive'} devices<br>
+• Environmental compliance for e-waste<br>
+• Certificate of destruction required<br>
+${config.compliance.includes('iso27001') ? '• ISO 27001 asset disposal procedures<br>' : ''}
+        `.trim()
+      },
+      'network-security': {
+        title: 'Network Security Policy',
+        generateContent: (config) => `
+<strong>${config.companyName.toUpperCase()} NETWORK SECURITY POLICY</strong><br><br>
+
+<strong>1. PURPOSE</strong><br>
+This policy defines security requirements for ${config.companyName}'s network infrastructure and user access controls.<br><br>
+
+<strong>2. ACCESS CONTROLS</strong><br>
+• Multi-factor authentication required<br>
+• VPN required for remote access<br>
+• Role-based access controls (RBAC)<br>
+• ${config.companySize === 'enterprise' ? 'Monthly' : 'Quarterly'} access reviews required<br>
+${config.industry === 'finance' ? '• Segregation of duties for financial systems<br>' : ''}
+${config.compliance.includes('hipaa') ? '• HIPAA minimum necessary access controls<br>' : ''}<br>
+
+<strong>3. NETWORK MONITORING</strong><br>
+• 24/7 network monitoring ${config.companySize === 'enterprise' ? 'with SOC' : 'enabled'}<br>
+• Intrusion detection systems active<br>
+• Log all network access attempts<br>
+• Alert on suspicious activities<br>
+${config.compliance.includes('iso27001') ? '• ISO 27001 security monitoring controls<br>' : ''}<br>
+
+<strong>4. WIRELESS SECURITY</strong><br>
+• WPA3 encryption required<br>
+• Guest network isolation<br>
+• ${config.companySize === 'enterprise' ? 'Weekly' : 'Monthly'} password rotation<br>
+• Device registration required<br>
+${config.industry === 'healthcare' ? '• Medical device network segmentation<br>' : ''}
+        `.trim()
+      }
+    };
+
+    // Get current configuration
+    function getCurrentConfig() {
+      return {
+        companyName: document.getElementById('company-name').value,
+        industry: document.getElementById('industry').value,
+        companySize: document.getElementById('company-size').value,
+        compliance: Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.id)
+      };
+    }
+
+    // Regenerate specific policy
+    function regeneratePolicy(policyType) {
+      const config = getCurrentConfig();
+      const template = policyTemplates[policyType];
+      
+      if (!template) return;
+      
+      const previewElement = document.getElementById(`${policyType}-preview`);
+      if (!previewElement) return;
+      
+      // Show generation animation
+      previewElement.innerHTML = `
+        <div class="flex items-center justify-center py-8">
+          <div class="generation-progress w-32 mb-2"></div>
+        </div>
+        <div class="text-center text-slate-400">Generating ${template.title}...</div>
+      `;
+      
+      // Simulate AI generation delay
+      setTimeout(() => {
+        previewElement.innerHTML = template.generateContent(config);
+      }, 1500);
+    }
+
+    // Regenerate all policies
+    document.getElementById('regenerate-all')?.addEventListener('click', () => {
+      const button = event.target;
+      const originalText = button.textContent;
+      
+      button.textContent = 'Regenerating...';
+      button.disabled = true;
+      
+      // Regenerate each policy with staggered timing
+      const policies = Object.keys(policyTemplates);
+      policies.forEach((policyType, index) => {
+        setTimeout(() => {
+          regeneratePolicy(policyType);
+        }, index * 500);
+      });
+      
+      setTimeout(() => {
+        button.textContent = 'Regeneration Complete!';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 1500);
+      }, policies.length * 500 + 1500);
+    });
+
+    // Update configuration
+    document.getElementById('update-config')?.addEventListener('click', () => {
+      const button = event.target;
+      const originalText = button.textContent;
+      
+      button.textContent = 'Updating...';
+      button.disabled = true;
+      
+      setTimeout(() => {
+        button.textContent = 'Updated!';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 1000);
+      }, 1000);
+    });
+
+    // Export policies
+    document.getElementById('export-policies')?.addEventListener('click', () => {
+      const config = getCurrentConfig();
+      const button = event.target;
+      const originalText = button.textContent;
+      
+      button.textContent = 'Exporting...';
+      button.disabled = true;
+      
+      setTimeout(() => {
+        // Simulate file download
+        const link = document.createElement('a');
+        link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(`${config.companyName} IT Policies - Generated by AtlasIT\\n\\nExported on: ${new Date().toLocaleDateString()}`);
+        link.download = `${config.companyName}_IT_Policies.txt`;
+        link.click();
+        
+        button.textContent = 'Exported!';
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 1500);
+      }, 1000);
+    });
+
+    // Create custom policy
+    document.getElementById('create-custom-policy')?.addEventListener('click', () => {
+      const policyName = prompt('Enter the name for your custom policy:');
+      if (policyName) {
+        alert(`Custom policy "${policyName}" will be generated based on your current configuration. This feature is coming soon!`);
+      }
+    });
+
+    // Auto-update policies when configuration changes
+    ['company-name', 'industry', 'company-size'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', () => {
+        // Could trigger auto-regeneration here if desired
+        console.log('Configuration changed - policies may need regeneration');
+      });
+    });
+
+    // Initialize with current configuration
+    window.addEventListener('load', () => {
+      console.log('Policy generation system initialized with HardWorkCo defaults');
+    });
+
+    // Make regeneratePolicy global for onclick handlers
+    window.regeneratePolicy = regeneratePolicy;
   </script>
 </body>
 </html>
