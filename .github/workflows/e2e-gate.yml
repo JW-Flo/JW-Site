@@ -1,0 +1,43 @@
+name: E2E App Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseUrl:
+        description: Base URL to test (e.g., https://dev.atlasit.app)
+        required: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium]
+    env:
+      E2E_BASE_URL: ${{ inputs.baseUrl || 'https://dev.atlasit.app' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E (gate + app tests)
+        run: npx playwright test apps/atlasit-sveltekit/e2e --project=${{ matrix.project }} --reporter=line
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: playwright-report

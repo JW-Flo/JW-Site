@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       dry-run:
-        description: 'Run deploy script with --dry-run'
+        description: "Run deploy script with --dry-run"
         required: false
-        default: 'true'
+        default: "true"
 
 jobs:
   deploy:

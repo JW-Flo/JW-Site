@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+/* Global styles for AtlasIT dashboard */
+.nav-link {
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.demo-banner {
+  background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25));
+  border: 1px solid rgba(59,130,246,0.35);
+  border-radius: 0.75rem;
+  color: #bfdbfe;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  margin: 1.5rem auto 0;
+  max-width: 60rem;
+}

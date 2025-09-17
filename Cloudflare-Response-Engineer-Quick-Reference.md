@@ -49,8 +49,6 @@
 
 ---
 
-
-
 ## Platform Overview
 
 - **AtlasIT**: Modular, Cloudflare-native platform for IT automation, security, and analytics.

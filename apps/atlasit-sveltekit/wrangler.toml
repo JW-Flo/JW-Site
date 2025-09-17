@@ -1,0 +1,48 @@
+name = "atlasit-sveltekit"
+compatibility_date = "2025-08-29"
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+[vars]
+SITE_URL = "https://dev.atlasit.app"
+
+[env.staging]
+vars = { SITE_URL = "https://stg.atlasit.app" }
+
+[env.production]
+vars = { SITE_URL = "https://app.atlasit.app" }
+
+# -----------------------------------------------------------------------------
+# Data bindings (configure real IDs/names before deploy)
+# -----------------------------------------------------------------------------
+
+# D1 database (authoritative store for sessions and app data)
+[[d1_databases]]
+binding = "D1_DB"
+database_name = "atlasit_preview"
+# Replace with your preview database UUID
+database_id = "00000000-0000-0000-0000-000000000001"
+
+[[env.production.d1_databases]]
+binding = "D1_DB"
+database_name = "atlasit_prod"
+# Replace with your production database UUID
+database_id = "00000000-0000-0000-0000-000000000000"
+
+# KV namespace for session cache (fast path). Create via:
+#   wrangler kv:namespace create SESSION
+#   wrangler kv:namespace create SESSION --env=production
+[[kv_namespaces]]
+binding = "SESSION"
+# Replace with preview KV namespace id
+id = "<preview-session-namespace-id>"
+
+[[env.production.kv_namespaces]]
+binding = "SESSION"
+# Replace with production KV namespace id
+id = "<prod-session-namespace-id>"
+
+# Optional other app resources
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "atlasit-media"
+preview_bucket_name = "atlasit-media-preview"

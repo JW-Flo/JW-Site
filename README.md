@@ -624,6 +624,7 @@ chmod +x scripts/smoke.sh # first run
   }
 }
 ```
+
 ```
 
 See `src/pages/api/scans/types.ts` for full type definitions.
@@ -774,6 +775,7 @@ OPENCVE_ENRICH=true
   }
 }
 ```
+
 An intentionally unlinked, low-noise admin view for aggregated consent preferences to validate privacy UX and regional gating. Accessible at:
 
 - Page: `/admin-consent`

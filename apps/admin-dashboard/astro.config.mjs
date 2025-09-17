@@ -1,14 +1,14 @@
-import { defineConfig } from 'astro/config';
-import cloudflare from '@astrojs/cloudflare';
-import tailwind from '@astrojs/tailwind';
+import { defineConfig } from "astro/config";
+import cloudflare from "@astrojs/cloudflare";
+import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
-  output: 'server',
+  output: "server",
   adapter: cloudflare(),
   integrations: [tailwind()],
-  site: 'https://admin.atlasit.pro',
+  site: "https://admin.atlasit.pro",
   server: {
     host: true,
-    port: 4321
-  }
+    port: 4321,
+  },
 });

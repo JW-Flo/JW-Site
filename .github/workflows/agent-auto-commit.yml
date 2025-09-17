@@ -1,0 +1,78 @@
+name: Agent Auto-Commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: High-level task the agent should execute
+        required: true
+      branch:
+        description: Branch to work on (will create if missing)
+        required: true
+        default: agent/automation
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Ensure branch
+        run: |
+          git fetch origin ${{ github.event.inputs.branch }} || true
+          git checkout -B ${{ github.event.inputs.branch }}
+
+      - name: Run unit tests (atlasit-sveltekit)
+        run: |
+          cd apps/atlasit-sveltekit
+          npm test -- --run
+
+      - name: Lint/type check
+        run: |
+          cd apps/atlasit-sveltekit
+          npm run check || true
+
+      - name: Terraform validate (cloudflare)
+        run: |
+          cd infra/cloudflare
+          terraform init -input=false
+          terraform validate
+
+      - name: Commit any safe changes
+        run: |
+          set -e
+          git config user.name "automation-bot"
+          git config user.email "bot@example.com"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore(agent): automated safe changes for '${{ github.event.inputs.task }}'"
+            git push -u origin ${{ github.event.inputs.branch }}
+          fi
+
+      - name: Open or update PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ github.event.inputs.branch }}
+          title: "Agent: ${{ github.event.inputs.task }}"
+          body: |
+            Automated changes for: `${{ github.event.inputs.task }}`
+
+            - Unit tests: run on atlasit-sveltekit
+            - Lint/type: attempted (non-blocking)
+            - Terraform: validate infra/cloudflare
+          labels: automation
+          draft: false

@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30 * 1000,
   retries: 1,
   use: {
-  baseURL: 'https://www.atlasit.pro',
+  baseURL: process.env.E2E_BASE_URL || 'https://www.atlasit.pro',
     trace: 'on-first-retry',
   screenshot: 'only-on-failure',
   video: 'retain-on-failure',

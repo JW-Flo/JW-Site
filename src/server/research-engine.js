@@ -1,4 +1,4 @@
-const axios = require("axios");
+const { axios } = require("../../utils/safe-axios");
 const cheerio = require("cheerio");
 const { AIAnalyzer } = require("./ai-analyzer");
 

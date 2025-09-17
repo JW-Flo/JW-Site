@@ -1,0 +1,105 @@
+name: atlasit-sveltekit CI
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - "apps/atlasit-sveltekit/**"
+      - "packages/**"
+      - ".github/workflows/atlasit-sveltekit-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/atlasit-sveltekit/**"
+      - "packages/**"
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies (monorepo root)
+        run: npm ci
+      - name: Typecheck (svelte-check)
+        run: npm run check --workspace apps/atlasit-sveltekit
+      - name: Unit tests (vitest)
+        run: npx vitest run --reporter=basic
+        working-directory: apps/atlasit-sveltekit
+
+  e2e-smoke:
+    needs: typecheck-and-unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build SvelteKit app
+        run: npm run build --workspace apps/atlasit-sveltekit
+      - name: Start preview server
+        run: npm run preview --workspace apps/atlasit-sveltekit &
+      - name: Wait for preview
+        run: npx wait-on http://localhost:4173
+      - name: Smoke check routes
+        run: |
+          curl -sSf http://localhost:4173/login > /dev/null
+          curl -sSf http://localhost:4173/marketplace > /dev/null
+          curl -sSf http://localhost:4173/onboarding > /dev/null
+          curl -sSf http://localhost:4173/orchestrator > /dev/null
+          curl -sSf http://localhost:4173/api-manager > /dev/null
+
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    needs: [typecheck-and-unit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build SvelteKit (Cloudflare output)
+        run: npm run build --workspace apps/atlasit-sveltekit
+      - name: Deploy Preview to Cloudflare Pages (atlasit-sveltekit)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/atlasit-sveltekit/.svelte-kit/cloudflare --project-name atlasit-sveltekit --branch pr-${{ github.event.pull_request.number }}
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [typecheck-and-unit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build SvelteKit (Cloudflare output)
+        run: npm run build --workspace apps/atlasit-sveltekit
+      - name: Deploy Production to Cloudflare Pages (atlasit-sveltekit)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/atlasit-sveltekit/.svelte-kit/cloudflare --project-name atlasit-sveltekit --branch main

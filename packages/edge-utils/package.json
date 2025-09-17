@@ -1,0 +1,7 @@
+{
+  "name": "@atlasit/edge-utils",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "types": "index.ts",
+  "private": true
+}

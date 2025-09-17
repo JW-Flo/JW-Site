@@ -40,6 +40,14 @@ Cloudflare Pages / Worker (Astro SSR)
   +----> HMAC Signing (session + role cookies)
 ```
 
+### AtlasIT Edge App (SvelteKit)
+
+- `/api/bindings` — runtime probe that reports Cloudflare binding availability without leaking secret material (SITE_URL, D1, KV, R2).
+- `/marketplace` — surfaces featured IAM integrations with direct OAuth start links (`/api/oauth/google`, `/api/oauth/entra`) and renders dynamic inventory from `/api/iam-automation`.
+- `/account/sessions` — authenticated portal that consumes `/api/auth/sessions` to list active devices and uses `/api/auth/sessions/:id/revoke` and `/api/auth/sessions/revoke-all` for revocation flows.
+- Playwright coverage asserts unauthenticated users are redirected from `/app/**` and that marketplace and session UI affordances remain present.
+- `/api/iam-automation` — in-memory Joiner/Mover/Leaver storyline seeded with Paycom → Okta source-of-truth data; feeds dashboard, onboarding, marketplace, orchestrator, and API manager visuals.
+
 ## Mermaid Diagram
 
 ```mermaid
@@ -116,7 +124,6 @@ flowchart TD
 ## Future Enhancements (Suggested)
 
 ---
-
 
 ## Research Reference
 

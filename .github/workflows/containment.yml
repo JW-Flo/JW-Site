@@ -1,0 +1,42 @@
+name: Cloudflare Containment
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "inventory or disable"
+        required: true
+        default: "inventory"
+      dry_run:
+        description: "echo only (for disable)"
+        required: false
+        default: "true"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Inventory
+        if: ${{ github.event.inputs.action == 'inventory' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_ZONE_ID_PRO: ${{ secrets.CLOUDFLARE_ZONE_ID_PRO }}
+        run: bash scripts/cloudflare/inventory.sh
+      - name: Disable
+        if: ${{ github.event.inputs.action == 'disable' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_ZONE_ID_PRO: ${{ secrets.CLOUDFLARE_ZONE_ID_PRO }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          if [ "${DRY_RUN}" != "false" ]; then
+            echo "Dry-run requested; printing inventory only";
+            bash scripts/cloudflare/inventory.sh;
+          else
+            bash scripts/cloudflare/disable.sh;
+          fi

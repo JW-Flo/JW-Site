@@ -2,7 +2,6 @@
 
 This directory contains the core platform logic, analytics, and D1 database schema for the AtlasIT system.
 
-
 ## Key Files
 
 - `d1-schema.sql`: D1 database schema for analytics events
@@ -17,13 +16,11 @@ This directory contains the core platform logic, analytics, and D1 database sche
 - `terraform/`: Infrastructure as code
 - `ui/`: React dashboard
 
-
 ## Analytics & Multi-Tenant Isolation
 
 - Analytics events are tracked platform-wide and stored in D1.
 - Multi-tenant data isolation is enforced for all demo and real tenants.
 - Admin dashboard at `/apps/admin-dashboard/` provides secure analytics review and management.
-
 
 ## See Also
 
