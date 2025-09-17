@@ -78,6 +78,34 @@
       - Demo data reset and E2E flows confirmed intact
     - Roadmap and documentation updated for production readiness
 
+    - **Onboarding endpoint refactored:**
+      - Replaced onboarding endpoint with typed POST handler (apps/platform/src/pages/api/onboarding.ts)
+      - Validates payloads, returns structured errors, logs analytics, generates simulated config
+      - Fixed "string did not match the expected pattern" failure
+
+    - **OAuth starter endpoints added:**
+      - Google Workspace and Microsoft 365/Entra endpoints (apps/platform/src/pages/api/oauth/google.ts, .../entra.ts)
+      - Return real consent URL when credentials present, or setup guidance otherwise
+
+    - **Marketplace buttons wired to endpoints:**
+      - "Connect to Google Workspace" and "Connect to Microsoft 365 & Entra" now launch OAuth or show config instructions
+
+    - **Marketplace and admin onboarding error handling improved:**
+      - Actionable error text shown, non-prod analytics noise avoided
+
+    - **Tests:**
+      - Guestbook endpoint tested: cd apps/jw-immersive && npx vitest run src/test/guestbook.test.ts
+
+---
+
+## Next Steps (Sep 2025)
+
+    - Broader test coverage for new endpoints and flows
+    - Flesh out OAuth callback handlers for Google Workspace and Microsoft 365/Entra
+    - Continue UI/UX polish and actionable error messaging
+    - Document new endpoints and flows in OpenAPI spec and README
+    - Align with Codex for phased rollout and feedback
+
 ---
 
 ## Next Phase: Backend/Orchestration Integration (Sep 2025)

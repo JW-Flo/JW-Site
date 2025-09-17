@@ -1,9 +1,12 @@
 import { defineConfig } from 'astro/config';
+import cloudflare from '@astrojs/cloudflare';
+import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
   output: 'server',
-  integrations: [],
-  site: 'https://www.atlasit.admin.pro',
+  adapter: cloudflare(),
+  integrations: [tailwind()],
+  site: 'https://admin.atlasit.pro',
   server: {
     host: true,
     port: 4321

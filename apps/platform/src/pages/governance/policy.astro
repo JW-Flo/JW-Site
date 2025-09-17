@@ -1,0 +1,112 @@
+  <script>
+    // Screenshot detection logic for policy builder
+    function sendScreenshotEvent(context = 'policy-builder') {
+      const user = localStorage.getItem('atlasit_user');
+      const userData = user ? JSON.parse(user) : {};
+      fetch('/api/screenshot-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: userData.email || userData.company || 'unknown',
+          page: window.location.pathname,
+          context,
+          risk_level: 'high',
+          details: 'Possible screenshot detected via blur/visibilitychange.'
+        })
+      });
+      window.dispatchEvent(new CustomEvent('atlasit-analytics', { detail: { event: 'screenshot', page: window.location.pathname, context } }));
+      console.log('[Security] Screenshot event sent');
+    }
+    function screenshotDetectionHandler(e) {
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        sendScreenshotEvent('policy-builder');
+      }
+    }
+    window.addEventListener('blur', screenshotDetectionHandler);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        screenshotDetectionHandler();
+      }
+    });
+---
+title: "Policy Builder - AtlasIT"
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policy Builder - AtlasIT</title>
+  <style>
+    body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; min-height: 100vh; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border-radius: 1rem; border: 1px solid rgba(71, 85, 105, 0.3); padding: 2rem; }
+    .input-field { width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #334155; background: #1e293b; color: white; margin-bottom: 1rem; }
+    .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: #2563eb; }
+    .output { background: #111827; border-radius: 0.5rem; padding: 1rem; margin-top: 2rem; font-family: monospace; font-size: 0.95rem; white-space: pre-wrap; }
+    .export-btn { margin-top: 1rem; background: #10b981; }
+    .export-btn:hover { background: #059669; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-3xl font-bold mb-6">AI Policy Builder</h1>
+    <div class="glass">
+      <form id="policy-builder-form">
+        <label for="policy-type">Policy Type</label>
+        <select id="policy-type" class="input-field">
+          <option value="data-protection">Data Protection</option>
+          <option value="incident-response">Incident Response</option>
+          <option value="access-control">Access Control</option>
+          <option value="privacy">Privacy</option>
+          <option value="custom">Custom</option>
+        </select>
+        <label for="company-name">Company Name</label>
+        <input type="text" id="company-name" class="input-field" placeholder="Acme Corp" />
+        <label for="custom-parameters">Custom Parameters</label>
+        <input type="text" id="custom-parameters" class="input-field" placeholder="e.g. retention=90d, encryption=AES256" />
+        <button type="submit" class="btn">Generate Policy</button>
+      </form>
+      <div id="policy-output" class="output" style="display:none;"></div>
+      <button id="export-policy-btn" class="btn export-btn" style="display:none;">Export Policy</button>
+    </div>
+  </div>
+  <script>
+    document.getElementById('policy-builder-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const type = document.getElementById('policy-type').value;
+      const company = document.getElementById('company-name').value || 'Acme Corp';
+      const params = document.getElementById('custom-parameters').value;
+      let policyText = `---\n${company} ${type.replace(/-/g, ' ').toUpperCase()} Policy\n---\n`;
+      policyText += `\nPolicy Type: ${type}\nCompany: ${company}\nParameters: ${params || 'default'}\n\n`;
+      policyText += `This policy was generated using AtlasIT AI Policy Builder.\n\n`;
+      if (type === 'data-protection') {
+        policyText += `All company data must be protected using industry-standard encryption. Data retention is governed by ${params || 'company policy'}. Access is restricted to authorized personnel only.`;
+      } else if (type === 'incident-response') {
+        policyText += `All incidents must be reported within 24 hours. The incident response team will investigate and document all findings. Procedures must be reviewed quarterly.`;
+      } else if (type === 'access-control') {
+        policyText += `Access to systems is granted based on least privilege. All access requests must be logged and reviewed. Multi-factor authentication is required for sensitive systems.`;
+      } else if (type === 'privacy') {
+        policyText += `Personal data is processed in accordance with GDPR and CCPA. Data subjects have the right to access, rectify, and erase their data. Privacy impact assessments are conducted annually.`;
+      } else {
+        policyText += `Custom policy parameters: ${params || 'none specified'}. Please review and update as needed.`;
+      }
+      document.getElementById('policy-output').textContent = policyText;
+      document.getElementById('policy-output').style.display = 'block';
+      document.getElementById('export-policy-btn').style.display = 'inline-block';
+    });
+    document.getElementById('export-policy-btn').addEventListener('click', function() {
+      const policyText = document.getElementById('policy-output').textContent;
+      const blob = new Blob([policyText], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `AtlasIT_Policy_${new Date().toISOString().split('T')[0]}.txt`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

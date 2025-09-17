@@ -7,10 +7,23 @@ const title = "Backup Solution - AtlasIT Marketplace";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
+  <style>
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.08); }
+    .badge-simulated { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(250, 204, 21, 0.18); border: 1px solid rgba(250, 204, 21, 0.45); color: #fef08a; }
+    .simulated-callout { border: 1px solid rgba(250, 204, 21, 0.35); border-radius: 0.75rem; padding: 1rem 1.25rem; background: rgba(250, 204, 21, 0.08); margin-bottom: 1.5rem; }
+    .simulated-note { color: #cbd5f5; font-size: 0.85rem; line-height: 1.4; }
+    .simulated-history__item { border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .simulated-history__title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin: 0; }
+    .simulated-history__meta { font-size: 0.75rem; color: #94a3b8; margin-top: 0.35rem; }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
   <main class="container mx-auto px-6 py-8">
     <h1 class="text-3xl font-bold mb-6">Backup Solution</h1>
+    <div class="glass-effect simulated-callout">
+      <span class="badge-simulated">Simulated Connector</span>
+      <p class="simulated-note">Backup automations are running against AtlasIT&rsquo;s simulated connector until your storage credentials are connected. Review the sample run history below to see what data is captured. Ready to switch to production? Add your storage credentials using the steps outlined in the Orchestrator transition guide.</p>
+    </div>
     <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
       <h2 class="text-xl font-semibold mb-4">Quick Integration Walkthrough</h2>
       <ol class="list-decimal ml-6 space-y-3">
@@ -37,6 +50,26 @@ const title = "Backup Solution - AtlasIT Marketplace";
         <li>Finish setup and test backup <button class="px-4 py-2 bg-green-600 text-white rounded-lg ml-2">Test Backup</button></li>
       </ol>
     </div>
+
+    <section class="glass-effect p-6 rounded-xl border border-slate-700/50">
+      <h2 class="text-xl font-semibold text-slate-100 mb-4">Simulation Run History</h2>
+      <div class="space-y-3 text-sm">
+        <div class="simulated-history__item">
+          <div>
+            <p class="simulated-history__title">2025-09-16 · Daily Backup Workflow</p>
+            <p class="simulated-history__meta">Simulated storage target · Status: Success · Duration: 15m</p>
+          </div>
+          <span class="badge-simulated">Simulated</span>
+        </div>
+        <div class="simulated-history__item">
+          <div>
+            <p class="simulated-history__title">2025-09-14 · Compliance Audit Evidence</p>
+            <p class="simulated-history__meta">Backups archived in sandbox Dropbox connector</p>
+          </div>
+          <span class="badge-simulated">Simulated</span>
+        </div>
+      </div>
+    </section>
   </main>
 </body>
 </html>

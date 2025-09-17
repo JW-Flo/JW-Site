@@ -7,14 +7,48 @@ const title = "Microsoft 365 Integration - AtlasIT Marketplace";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
+  <style>
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.08); }
+    .badge-simulated { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(250, 204, 21, 0.18); border: 1px solid rgba(250, 204, 21, 0.45); color: #fef08a; }
+    .simulated-callout { border: 1px solid rgba(250, 204, 21, 0.35); border-radius: 0.75rem; padding: 1rem 1.25rem; background: rgba(250, 204, 21, 0.08); margin-bottom: 1.5rem; }
+    .simulated-note { color: #cbd5f5; font-size: 0.85rem; line-height: 1.4; }
+    .simulated-history__item { border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(15, 23, 42, 0.4); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .simulated-history__title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin: 0; }
+    .simulated-history__meta { font-size: 0.75rem; color: #94a3b8; margin-top: 0.35rem; }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
   <main class="container mx-auto px-6 py-8">
     <h1 class="text-3xl font-bold mb-6">Microsoft 365 Integration</h1>
+    <div class="simulated-callout glass-effect">
+      <div class="flex flex-col gap-2">
+        <span class="badge-simulated">Simulated Connector</span>
+        <p class="simulated-note">AtlasIT currently runs the Microsoft 365 connector in a simulated mode. Use this environment to design workflows and review metadata before attaching your production tenant. When ready, follow the Orchestrator documentation on transitioning from simulation to production to register your Microsoft credentials.</p>
+      </div>
+    </div>
+    <div
+      id="entra-oauth-alert"
+      class="hidden mb-6 rounded-lg border px-4 py-3 text-sm"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      tabindex="-1"
+    ></div>
     <div class="glass-effect p-6 rounded-xl border border-slate-700/50 mb-8">
       <h2 class="text-xl font-semibold mb-4">Quick Integration Walkthrough</h2>
       <ol class="list-decimal ml-6 space-y-3">
-        <li>Authorize AtlasIT to access your Microsoft 365, Microsoft Entra ID, and Active Directory accounts <button class="px-4 py-2 bg-blue-600 text-white rounded-lg ml-2">Connect to Microsoft 365 & Entra</button></li>
+        <li class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <span>Authorize AtlasIT to access your Microsoft 365, Microsoft Entra ID, and Active Directory accounts</span>
+          <button
+            id="connect-entra-btn"
+            type="button"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-400 focus-visible:ring-offset-slate-900"
+            aria-busy="false"
+            aria-live="polite"
+          >
+            Connect to Microsoft 365 &amp; Entra
+          </button>
+        </li>
         <li>Configure which services to sync:
           <div class="mt-2">
             <label class="block mb-1">Select Services:</label>
@@ -40,6 +74,89 @@ const title = "Microsoft 365 Integration - AtlasIT Marketplace";
         <li>Finish setup and test integration <button class="px-4 py-2 bg-green-600 text-white rounded-lg ml-2">Test Integration</button></li>
       </ol>
     </div>
+
+    <section class="glass-effect p-6 rounded-xl border border-slate-700/50">
+      <h2 class="text-xl font-semibold text-slate-100 mb-4">Simulation Run History</h2>
+      <div class="space-y-3 text-sm">
+        <div class="simulated-history__item">
+          <div>
+            <p class="simulated-history__title">2025-09-16 · User Offboarding Workflow</p>
+            <p class="simulated-history__meta">Connector v1.0.0 · Mode: Simulated · Accounts disabled in sandbox only</p>
+          </div>
+          <span class="badge-simulated">Simulated</span>
+        </div>
+        <div class="simulated-history__item">
+          <div>
+            <p class="simulated-history__title">2025-09-14 · Profile Synchronization</p>
+            <p class="simulated-history__meta">AD + Microsoft 365 profile sync validated using simulated responses</p>
+          </div>
+          <span class="badge-simulated">Simulated</span>
+        </div>
+      </div>
+    </section>
   </main>
 </body>
 </html>
+
+<script>
+  const connectEntraBtn = document.getElementById('connect-entra-btn');
+  const entraAlert = document.getElementById('entra-oauth-alert');
+
+  function showEntraAlert(message, type = 'info') {
+    if (!entraAlert) return;
+    const styles = {
+      success: 'border-green-500/40 bg-green-500/10 text-green-200',
+      error: 'border-red-500/40 bg-red-500/10 text-red-200',
+      info: 'border-blue-500/40 bg-blue-500/10 text-blue-200',
+    };
+    entraAlert.className = `${styles[type] || styles.info} mb-6 rounded-lg border px-4 py-3 text-sm`;
+    entraAlert.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    entraAlert.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    entraAlert.textContent = message;
+    entraAlert.classList.remove('hidden');
+    entraAlert.focus?.({ preventScroll: true });
+  }
+
+  const entraParams = new URLSearchParams(window.location.search);
+  const entraStatus = entraParams.get('oauth');
+  const entraMessage = entraParams.get('message');
+  if (entraStatus === 'success') {
+    showEntraAlert('Microsoft 365/Entra authorization succeeded. You can now configure the integration.', 'success');
+  } else if (entraStatus === 'error') {
+    showEntraAlert(entraMessage || 'Microsoft 365 authorization failed. Please try again.', 'error');
+  }
+
+  connectEntraBtn?.addEventListener('click', async () => {
+    connectEntraBtn.disabled = true;
+    connectEntraBtn.textContent = 'Checking configuration...';
+    connectEntraBtn.setAttribute('aria-busy', 'true');
+    connectEntraBtn.setAttribute('aria-disabled', 'true');
+    try {
+      const res = await fetch('/api/oauth/entra');
+      const data = await res.json();
+      if (res.ok && data.url) {
+        try {
+          const state = data.state;
+          if (state) {
+            sessionStorage.setItem('atlasit_m365_oauth_state', state);
+          }
+        } catch (error) {
+          console.warn('[m365-oauth] unable to persist state', error);
+        }
+        window.location.href = data.url;
+      } else {
+        showEntraAlert(data?.instructions || data?.error || 'Microsoft 365 OAuth is not configured yet.', 'error');
+        connectEntraBtn.disabled = false;
+        connectEntraBtn.textContent = 'Connect to Microsoft 365 & Entra';
+        connectEntraBtn.setAttribute('aria-busy', 'false');
+        connectEntraBtn.setAttribute('aria-disabled', 'false');
+      }
+    } catch (error) {
+      showEntraAlert(`Unable to start Microsoft 365 authorization: ${error.message}`, 'error');
+      connectEntraBtn.disabled = false;
+      connectEntraBtn.textContent = 'Connect to Microsoft 365 & Entra';
+      connectEntraBtn.setAttribute('aria-busy', 'false');
+      connectEntraBtn.setAttribute('aria-disabled', 'false');
+    }
+  });
+</script>

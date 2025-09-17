@@ -1,9 +1,27 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
+---
+const baseUrl = new URL(Astro.request.url);
+const runHistoryResponse = await fetch(new URL('/api/workflow-runs', baseUrl));
+const runHistoryData = await runHistoryResponse.json();
+const workflowRuns = runHistoryData.runs || [];
+const runsSource = runHistoryData.source || 'unknown';
+
+const modeBadgeClass = (mode?: string) =>
+  mode === 'production'
+    ? 'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700'
+    : 'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700';
+
+const statusBadgeClass = (status?: string) =>
+  status === 'failed'
+    ? 'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700'
+    : 'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700';
+---
+
 <BaseLayout title="AtlasIT Admin Dashboard">
   <h1 class="text-3xl font-bold mb-6">AtlasIT Admin Dashboard</h1>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
     <section class="p-6 bg-white rounded shadow">
       <h2 class="text-xl font-semibold mb-2">Analytics Overview</h2>
       <p>Platform-wide analytics widgets will appear here.</p>
@@ -17,4 +35,54 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p>YubiKey-only authentication and AWS alerting widgets.</p>
     </section>
   </div>
+
+  <section class="bg-white rounded shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-200">
+      <div class="flex items-baseline justify-between">
+        <h2 class="text-xl font-semibold">Workflow Run History</h2>
+        <span class="text-xs uppercase tracking-wide text-slate-500">Source: {runsSource}</span>
+      </div>
+      <p class="text-sm text-slate-500 mt-2">Review recent workflow executions and confirm whether they ran against simulated or production connectors.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Timestamp</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Workflow</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Connector</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Mode</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Version</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Auth Target</th>
+            <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">Status</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-slate-200">
+          {workflowRuns.length === 0 && (
+            <tr>
+              <td class="px-4 py-4 text-sm text-slate-500" colspan="7">No workflow runs have been recorded yet.</td>
+            </tr>
+          )}
+          {workflowRuns.map((run: any) => (
+            <tr>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-slate-700">{new Date(run.timestamp).toLocaleString()}</td>
+              <td class="px-4 py-3 text-sm text-slate-900">{run.workflowName ?? run.workflow_name}</td>
+              <td class="px-4 py-3 text-sm text-slate-600">
+                <div class="font-medium text-slate-900">{run.connectorAlias ?? run.connector_alias}</div>
+                <div class="text-xs text-slate-500">{run.connectorId ?? run.connector_id}</div>
+              </td>
+              <td class="px-4 py-3 text-sm">
+                <span class={modeBadgeClass(run.mode)}>{run.mode ?? 'simulated'}</span>
+              </td>
+              <td class="px-4 py-3 text-sm text-slate-600">{run.connectorVersion ?? run.connector_version ?? '—'}</td>
+              <td class="px-4 py-3 text-sm text-slate-600">{run.authTarget ?? run.auth_target ?? '—'}</td>
+              <td class="px-4 py-3 text-sm">
+                <span class={statusBadgeClass(run.status)}>{run.status ?? 'completed'}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
 </BaseLayout>

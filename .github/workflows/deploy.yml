@@ -14,20 +14,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      CF_PAGES_PROJECT: ${{ secrets.CF_PAGES_PROJECT }}
+      CF_PAGES_PROJECT: admin-dashboard
       CF_PAGES_BRANCH: main
-      CF_PAGES_DIST_DIR: apps/platform/dist
-  DEPLOY_HEALTHCHECK_URL: https://www.atlasit.pro/health
-      SUPER_ADMIN_KEY: ${{ secrets.SUPER_ADMIN_KEY }}
-      SESSION_SIGNING_KEY: ${{ secrets.SESSION_SIGNING_KEY }}
-      CONSENT_ADMIN_KEY: ${{ secrets.CONSENT_ADMIN_KEY }}
-      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
-      SITE_URL: ${{ secrets.SITE_URL }}
-      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
-      OPENCVE_API_TOKEN: ${{ secrets.OPENCVE_API_TOKEN }}
-      OPENCVE_BASIC_USER: ${{ secrets.OPENCVE_BASIC_USER }}
-      OPENCVE_BASIC_PASSWORD: ${{ secrets.OPENCVE_BASIC_PASSWORD }}
+      CF_PAGES_DIST_DIR: apps/admin-dashboard/dist
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,6 +32,9 @@ jobs:
       - name: Validate environment
         run: npm run validate:env
 
+      - name: Check connector readiness
+        run: npm run connectors:check
+
       - name: Check bundle sizes
         run: npm run check:bundle
 
@@ -52,6 +44,6 @@ jobs:
           if [ "${{ github.event.inputs.dry-run }}" != "false" ]; then
             args="-- --dry-run"
           fi
-          npm run deploy:production $args
+          npx wrangler pages deploy apps/admin-dashboard/dist --project-name admin-dashboard --branch=main $args
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

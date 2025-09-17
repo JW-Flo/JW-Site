@@ -14,7 +14,13 @@ export async function trackEvent(event: string, details?: Record<string, any>) {
         body: JSON.stringify({ event, details, page: window.location.pathname })
       });
     } catch (err) {
-      // Fail silently for now
+      // Log error with stack trace and actionable message
+      if (err instanceof Error) {
+        console.error('[Analytics] Failed to send event:', event, err.message, err.stack);
+      } else {
+        console.error('[Analytics] Failed to send event:', event, err);
+      }
+      // Optionally, report error to a monitoring service here
     }
   }
   console.log(`[Analytics] Event: ${event}`, details || {});

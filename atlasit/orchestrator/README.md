@@ -223,6 +223,23 @@ instantiates the connector implementations that ship with
   tenants, override the connector resources with production credentials while
   retaining the same workflow definition.
 
+### Transitioning from Simulation to Production
+
+1. **Register production credentials** – Supply real OAuth/OIDC or API key
+   configs through `AuthenticationManager.registerAuth` (or the exported helper
+   in `src/services/authManager.ts`). Secrets should come from your vault/KV and
+   be injected at runtime, not hard-coded.
+2. **Override workflow resources** – Pass a `connectorResources` map when
+   instantiating `OktaStyleWorkflowEngine` (or update the workflow definition
+   per tenant) so aliases like `jira` or `confluence` resolve to the production
+   connector id and metadata instead of the simulated defaults.
+3. **Disable simulation fallback** – Skip `registerSimulatedConnectorAuth`
+   wherever real connectors are available, or guard the call behind a feature
+   flag so only sandbox tenants see simulated auth profiles.
+4. **Validate and update UI messaging** – Run the Vitest suite plus any smoke
+   tests after wiring live credentials, then adjust marketplace copy to reflect
+   the production state once verification is complete.
+
 ## Error Handling
 
 The service uses consistent error codes:

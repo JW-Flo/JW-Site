@@ -17,7 +17,8 @@
     "demo:refresh": "node scripts/demo-refresh.mjs",
     "deploy:production": "node scripts/deploy-production.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
-    "validate:env": "node scripts/validate-env.mjs"
+    "validate:env": "node scripts/validate-env.mjs",
+    "connectors:check": "node scripts/check-connector-transition.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
