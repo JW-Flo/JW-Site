@@ -1,0 +1,66 @@
+name: cloudflare-terraform-apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to apply (e.g. main or refs/heads/feature)'
+        type: string
+        default: main
+        required: true
+
+concurrency:
+  group: cloudflare-terraform-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: terraform apply (infra/cloudflare)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment:
+      name: cloudflare-apply
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra/cloudflare
+    env:
+      TF_VAR_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TF_VAR_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_zone_id_pro: ${{ secrets.CLOUDFLARE_ZONE_ID_PRO }}
+      TF_VAR_zone_id_app: ${{ secrets.CLOUDFLARE_ZONE_ID_APP }}
+      TF_VAR_dev_emails: ${{ secrets.CLOUDFLARE_DEV_EMAILS_JSON }}
+      TF_VAR_team_emails: ${{ secrets.CLOUDFLARE_TEAM_EMAILS_JSON }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color -out=plan.out
+
+      - name: Terraform apply
+        run: terraform apply -input=false -auto-approve plan.out
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-apply-plan
+          path: infra/cloudflare/plan.out
+          if-no-files-found: ignore
