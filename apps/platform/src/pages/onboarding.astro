@@ -239,11 +239,25 @@ const title = "Onboarding - AtlasIT";
             >
               Start Onboarding
             </button>
-            <div id="onboarding-error" class="hidden rounded-lg border border-red-500/40 bg-red-500/10 text-red-300 text-sm px-4 py-3"></div>
+            <div
+              id="onboarding-error"
+              class="hidden rounded-lg border border-red-500/40 bg-red-500/10 text-red-200 text-sm px-4 py-3"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+              tabindex="-1"
+            ></div>
           </form>
         </div>
 
-        <div id="onboarding-result" class="hidden glass-effect p-8 rounded-xl border border-slate-700/50">
+        <div
+          id="onboarding-result"
+          class="hidden glass-effect p-8 rounded-xl border border-slate-700/50"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          tabindex="-1"
+        >
           <h2 class="text-xl font-semibold mb-4">Onboarding Complete!</h2>
           <div id="result-content"></div>
         </div>
@@ -293,6 +307,38 @@ const title = "Onboarding - AtlasIT";
 
   <script>
     // Mobile menu toggle
+
+    // Screenshot detection logic
+    function sendScreenshotEvent(context = 'onboarding') {
+      const user = localStorage.getItem('atlasit_user');
+      const userData = user ? JSON.parse(user) : {};
+      fetch('/api/screenshot-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: userData.email || userData.company || 'unknown',
+          page: window.location.pathname,
+          context,
+          risk_level: 'high',
+          details: 'Possible screenshot detected via blur/visibilitychange.'
+        })
+      });
+      window.dispatchEvent(new CustomEvent('atlasit-analytics', { detail: { event: 'screenshot', page: window.location.pathname, context } }));
+      console.log('[Security] Screenshot event sent');
+    }
+
+    function screenshotDetectionHandler(e) {
+      if (/Mobi|Android/i.test(navigator.userAgent)) {
+        sendScreenshotEvent('onboarding');
+      }
+    }
+
+    window.addEventListener('blur', screenshotDetectionHandler);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        screenshotDetectionHandler();
+      }
+    });
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
 
@@ -312,6 +358,7 @@ const title = "Onboarding - AtlasIT";
       const form = document.getElementById('onboarding-form');
       const tenantInput = form?.querySelector('input[name="tenantId"]');
       const companyInput = form?.querySelector('input[name="name"]');
+      const industrySelect = form?.querySelector('select[name="industry"]');
       const demoSelect = document.getElementById('demo-user-select');
       const demoUserIdInput = document.getElementById('demo-user-id');
       const previewCard = document.getElementById('demo-user-preview');
@@ -382,6 +429,43 @@ const title = "Onboarding - AtlasIT";
         const hasBasics = Boolean(tenantInput?.value && companyInput?.value);
         const hasPersona = Boolean(demoUserIdInput?.value);
         setProgress(hasBasics || hasPersona ? 2 : 1);
+      }
+
+      function clearValidationStates() {
+        tenantInput?.removeAttribute('aria-invalid');
+        companyInput?.removeAttribute('aria-invalid');
+        industrySelect?.removeAttribute('aria-invalid');
+      }
+
+      function flagFieldFromMessage(message) {
+        if (!message) return;
+        const text = message.toLowerCase();
+        if (tenantInput && text.includes('tenant')) {
+          tenantInput.setAttribute('aria-invalid', 'true');
+          return;
+        }
+        if (companyInput && text.includes('company')) {
+          companyInput.setAttribute('aria-invalid', 'true');
+          return;
+        }
+        if (industrySelect && text.includes('industry')) {
+          industrySelect.setAttribute('aria-invalid', 'true');
+        }
+      }
+
+      function showFormError(message, code) {
+        if (!errorBox) return;
+        const headline = message || 'Unexpected error';
+        const guidance = code === 'INVALID_PAYLOAD'
+          ? 'Check the highlighted form fields and try again.'
+          : code === 'INVALID_JSON'
+            ? 'Verify the request body is valid JSON and resubmit.'
+            : 'Retry in a moment or share the reference details with AtlasIT support.';
+        const reference = code ? `Error code: ${code}.` : '';
+        const supportCopy = [reference, guidance].filter(Boolean).join(' ');
+        errorBox.innerHTML = `⚠️ <strong>${headline}</strong><br><span class="block mt-2 text-xs text-red-200/80">${supportCopy}</span>`;
+        errorBox.classList.remove('hidden');
+        errorBox.focus?.({ preventScroll: true });
       }
 
       function renderUsers(users) {
@@ -491,28 +575,27 @@ const title = "Onboarding - AtlasIT";
             });
             const result = await response.json();
             if (response.ok) {
+              clearValidationStates();
               errorBox?.classList.add('hidden');
               resultPanel?.classList.remove('hidden');
-              document.getElementById('result-content').innerHTML = `
+              document.getElementById('result-content')?.innerHTML = `
                 <p class="text-green-400 mb-4">✅ Onboarding successful!</p>
                 <pre class="bg-slate-800 p-4 rounded text-sm overflow-x-auto text-slate-100">${JSON.stringify(result, null, 2)}</pre>
                 <a href="/dashboard" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Go to Dashboard</a>
               `;
               setProgress(3);
+              resultPanel?.focus?.({ preventScroll: true });
             } else {
+              clearValidationStates();
               const message = result?.error || result?.code || 'Unexpected error';
-              if (errorBox) {
-                errorBox.textContent = `⚠️ ${message}`;
-                errorBox.classList.remove('hidden');
-              }
+              flagFieldFromMessage(message);
+              showFormError(message, result?.code);
               resultPanel?.classList.add('hidden');
               evaluateStep();
             }
           } catch (error) {
-            if (errorBox) {
-              errorBox.textContent = `⚠️ Network error: ${error.message}`;
-              errorBox.classList.remove('hidden');
-            }
+            clearValidationStates();
+            showFormError(`Network error: ${error instanceof Error ? error.message : error}`, 'NETWORK_ERROR');
             resultPanel?.classList.add('hidden');
             evaluateStep();
           }
@@ -523,6 +606,7 @@ const title = "Onboarding - AtlasIT";
         if (errorBox) {
           errorBox.classList.add('hidden');
         }
+        clearValidationStates();
         evaluateStep();
       });
 
@@ -554,6 +638,7 @@ const title = "Onboarding - AtlasIT";
           resetButton.textContent = 'Resetting...';
           resetSuccess?.classList.add('hidden');
           errorBox?.classList.add('hidden');
+          clearValidationStates();
 
           const response = await fetch('/api/demo/reset', { method: 'POST' });
           if (!response.ok) {
@@ -575,11 +660,8 @@ const title = "Onboarding - AtlasIT";
             resetSuccess.classList.remove('hidden');
           }
         } catch (error) {
-          if (errorBox) {
-            const message = error instanceof Error ? error.message : String(error);
-            errorBox.textContent = `⚠️ ${message}`;
-            errorBox.classList.remove('hidden');
-          }
+          const message = error instanceof Error ? error.message : String(error);
+          showFormError(message, 'RESET_FAILED');
         } finally {
           if (resetButton) {
             resetButton.disabled = false;

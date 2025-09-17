@@ -7,7 +7,8 @@
     "author": "AtlasIT",
     "tags": ["onboarding", "identity", "automation"],
     "estimatedDuration": "15 minutes",
-    "complexity": "high"
+    "complexity": "high",
+    "changeManagement": "Simulated Jira approvals and Confluence documentation"
   },
   "resources": {
     "idp": {
@@ -20,7 +21,9 @@
       "activeDirectory": "{{connectors.activeDirectory}}",
       "office365": "{{connectors.office365}}",
       "slack": "{{connectors.slack}}",
-      "aws": "{{connectors.aws}}"
+      "aws": "{{connectors.aws}}",
+      "jira": "{{connectors.jira}}",
+      "confluence": "{{connectors.confluence}}"
     }
   },
   "cards": [
@@ -263,6 +266,56 @@
           "{{general-path.complete}}"
         ]
       }
+    },
+    {
+      "id": "create-change-ticket",
+      "type": "connector-action",
+      "name": "Create Change Ticket",
+      "icon": "clipboard",
+      "position": { "x": 1020, "y": 20 },
+      "config": {
+        "connector": "jira",
+        "action": "create-issue",
+        "parameters": {
+          "projectKey": "OPS",
+          "summary": "Onboard {{userData.firstName}} {{userData.lastName}}",
+          "description": "Automated onboarding change for {{userData.email}}",
+          "changeType": "Standard",
+          "approvers": ["ops-lead@example.com"]
+        }
+      }
+    },
+    {
+      "id": "approve-change-ticket",
+      "type": "connector-action",
+      "name": "Approve Change Ticket",
+      "icon": "check-square",
+      "position": { "x": 1180, "y": 20 },
+      "config": {
+        "connector": "jira",
+        "action": "transition-issue",
+        "parameters": {
+          "issueKey": "{{card.create-change-ticket.output.payload.issueKey}}",
+          "status": "Approved"
+        }
+      }
+    },
+    {
+      "id": "publish-change-docs",
+      "type": "connector-action",
+      "name": "Publish Change Documentation",
+      "icon": "file-text",
+      "position": { "x": 1340, "y": 20 },
+      "config": {
+        "connector": "confluence",
+        "action": "publish-page",
+        "parameters": {
+          "spaceKey": "OPS",
+          "title": "Onboarding - {{userData.firstName}} {{userData.lastName}}",
+          "body": "Change ticket {{card.create-change-ticket.output.payload.issueKey}} approved and onboarding completed for {{userData.email}}.",
+          "labels": ["onboarding", "change-management"]
+        }
+      }
     }
   ],
   "connections": [
@@ -302,6 +355,21 @@
     {
       "from": "sales-path",
       "to": "completion-notifier",
+      "type": "success"
+    },
+    {
+      "from": "completion-notifier",
+      "to": "create-change-ticket",
+      "type": "success"
+    },
+    {
+      "from": "create-change-ticket",
+      "to": "approve-change-ticket",
+      "type": "success"
+    },
+    {
+      "from": "approve-change-ticket",
+      "to": "publish-change-docs",
       "type": "success"
     }
   ],

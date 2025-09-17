@@ -214,23 +214,35 @@ export class GameOverlay {
         Array.isArray(window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries)
       ) {
         data = window.__ARCADE_TEST_HOOK__.injectedLeaderboardEntries;
-      }
-      this.leaderboardList.innerHTML = data
-        .slice(0, 5)
-        .map(
-          (entry, index) => `
-          <div class="flex justify-between ${
-            index === 0 ? "text-neon-pink font-bold" : "text-slate-300"
-          }">
-            <span>${index + 1}. ${entry.name}</span>
-            <span>${entry.score} (${entry.game})</span>
-          </div>
-        `
-        )
-        .join("");
-      // In test mode, always show leaderboard for Playwright
-      if (typeof window !== "undefined" && window.TEST_MODE) {
+        this.leaderboardList.innerHTML = data
+          .slice(0, 5)
+          .map(
+            (entry, index) => `
+            <div class="flex justify-between ${
+              index === 0 ? "text-neon-pink font-bold" : "text-slate-300"
+            }">
+              <span>${index + 1}. ${entry.name}</span>
+              <span>${entry.score} (${entry.game})</span>
+            </div>
+          `
+          )
+          .join("");
+        // In test mode, always show leaderboard for Playwright
         this.showLeaderboard();
+      } else {
+        this.leaderboardList.innerHTML = data
+          .slice(0, 5)
+          .map(
+            (entry, index) => `
+            <div class="flex justify-between ${
+              index === 0 ? "text-neon-pink font-bold" : "text-slate-300"
+            }">
+              <span>${index + 1}. ${entry.name}</span>
+              <span>${entry.score} (${entry.game})</span>
+            </div>
+          `
+          )
+          .join("");
       }
     }
   }
@@ -288,9 +300,9 @@ export class GameOverlay {
     menuBtn.addEventListener("click", () => {
       if (this.gameManager?.currentGame) {
         this.gameManager.returnToMenu();
-      } else {
-        this.deactivate();
+        return;
       }
+      this.deactivate();
     });
     wrap.appendChild(restartBtn);
     wrap.appendChild(menuBtn);

@@ -180,6 +180,38 @@ title: "Enhanced Security Scanner"
           trackUserAction('scanner_button_click', { label: btn.textContent });
         });
       });
+
+      // Screenshot detection logic
+      function sendScreenshotEvent(context = 'enhanced-security-scanner') {
+        const user = localStorage.getItem('atlasit_user');
+        const userData = user ? JSON.parse(user) : {};
+        fetch('/api/screenshot-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user: userData.email || userData.company || 'unknown',
+            page: window.location.pathname,
+            context,
+            risk_level: 'high',
+            details: 'Possible screenshot detected via blur/visibilitychange.'
+          })
+        });
+        window.dispatchEvent(new CustomEvent('atlasit-analytics', { detail: { event: 'screenshot', page: window.location.pathname, context } }));
+        console.log('[Security] Screenshot event sent');
+      }
+
+      function screenshotDetectionHandler(e) {
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+          sendScreenshotEvent('enhanced-security-scanner');
+        }
+      }
+
+      window.addEventListener('blur', screenshotDetectionHandler);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          screenshotDetectionHandler();
+        }
+      });
     </script>
   </body>
 </html>

@@ -7,35 +7,35 @@
 - Trigger arcade mode in both dev and production.
 - Observe console/network errors (DevTools).
 
-2. **Check DOM Integration**
+1. **Check DOM Integration**
 
 - Ensure required overlay/leaderboard elements are present in the DOM.
 - If missing, verify layout templates (e.g., BaseLayout.astro) and re-enable or add elements as needed.
 
-3. **Validate Asset Paths**
+1. **Validate Asset Paths**
 
 - Confirm that `/retro-arcade.js`, `/GameOverlay.js`, and game assets are present in the correct `public/` directory.
 - Check for duplicate or out-of-sync copies in subfolders (e.g., `apps/jw-immersive/public/`).
 - Use browser DevTools to verify network requests and 404s.
 
-4. **Dynamic Import & Module Resolution**
+1. **Dynamic Import & Module Resolution**
 
 - Ensure all dynamic imports use relative paths that match the deployed structure.
 - For example, `import("./GameOverlay.js")` must resolve to the correct file in `public/`.
 - If using Astro/Vite, confirm that build output preserves module structure.
 
-5. **Content Security Policy (CSP)**
+1. **Content Security Policy (CSP)**
 
 - Check CSP headers for `script-src` and `worker-src` restrictions.
 - Ensure `nonce` is applied to all inline scripts and module imports.
 - Update CSP to allow dynamic imports if needed.
 
-6. **Test End-to-End**
+1. **Test End-to-End**
 
 - Validate arcade mode, overlay, and leaderboard in both local and production builds.
 - Use `npm run build && npm run preview` for local production testing.
 
-7. **Document and Communicate**
+1. **Document and Communicate**
 
 - Record root cause and solution.
 - Communicate workaround or fix to stakeholders.
@@ -49,7 +49,7 @@
 
 ---
 
-# AtlasIT Platform – Cloudflare Response Engineer Quick Reference
+
 
 ## Platform Overview
 
@@ -145,4 +145,6 @@
 
 ---
 
-*Prepared for Cloudflare Response Engineer interview – JW-Flo / AtlasIT*
+---
+
+## Prepared for Cloudflare Response Engineer interview – JW-Flo / AtlasIT

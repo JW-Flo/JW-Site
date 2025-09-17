@@ -8,6 +8,7 @@ This architecture is designed and maintained in direct alignment with authoritat
 - [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md) — Small business IT automation market sizing, competitive gaps, and platform feature recommendations
 
 All architectural decisions, security layers, and future enhancements are referenced to these reports. Please consult them for justification and ongoing strategic alignment
+
 ---
 
 ## High-Level Components
@@ -116,8 +117,11 @@ flowchart TD
 
 ---
 
-**Research Reference:**
+
+## Research Reference
+
 All future enhancements and architectural changes are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for strategic context and justification
+
 ---
 
 ---

@@ -19,6 +19,12 @@ const title = "Slack Integration - AtlasIT Marketplace";
     .demo-banner { background: linear-gradient(90deg, rgba(37,99,235,0.25), rgba(168,85,247,0.25)); border: 1px solid rgba(59,130,246,0.35); border-radius: 0.75rem; color: #bfdbfe; font-size: 0.75rem; letter-spacing: 0.08em; padding: 0.6rem 1rem; text-transform: uppercase; text-align: center; margin: 1.5rem auto 0; max-width: 60rem; }
     .feature-card { transition: all 0.2s ease; }
     .feature-card:hover { transform: translateY(-2px); }
+    .badge-simulated { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(250, 204, 21, 0.18); border: 1px solid rgba(250, 204, 21, 0.45); color: #fef08a; }
+    .simulated-callout { border: 1px solid rgba(250, 204, 21, 0.35); border-radius: 0.75rem; padding: 1rem 1.25rem; background: rgba(250, 204, 21, 0.08); }
+    .simulated-note { color: #cbd5f5; font-size: 0.85rem; line-height: 1.4; margin-top: 0.75rem; }
+    .simulated-history__item { border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(15, 23, 42, 0.4); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .simulated-history__title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin: 0; }
+    .simulated-history__meta { font-size: 0.75rem; color: #94a3b8; margin-top: 0.35rem; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 min-h-screen">
@@ -86,6 +92,11 @@ const title = "Slack Integration - AtlasIT Marketplace";
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="glass-effect simulated-callout mb-8">
+      <span class="badge-simulated">Simulated Connector</span>
+      <p class="simulated-note">This Slack integration currently runs in AtlasIT&rsquo;s simulated connector environment. Review the sample events and approvals before connecting your production workspace. When you have production tokens, follow the transition steps in the Orchestrator documentation to register the real connector.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -335,6 +346,26 @@ const title = "Slack Integration - AtlasIT Marketplace";
             <a href="#" class="block w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm text-center">
               Report Issues
             </a>
+          </div>
+        </div>
+
+        <div class="glass-effect p-6 rounded-xl border border-slate-700/50">
+          <h3 class="text-lg font-semibold mb-4">Simulation Run History</h3>
+          <div class="space-y-3 text-sm">
+            <div class="simulated-history__item">
+              <div>
+                <p class="simulated-history__title">2025-09-16 · Access Approval Workflow</p>
+                <p class="simulated-history__meta">Slack notifications and approvals executed in simulated mode</p>
+              </div>
+              <span class="badge-simulated">Simulated</span>
+            </div>
+            <div class="simulated-history__item">
+              <div>
+                <p class="simulated-history__title">2025-09-13 · Offboarding Alerts</p>
+                <p class="simulated-history__meta">Sandbox channel updates for departing users</p>
+              </div>
+              <span class="badge-simulated">Simulated</span>
+            </div>
           </div>
         </div>
 

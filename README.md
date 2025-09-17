@@ -10,12 +10,14 @@ This platform and all planning, architecture, and feature development are rigoro
 - [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md) — Small business IT automation market sizing, competitive gaps, and platform feature recommendations
 
 All roadmap decisions, architectural choices, and feature prioritization are referenced to these reports. Please consult them for rationale, data, and ongoing alignment
+
 ---
 
 **Primary Domain:** <https://www.atlasit.pro>  
 **Branding:** See monorepo root for generated logo options and taglines.  
 **Migration Guide:** See `/docs/# AtlasIT Platform Consolidation & Migra.md`
 
+```json
 
 ## Monorepo Context
 
@@ -35,7 +37,8 @@ To run the admin dashboard:
 cd apps/admin-dashboard
 npm install
 npm run dev
-```
+```json
+```json
 
 To run the immersive app:
 
@@ -43,14 +46,14 @@ To run the immersive app:
 ```bash
 cd apps/jw-immersive
 npm run dev
-```
+```sql
 
 For full monorepo development:
 
 ```bash
 ```bash
 npm run dev  # from root
-```
+```text
 
 ---
 
@@ -62,6 +65,15 @@ npm run dev  # from root
 - Secure admin dashboard with YubiKey-only authentication
 - Multi-tenant data isolation and demo mode
 - Astro SSR, TailwindCSS, Cloudflare Pages/Workers
+
+- **Mobile Screenshot Tracking:**
+  The platform now tracks mobile screenshots of sensitive information as user actions in analytics, contributing to the risk matrix.
+  *Feature inspired by Roku’s alert system and suggested by Matt Lujan.*
+
+## Connector Transition
+
+- Review the [Connector Transition Checklist](docs/connector-transition-checklist.md) when promoting simulated connectors (Jira, Confluence, Microsoft 365, etc.) to production.
+- Run `npm run connectors:check` to ensure required environment variables are present before disabling simulation mode.
 
 
 ## Stack
@@ -81,7 +93,7 @@ npm run dev  # from root
 ```bash
 npm install
 npm run dev
-```
+```bash
 
 Site at <http://localhost:4321>
 
@@ -97,7 +109,7 @@ docker-compose up
 # Or build and run separately:
 docker-compose build
 docker-compose up -d
-```
+```bash
 
 Site at <http://localhost:4321>
 
@@ -115,7 +127,7 @@ npm run docker:up
 
 # Stop containers
 npm run docker:down
-```
+```bash
 
 Docker provides a consistent development environment across different machines and ensures all dependencies are properly isolated.
 
@@ -487,7 +499,9 @@ See `ARCHITECTURE.md` for diagrams (ASCII + Mermaid), data flow, and future enha
 ---
 
 ## Research Reference
+
 All architectural decisions and future enhancements are mapped to findings and recommendations in [COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md](./COMPREHENSIVE_ATLASIT_INDUSTRY_RESEARCH_REPORT.md) and [ATLASIT_MARKET_RESEARCH_REPORT.md](./ATLASIT_MARKET_RESEARCH_REPORT.md). See those reports for justification and strategic context
+
 ---
 
 ---
@@ -517,9 +531,8 @@ npx wrangler pages deploy apps/platform/dist --project-name=atlasit-platform
 # Verify deployment
 curl -I https://www.atlasit.pro/dashboard/
 curl -I https://1d9d5ba0.atlasit-platform.pages.dev/dashboard/
+```text
 ```
-
-**Troubleshooting:**
 
 - If SSL handshake fails (525): Check domain mapping and SSL/TLS mode
 - If 404 on custom domain: Verify correct project mapping
@@ -544,9 +557,8 @@ pubDate: 2025-08-27
 ---
 
 Content here.
+```text
 ```
-
-1. Commit & push – feed & sitemap update automatically.
 
 Update resume:
 
@@ -581,14 +593,11 @@ chmod +x scripts/smoke.sh # first run
 ./scripts/smoke.sh http://localhost:4321
 ```
 
-## API Endpoints (Current)
-
 ### Enhanced Security Scan API
 
-```
+```json
 {
   "url": "https://example.com",
-```json
   "type": "headers" // or any supported scan type
 }
 ```
@@ -600,10 +609,9 @@ chmod +x scripts/smoke.sh # first run
 
 **Result Shape:**
 
-```
+```json
 {
   "result": {
-```sql
     "scanId": "...",
     "url": "...",
     "scanType": "...",
@@ -615,7 +623,7 @@ chmod +x scripts/smoke.sh # first run
     "metadata": { ... }
   }
 }
-  ```text
+```
 ```
 
 See `src/pages/api/scans/types.ts` for full type definitions.
@@ -685,13 +693,12 @@ Adding / Editing Hints:
 
 Using Secret Progress (example inside a game module):
 
-```js
-// Award hidden progress when player performs a special action
-import './arcadeHints.js'; // ensure global is registered (or rely on existing load)
-window.ArcadeHints?.incrementSecretProgress(2);
+```json
+{
+  "url": "https://example.com",
+  "type": "headers" // or any supported scan type
+}
 ```
-
-Potential Extension Channels (backlog):
 
 - HTTP Response Header: Inject a low‑value, rotating `X-Arcade-Hint` header on arcade asset requests (disabled by default) for users inspecting network traffic.
 - Achievements Overlay: Display a transient toast when secret progress crosses thresholds (e.g., 5, 10, 20) to tease deeper layers.
@@ -752,22 +759,21 @@ Example enablement in `.env.local` (do not commit real keys):
 NVD_API_KEY=your_nvd_key
 VIRUSTOTAL_API_KEY=your_vt_key
 OPENCVE_ENRICH=true
+```json
+{
+  "result": {
+    "scanId": "...",
+    "url": "...",
+    "scanType": "...",
+    "timestamp": "...",
+    "duration": 0,
+    "findings": [ /* array of EnhancedFinding */ ],
+    "summary": { ... },
+    "businessMetrics": { ... },
+    "metadata": { ... }
+  }
+}
 ```
-
-Operational Guidance:
-
-- Keep requests conservative (current implementation limits CVE queries to small pages and simple keyword search) to stay within fair use.
-- If rate limiting or errors occur, findings are downgraded to `warning` or `info` without failing the overall scan.
-- Disable any enrichment quickly by unsetting the variable or setting `OPENCVE_ENRICH=false`.
-
-Security Considerations:
-
-- External lookups include only product/version keywords derived from already public response headers (no user PII).
-- Keys should be configured in the Cloudflare environment, never committed.
-- Future expansion (e.g., more precise CVE matching) should preserve minimal disclosure and add caching to reduce external traffic.
-
-### Admin Consent Metrics Portal
-
 An intentionally unlinked, low-noise admin view for aggregated consent preferences to validate privacy UX and regional gating. Accessible at:
 
 - Page: `/admin-consent`
