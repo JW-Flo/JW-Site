@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "install (root)",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "lint (all)",
+      "type": "shell",
+      "command": "npm run lint",
+      "group": "build",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "typecheck (atlasit)",
+      "type": "shell",
+      "command": "npm run check:atlasit",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "build (all)",
+      "type": "shell",
+      "command": "npm run build",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "test (all)",
+      "type": "shell",
+      "command": "npm run test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "test (atlasit quick)",
+      "type": "shell",
+      "command": "npm run test:atlasit",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "playwright (smokes)",
+      "type": "shell",
+      "command": "npx playwright install --with-deps && npx playwright test --reporter=line",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "terraform-validate-cloudflare",
+      "type": "shell",
+      "command": "cd infra/cloudflare && terraform init -input=false && terraform validate",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "deploy (atlasit pages)",
+      "type": "shell",
+      "command": "npm run deploy:atlasit:pages",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

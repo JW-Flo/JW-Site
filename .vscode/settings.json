@@ -1,0 +1,35 @@
+{
+  "editor.formatOnSave": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "eslint.workingDirectories": [
+    { "mode": "auto" },
+    { "directory": "apps/atlasit-sveltekit", "changeProcessCWD": true },
+    { "directory": "apps/platform", "changeProcessCWD": true },
+    { "directory": "apps/jw-immersive", "changeProcessCWD": true },
+    { "directory": "packages", "changeProcessCWD": true }
+  ],
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "svelte.enable-ts-plugin": true,
+  "svelte.plugin.typescript.enable": true,
+  "svelte.trace.server": "off",
+  "svelte.language-server.runtime": "node",
+  "powershell.integratedConsole.forceClearScrollbackBuffer": true,
+  "powershell.integratedConsole.startInBackground": true,
+  "powershell.integratedConsole.suppressStartupBanner": true,
+  "terminal.integrated.sendKeybindingsToShell": true,
+  "cmake.sourceDirectory": "/Users/jw/Projects/JW-Site/node_modules/bare-fs"
+}
