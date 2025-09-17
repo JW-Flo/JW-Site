@@ -1,0 +1,124 @@
+name: cloudflare-terraform-plan
+
+on:
+  pull_request:
+    paths:
+      - 'infra/cloudflare/**'
+
+concurrency:
+  group: cloudflare-terraform-plan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: terraform plan (infra/cloudflare)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    if: >-
+      ${{
+        secrets.CLOUDFLARE_API_TOKEN != '' &&
+        secrets.CLOUDFLARE_ACCOUNT_ID != '' &&
+        secrets.CLOUDFLARE_ZONE_ID_PRO != '' &&
+        secrets.CLOUDFLARE_ZONE_ID_APP != '' &&
+        secrets.CLOUDFLARE_DEV_EMAILS_JSON != '' &&
+        secrets.CLOUDFLARE_TEAM_EMAILS_JSON != ''
+      }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra/cloudflare
+    env:
+      TF_VAR_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TF_VAR_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_zone_id_pro: ${{ secrets.CLOUDFLARE_ZONE_ID_PRO }}
+      TF_VAR_zone_id_app: ${{ secrets.CLOUDFLARE_ZONE_ID_APP }}
+      TF_VAR_dev_emails: ${{ secrets.CLOUDFLARE_DEV_EMAILS_JSON }}
+      TF_VAR_team_emails: ${{ secrets.CLOUDFLARE_TEAM_EMAILS_JSON }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color -out=plan.out
+
+      - name: Terraform show
+        id: show
+        run: terraform show -no-color plan.out > plan.txt
+
+      - name: Capture plan output
+        id: capture
+        run: |
+          {
+            echo 'plan<<PLAN_EOF'
+            cat plan.txt
+            echo 'PLAN_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post plan comment
+        uses: actions/github-script@v7
+        env:
+          PLAN: ${{ steps.capture.outputs.plan }}
+        with:
+          script: |
+            const marker = '<!-- cloudflare-terraform-plan -->';
+            const plan = process.env.PLAN || '';
+            const truncatedPlan = plan.length > 60000 ? `${plan.slice(0, 60000)}\n...plan truncated...` : plan;
+            const body = `${marker}\n### Terraform plan (infra/cloudflare)\n\n\u0060\u0060\u0060\n${truncatedPlan}\n\u0060\u0060\u0060\n`;
+            const {owner, repo} = context.repo;
+            const issue_number = context.issue.number;
+            const existing = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number }).then(comments => comments.find(c => c.user?.login === 'github-actions[bot]' && c.body?.includes(marker)));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: infra/cloudflare/plan.out
+          if-no-files-found: ignore
+
+  no-secrets:
+    if: >-
+      ${{
+        !(secrets.CLOUDFLARE_API_TOKEN != '' &&
+          secrets.CLOUDFLARE_ACCOUNT_ID != '' &&
+          secrets.CLOUDFLARE_ZONE_ID_PRO != '' &&
+          secrets.CLOUDFLARE_ZONE_ID_APP != '' &&
+          secrets.CLOUDFLARE_DEV_EMAILS_JSON != '' &&
+          secrets.CLOUDFLARE_TEAM_EMAILS_JSON != '')
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Comment missing secrets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- cloudflare-terraform-plan -->';
+            const body = `${marker}\n⚠️ Terraform plan skipped: required secrets are not configured for \`infra/cloudflare\`. Please add CLOUDFLARE_* secrets to enable planning.`;
+            const {owner, repo} = context.repo;
+            const issue_number = context.issue.number;
+            const existing = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number }).then(comments => comments.find(c => c.user?.login === 'github-actions[bot]' && c.body?.includes(marker)));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

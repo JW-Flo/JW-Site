@@ -1,0 +1,39 @@
+name: cloudflare-terraform-validate
+
+on:
+  pull_request:
+    paths:
+      - 'infra/cloudflare/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/cloudflare/**'
+
+jobs:
+  fmt-validate:
+    name: terraform fmt & validate (infra/cloudflare)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+        working-directory: infra/cloudflare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
