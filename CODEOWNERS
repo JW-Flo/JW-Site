@@ -1,4 +1,1 @@
-# Code owners for critical paths
-/apps/atlasit-sveltekit/* @JW-Flo/platform-owners
-/apps/atlasit-sveltekit/src/routes/** @JW-Flo/platform-owners
-/apps/atlasit-sveltekit/src/lib/** @JW-Flo/platform-owners
+* @JW-Flo/platform-owners

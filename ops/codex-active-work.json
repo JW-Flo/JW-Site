@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "updatedAt": "2025-09-17T19:30:00Z",
+  "active": [
+    {
+      "branch": "chore/docs-pr6-alignment",
+      "pr": "PR6 TBD",
+      "title": "Docs alignment",
+      "files": [
+        "docs/ATLASIT_ROADMAP_LINKS.md",
+        "README.md",
+        "ops/pr-bodies/PR6_docs-alignment.md",
+        "ops/codex-active-work.json"
+      ],
+      "notes": "Ready to push (docs updated; changes staged)"
+    }
+  ]
+}
