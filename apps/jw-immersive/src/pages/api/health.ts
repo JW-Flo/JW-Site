@@ -26,6 +26,30 @@ export const GET: APIRoute = async ({ locals }) => {
     enrichment,
     timestamp: new Date().toISOString()
   };
+  try {
+    const diagnostics = await (async () => {
+      const candidates = [
+        '../runtime/scans/service',
+        '../../../../../Project-AtlasIT/src/runtime/scans/service.ts',
+      ];
+      for (const candidate of candidates) {
+        try {
+          // eslint-disable-next-line no-await-in-loop, @typescript-eslint/ban-ts-comment
+          // @ts-ignore optional path
+          const { getHealthScanPerf } = await import(candidate);
+          return getHealthScanPerf?.();
+        } catch {
+          // continue searching
+        }
+      }
+      return undefined;
+    })();
+    if (diagnostics) {
+      (body as any).scanPerf = diagnostics;
+    }
+  } catch {
+    // optional diagnostics; never fail health response
+  }
   logger.debug('Health check', { uptime: body.uptime_ms, commit });
   return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 };

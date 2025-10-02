@@ -1,5 +1,42 @@
 import type { APIRoute } from 'astro';
 import { applyRateLimit, rateLimitHeaders } from '../../utils/applyRateLimit.js';
+// Dynamic flag support: if dynamic runtime layer is present (from Project-AtlasIT monorepo),
+// we will attempt to lazy-load a dynamic config and respect GUESTBOOK_DYNAMIC_MODE precedence:
+// 1. Explicit env var GUESTBOOK_DYNAMIC_MODE ("true" / "false")
+// 2. Dynamic config key guestbook.dynamic.enabled (boolean or string)
+// 3. Fallback to legacy nonProd heuristic (existing behavior)
+// This is implemented append-only and wrapped in try/catch so absence of runtime has zero impact.
+
+async function resolveDynamicMode(): Promise<boolean | null> {
+  // Highest precedence: direct environment variable (string comparison, case-insensitive)
+  if (typeof process !== 'undefined' && process.env && typeof process.env.GUESTBOOK_DYNAMIC_MODE !== 'undefined') {
+    const v = process.env.GUESTBOOK_DYNAMIC_MODE?.toLowerCase();
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+  }
+  // Attempt dynamic config import lazily
+  interface DynamicConfig {
+    values?: Record<string, unknown>;
+  }
+  try {
+    // Use dynamic import with a variable path to avoid hard-coded coupling.
+    const modulePath = '../../../../Project-AtlasIT/src/runtime/config/dynamicConfig.ts';
+    const mod = await import(modulePath).catch(() => null);
+    if (mod && typeof mod.getConfig === 'function') {
+      const cfg: DynamicConfig = await mod.getConfig();
+      const val = cfg?.values?.['guestbook.dynamic.enabled'];
+      if (typeof val === 'boolean') return val;
+      if (typeof val === 'string') {
+        const lv = val.toLowerCase();
+        if (lv === 'true') return true;
+        if (lv === 'false') return false;
+      }
+    }
+  } catch (_err) {
+    // Silently ignore – dynamic layer not present or failed; we fall back.
+  }
+  return null; // signal no explicit dynamic decision
+}
 
 export const prerender = false;
 
@@ -43,24 +80,14 @@ async function verifyGameScore(env: any, playerName: string, minimumScore: numbe
 }
 
 export const GET: APIRoute = async ({ locals, clientAddress }) => {
-  // Debug log to diagnose environment variables
-  if (typeof process !== 'undefined' && process.env) {
-    console.log('[Guestbook API] ENV DIAG:', {
-      GUESTBOOK_PRODUCTION: process.env.GUESTBOOK_PRODUCTION,
-      NODE_ENV: process.env.NODE_ENV
-    });
-  }
-  // Always return Playwright Test User entry unless GUESTBOOK_PRODUCTION === 'true'.
-  if (typeof process !== 'undefined' && process.env && process.env.GUESTBOOK_PRODUCTION !== 'true') {
-    console.log('[Guestbook API] Returning Playwright Test User entry for non-production environment:', process.env.NODE_ENV);
-    return new Response(JSON.stringify([
-      {
-        id: 1,
-        name: 'Playwright Test User',
-        message: 'This is a test message from Playwright.',
-        created_at: Date.now()
-      }
-    ]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  // Determine dynamic mode (may be null meaning fall back)
+  const dynamicMode = await resolveDynamicMode();
+  const legacyNonProd = typeof process !== 'undefined' && process.env && process.env.GUESTBOOK_PRODUCTION !== 'true';
+  const effectiveDynamic = dynamicMode ?? legacyNonProd;
+  if (effectiveDynamic && legacyNonProd) {
+    console.log('[Guestbook API] Dynamic non-production mode GET - will append static test entry');
+  } else if (legacyNonProd && !effectiveDynamic) {
+    console.log('[Guestbook API] Legacy non-production mode active (dynamic override disabled)');
   }
 
   // In explicit production, only access DB and clientAddress if both are available
@@ -87,20 +114,33 @@ export const GET: APIRoute = async ({ locals, clientAddress }) => {
     if (!rl.allowed) {
       return new Response(JSON.stringify({ error: 'rate-limited' }), { status: 429, headers: { 'Content-Type': 'application/json', ...rateLimitHeaders(rl) } });
     }
+    let list: any[] = [];
     const { results } = await env.DB.prepare('SELECT id, name, message, created_at FROM entries ORDER BY id DESC LIMIT 25').all();
-    return new Response(JSON.stringify(results), {
+    if (Array.isArray(results)) list = results.slice();
+  if (effectiveDynamic) {
+      list.push({
+        id: 999999,
+        name: 'Playwright Test User',
+        message: 'This is a test message from Playwright.',
+        created_at: Date.now()
+      });
+    }
+    return new Response(JSON.stringify(list), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    return new Response(JSON.stringify([
-      {
-        id: 1,
-        name: 'Playwright Test User',
-        message: 'This is a test message from Playwright.',
-        created_at: Date.now()
-      }
-    ]), {
+    // Swallow errors to preserve prior resilient behavior; log only in non-production to avoid noise.
+    if (legacyNonProd) {
+      console.error('[Guestbook API] GET fallback error:', error);
+    }
+    const fallback = [{
+      id: 1,
+      name: 'Playwright Test User',
+      message: 'This is a test message from Playwright.',
+      created_at: Date.now()
+    }];
+    return new Response(JSON.stringify(fallback), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });

@@ -40,6 +40,52 @@ interface DirectoryUser {
   systems: IntegrationKey[];
 }
 
+// --- Action Request Type System (added for stronger type safety on POST handler) ---
+interface StartWorkflowActionRequest {
+  action: 'start-workflow';
+  userId: string;
+  requester?: string;
+  systems?: IntegrationKey[]; // Optional subset/ordering for target systems
+}
+
+interface AdvanceWorkflowActionRequest {
+  action: 'advance-workflow';
+  workflowId: string;
+  system: IntegrationKey;
+  outcome?: StepState; // Defaults to 'completed' in handler
+  note?: string;
+}
+
+interface SyncGroupsActionRequest {
+  action: 'sync-groups';
+  userId: string;
+  groups: string[]; // Replacement list of Okta group names
+}
+
+interface ResetActionRequest {
+  action: 'reset';
+}
+
+type AutomationActionRequest =
+  | StartWorkflowActionRequest
+  | AdvanceWorkflowActionRequest
+  | SyncGroupsActionRequest
+  | ResetActionRequest;
+
+// Type guards (lightweight – defensive runtime validation will live in parsing helper)
+function isStartWorkflowAction(v: any): v is StartWorkflowActionRequest {
+  return v?.action === 'start-workflow' && typeof v?.userId === 'string';
+}
+function isAdvanceWorkflowAction(v: any): v is AdvanceWorkflowActionRequest {
+  return v?.action === 'advance-workflow' && typeof v?.workflowId === 'string' && typeof v?.system === 'string';
+}
+function isSyncGroupsAction(v: any): v is SyncGroupsActionRequest {
+  return v?.action === 'sync-groups' && typeof v?.userId === 'string' && Array.isArray(v?.groups);
+}
+function isResetAction(v: any): v is ResetActionRequest {
+  return v?.action === 'reset';
+}
+
 const integrationCatalog: IntegrationDescriptor[] = [
   {
     id: 'okta',
@@ -222,6 +268,14 @@ function resetState() {
   workflows = [];
 }
 
+// Exported test helper expected by demoFlows.test and demo reset API route.
+// It performs an in-memory reset of IAM automation demo data so tests start
+// from a clean deterministic baseline without cross-test pollution.
+export function resetIamAutomationDemoData() {
+  resetState();
+  return { users: users.length, workflows: workflows.length };
+}
+
 function serializeWorkflow(workflow: JoinerWorkflow) {
   return {
     ...workflow,
@@ -249,59 +303,55 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const body = await request.json();
-    const { action } = body;
-    if (!action) {
-      return new Response(JSON.stringify({ error: 'Missing action' }), { status: 400 });
+    const raw = await request.json();
+    const body: AutomationActionRequest | undefined = ((): AutomationActionRequest | undefined => {
+      if (isStartWorkflowAction(raw)) return raw;
+      if (isAdvanceWorkflowAction(raw)) return raw;
+      if (isSyncGroupsAction(raw)) return raw;
+      if (isResetAction(raw)) return raw;
+      return undefined;
+    })();
+    if (!body) {
+      return new Response(JSON.stringify({ error: 'Missing or invalid action' }), { status: 400 });
     }
 
-    if (action === 'start-workflow') {
-      const { userId, requester = 'okta-demo@atlasit.pro', systems } = body;
-      if (!userId) {
-        return new Response(JSON.stringify({ error: 'userId required' }), { status: 400 });
+    switch (body.action) {
+      case 'start-workflow': {
+        const { userId, requester = 'okta-demo@atlasit.pro', systems } = body;
+        const user = users.find((u) => u.id === userId);
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+        }
+        const targetSystems: IntegrationKey[] = systems?.length ? systems : ['aws', 'entra', 'ad', 'google', 'knowbe4'];
+        const wf = createWorkflow(userId, requester, targetSystems);
+        workflows.push(wf);
+        return new Response(JSON.stringify(serializeWorkflow(wf)), { status: 201 });
       }
-      const user = users.find((u) => u.id === userId);
-      if (!user) {
-        return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+      case 'advance-workflow': {
+        const { workflowId, system, outcome = 'completed', note } = body;
+        const wf = workflows.find((w) => w.id === workflowId);
+        if (!wf) {
+          return new Response(JSON.stringify({ error: 'Workflow not found' }), { status: 404 });
+        }
+        advanceWorkflow(wf, system, outcome, note);
+        return new Response(JSON.stringify(serializeWorkflow(wf)));
       }
-      const targetSystems: IntegrationKey[] = systems?.length ? systems : ['aws', 'entra', 'ad', 'google', 'knowbe4'];
-      const wf = createWorkflow(userId, requester, targetSystems);
-      workflows.push(wf);
-      return new Response(JSON.stringify(serializeWorkflow(wf)), { status: 201 });
+      case 'sync-groups': {
+        const { userId, groups } = body;
+        const user = users.find((u) => u.id === userId);
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+        }
+        user.oktaGroups = Array.from(new Set(groups));
+        return new Response(JSON.stringify(user));
+      }
+      case 'reset': {
+        resetState();
+        return new Response(JSON.stringify({ success: true }));
+      }
+      default:
+        return new Response(JSON.stringify({ error: 'Invalid action' }), { status: 400 });
     }
-
-    if (action === 'advance-workflow') {
-      const { workflowId, system, outcome = 'completed', note } = body;
-      if (!workflowId || !system) {
-        return new Response(JSON.stringify({ error: 'workflowId and system required' }), { status: 400 });
-      }
-      const wf = workflows.find((w) => w.id === workflowId);
-      if (!wf) {
-        return new Response(JSON.stringify({ error: 'Workflow not found' }), { status: 404 });
-      }
-      advanceWorkflow(wf, system, outcome, note);
-      return new Response(JSON.stringify(serializeWorkflow(wf)));
-    }
-
-    if (action === 'sync-groups') {
-      const { userId, groups } = body;
-      if (!userId || !Array.isArray(groups)) {
-        return new Response(JSON.stringify({ error: 'userId and groups required' }), { status: 400 });
-      }
-      const user = users.find((u) => u.id === userId);
-      if (!user) {
-        return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
-      }
-      user.oktaGroups = Array.from(new Set(groups));
-      return new Response(JSON.stringify(user));
-    }
-
-    if (action === 'reset') {
-      resetState();
-      return new Response(JSON.stringify({ success: true }));
-    }
-
-    return new Response(JSON.stringify({ error: 'Invalid action' }), { status: 400 });
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err?.message ?? 'Unknown error' }), { status: 500 });
   }

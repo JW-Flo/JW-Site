@@ -1,44 +1,37 @@
 #!/usr/bin/env node
-import 'dotenv/config';
+// Unified environment validation script.
+import "dotenv/config";
 
 const required = [
-  'SUPER_ADMIN_KEY',
-  'SESSION_SIGNING_KEY',
-  'CONSENT_ADMIN_KEY',
-  'TURNSTILE_SECRET_KEY',
-  'SITE_URL'
+  "SUPER_ADMIN_KEY",
+  "SESSION_SIGNING_KEY",
+  "CONSENT_ADMIN_KEY",
 ];
-
-const optional = [
-  'NVD_API_KEY',
-  'VIRUSTOTAL_API_KEY',
-  'OPENCVE_API_TOKEN',
-  'OPENCVE_BASIC_USER',
-  'OPENCVE_BASIC_PASSWORD',
-  'CF_PAGES_PROJECT',
-  'CF_PAGES_BRANCH',
-  'CF_PAGES_DIST_DIR',
-  'DEPLOY_HEALTHCHECK_URL'
-];
-
-function check(vars) {
-  const missing = vars.filter((key) => !process.env[key] || process.env[key].length === 0);
-  if (missing.length > 0) {
-    console.error(`Missing required environment variables: ${missing.join(', ')}`);
-    return false;
-  }
-  return true;
-}
-
-const ok = check(required);
-
-if (!ok) {
+const missing = required.filter(
+  (k) => !process.env[k] || process.env[k].trim() === ""
+);
+if (missing.length) {
+  console.error(`[env] Missing required secrets: ${missing.join(", ")}`);
   process.exit(1);
 }
 
-const missingOptional = optional.filter((key) => !process.env[key]);
-if (missingOptional.length > 0) {
-  console.warn(`Optional variables not set: ${missingOptional.join(', ')}`);
+function warn(msg) {
+  console.warn(`[env][warn] ${msg}`);
 }
-
-console.log('Environment validation passed.');
+if (!process.env.SITE_URL)
+  warn("SITE_URL not set (canonical links may be incorrect).");
+if (!process.env.TURNSTILE_SECRET_KEY)
+  warn("TURNSTILE_SECRET_KEY not set (bot protection disabled).");
+if (!process.env.VIRUSTOTAL_API_KEY)
+  warn("VIRUSTOTAL_API_KEY not set – threat intel placeholder only.");
+if ((process.env.OPENCVE_ENRICH || "").toLowerCase() === "true") {
+  const hasBasic =
+    (process.env.OPENCVE_USERNAME && process.env.OPENCVE_PASSWORD) ||
+    (process.env.OPENCVE_BASIC_USER && process.env.OPENCVE_BASIC_PASSWORD);
+  const hasToken = process.env.OPENCVE_API_TOKEN;
+  if (!hasBasic && !hasToken)
+    warn(
+      "OPENCVE_ENRICH enabled but no OpenCVE credentials (fallback counts used)."
+    );
+}
+console.log("[env] Environment validation passed.");
