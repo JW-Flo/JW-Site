@@ -1,5 +1,6 @@
-import { verifyJWT } from '@atlasit/edge-utils';
+import { verifyJWT, parseCookie } from '@atlasit/edge-utils';
 import type { Handle } from '@sveltejs/kit';
+import { sessionStore } from '$lib/server/sessionStore';
 
 export interface User {
   id: string;
@@ -55,11 +56,32 @@ export async function requireAuth(request: Request, jwtSecret: string): Promise<
 export const authMiddleware: Handle = async ({ event, resolve }) => {
   const jwtSecret = event.platform?.env?.JWT_SECRET || 'default-secret';
 
-  // Extract user from Authorization header
+  // 1. Try Authorization bearer first
   const authHeader = event.request.headers.get('Authorization');
-  const user = await getUserFromToken(authHeader, jwtSecret);
+  let user = await getUserFromToken(authHeader, jwtSecret);
 
-  // Add user to locals if authenticated
+  // 2. Fallback to session cookie if no bearer user
+  if (!user) {
+    try {
+      const cookieHeader = event.request.headers.get('cookie');
+      const sessionId = parseCookie(cookieHeader, 'atlasit_session');
+      if (sessionId) {
+        const store = sessionStore(event.platform?.env as any);
+        const session = await store.getSession(sessionId);
+        if (session && !session.revoked_at) {
+          user = {
+            id: session.user_id,
+            email: session.email || '',
+            tenantId: session.tenant_id || '',
+          };
+        }
+      }
+    } catch (err) {
+      // Non-fatal; continue without user
+      console.warn('Session cookie auth failed', err);
+    }
+  }
+
   if (user) {
     event.locals.user = user;
   }
