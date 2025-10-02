@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 
 // Placeholder session endpoint: always returns no active session during build stabilization.
-// TODO: Reintroduce real implementation once @atlasit/auth package is available in this workspace.
+// NOTE: Real session implementation will be restored when @atlasit/auth package is integrated into this workspace.
 export const GET: APIRoute = async () => {
   return new Response(
     JSON.stringify({ ok: false, session: null, stub: true }),
