@@ -8,11 +8,22 @@ export const GET: APIRoute = async ({ locals }) => {
   const env: any = (locals as any)?.runtime?.env || (globalThis as any)?.process?.env || {};
   const flags = projectClientFlags(loadFlags(env));
   const commit = env.GIT_COMMIT || env.COMMIT_SHA || 'unknown';
+  // Enrichment availability detection (no secrets echoed)
+  const vtEnabled = typeof env.VIRUSTOTAL_API_KEY === 'string' && env.VIRUSTOTAL_API_KEY.length > 0;
+  const ocveFlag = (env.OPENCVE_ENRICH || '').toString().toLowerCase() === 'true';
+  const ocveAuthBasic = env.OPENCVE_USERNAME && env.OPENCVE_PASSWORD;
+  const ocveAuthToken = env.OPENCVE_API_TOKEN && !ocveAuthBasic; // token only if no basic creds
+  const enrichment = {
+    virustotal: vtEnabled ? 'enabled' : 'disabled',
+    opencve: ocveFlag ? 'enabled' : 'disabled',
+    opencve_auth: ocveFlag ? (ocveAuthBasic ? 'basic' : (ocveAuthToken ? 'token' : 'none')) : 'n/a'
+  } as const;
   const body = {
     ok: true,
     uptime_ms: Date.now() - started,
     commit,
     flags,
+    enrichment,
     timestamp: new Date().toISOString()
   };
   logger.debug('Health check', { uptime: body.uptime_ms, commit });
