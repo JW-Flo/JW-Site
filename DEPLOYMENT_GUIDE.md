@@ -1,34 +1,32 @@
-# JW-Site & AWhittleWandering Cloudflare Pages Deploy Guide
+# (Historical) JW-Site Cloudflare Pages Deploy Guide
 
 ## 1. Build & Deploy (from project root)
 
-Always run deploy from the project root (where `wrangler.toml` lives):
+This document is retained only for historical reference. The Astro `jw-immersive` Pages deployment has been fully decommissioned. The production root `https://www.atlasit.pro/` now issues a 308 redirect to the console worker (`/console`).
 
-```
-cd /Users/jw/Projects/JW-Site
+Former build command (DO NOT USE):
+
+```bash
 npx wrangler pages deploy apps/jw-immersive/dist --commit-dirty=true
 ```
 
-- This ensures all relative paths resolve correctly and avoids ENOENT errors.
-- The `apps/jw-immersive/dist` directory must contain the latest static and SSR build output.
+Any attempt to rebuild should be avoided; underlying source was removed.
 
 ## 2. Static & SPA Routing
 
-- `/awhittlewandering/` and its subpaths are served as static files with SPA fallback (via custom SSR worker patch).
-- All other routes are handled by Astro SSR as normal.
+All routing logic has shifted to Cloudflare Workers. Static assets (if re‑introduced) should be served via R2 + Worker or a dedicated minimal Pages project separate from legacy assumptions.
 
 ## 3. Config Notes
 
 - `wrangler.toml` must **not** have `kv_namespaces` under `r2_buckets`.
 - All secrets and environment variables should be set in the Cloudflare Pages dashboard, not in the repo.
-- If you add KV or D1, follow the commented instructions in `wrangler.toml`.
+If new persistence is needed for the console, configure bindings directly in the worker configuration (not this historical Pages setup).
 
 ## 4. Troubleshooting
 
 - If you see ENOENT or missing file errors, check your working directory and ensure you are in the project root.
-- If static assets for AWhittleWandering do not load, verify the worker patch and that the static build output is present in `apps/jw-immersive/dist/awhittlewandering/`.
+Legacy static asset troubleshooting no longer applies. Any missing assets should be added to the console worker bundle or R2.
 
 ## 5. Team Handoff
 
-- This process is robust and repeatable for production deploys.
-- For further changes, update this guide and the config comments as needed.
+Decommission Status: COMPLETE. No further action required here. See `ASTRO_DEPRECATED.md` for authoritative status.

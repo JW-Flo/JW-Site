@@ -31,19 +31,14 @@ if (shouldBuild) {
   execSync('npm run build', { cwd: root, stdio: 'inherit' });
 }
 
+// jw-immersive removed (migrated to console worker). Only monitor active bundles.
 const targets = [
   {
     label: 'platform',
     dir: path.join(root, 'apps/platform/dist'),
     warn: 600 * 1024,
     fail: 1024 * 1024,
-  },
-  {
-    label: 'jw-immersive',
-    dir: path.join(root, 'apps/jw-immersive/dist'),
-    warn: 600 * 1024,
-    fail: 1024 * 1024,
-  },
+  }
 ];
 
 let violations = 0;
@@ -60,7 +55,12 @@ for (const target of targets) {
     top.forEach(({ path: filePath, size }) => {
       const rel = path.relative(root, filePath);
       const kb = (size / 1024).toFixed(1);
-      const flag = size >= target.fail ? '❌' : size >= target.warn ? '⚠️' : '✅';
+      let flag = '✅';
+      if (size >= target.fail) {
+        flag = '❌';
+      } else if (size >= target.warn) {
+        flag = '⚠️';
+      }
       console.log(`  ${flag} ${kb} KB  ${rel}`);
     });
     const max = sorted[0];
@@ -73,7 +73,8 @@ for (const target of targets) {
       console.log(`\n[bundle:${target.label}] Assets within thresholds.`);
     }
   } catch (error) {
-    console.warn(`[bundle:${target.label}] Skipping (missing dir?): ${target.dir}`);
+    // Log concise reason for skip to satisfy lint rule on empty catch handling
+    console.warn(`[bundle:${target.label}] Skipping (missing dir?): ${target.dir} :: ${error?.message || error}`);
   }
 }
 

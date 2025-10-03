@@ -10,11 +10,9 @@ This inventory catalogs all existing functionality across the monorepo, assessin
 **Edge Compatibility**: Mostly compatible, some APIs may need Node API removal  
 **Migration Priority**: **CRITICAL** - Core business functionality
 
-### apps/jw-immersive (Astro) - Marketing & Blog
+### (Removed) apps/jw-immersive (Astro) - Marketing & Blog
 
-**Purpose**: Public-facing marketing site, blog, demos, and contact forms  
-**Edge Compatibility**: High - mostly static content with some APIs  
-**Migration Priority**: **HIGH** - Public presence and lead generation
+Historical only. The Astro marketing/blog application was fully removed in favor of a unified console worker + redirect at domain root. Content and demo surfaces can be reintroduced as SvelteKit/Worker routes if needed. Previous purpose: public marketing site, blog, demos, contact. (Decommission complete.)
 
 ### apps/marketing (Astro) - Product Pages
 
@@ -65,7 +63,7 @@ This inventory catalogs all existing functionality across the monorepo, assessin
 - `security.astro` - **MEDIUM** - Security center
 - `governance/compliance.astro` - **MEDIUM** - Compliance dashboard
 
-#### apps/jw-immersive/src/pages/
+#### (Removed) apps/jw-immersive/src/pages/ (historical reference)
 
 - `index.astro` - **HIGH** - Homepage
 - `about.astro` - **MEDIUM** - About page
@@ -104,7 +102,7 @@ This inventory catalogs all existing functionality across the monorepo, assessin
 - `paycom/` - **MEDIUM** - Paycom integration
 - `screenshot-event.get.ts`, `screenshot-event.ts` - **LOW** - Screenshot detection
 
-#### apps/jw-immersive/src/pages/api/
+#### (Removed) apps/jw-immersive/src/pages/api/ (historical reference)
 
 - `guestbook.ts`, `guestbook/` - **LOW** - Guestbook API
 - `analytics/` - **MEDIUM** - Analytics endpoints
