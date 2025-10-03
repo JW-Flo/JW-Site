@@ -53,3 +53,17 @@ Re-run deploy for previously known good commit or restore artifact via older wor
 - Add Playwright smoke tests stage prior to deploy.
 - Add Lighthouse CI performance budget gating.
 - Add automated sitemap ping to search engines post-deploy.
+
+---
+
+## Deprecation Notice (Astro jw-immersive)
+
+The original `jw-immersive` Astro Pages deployment is deprecated and disabled. See `ASTRO_DEPRECATED.md` for details. All interactive dashboard functionality has migrated to the `atlasit-console` worker (routes: `/console*`, `/access-requests*`, `/incidents*`, `/api/config*`, `/api/mock/*`).
+
+Required secrets now focus on Worker deployments:
+
+- `WRANGLER_API_TOKEN` (Workers + Pages scopes if you retain any Pages project)
+- `CF_ACCOUNT_ID`
+- (Optional) `CF_API_TOKEN` only if re-enabling Pages.
+
+If you re-enable Astro, remove the `if: false` in `.github/workflows/deploy-pages.yml`.
