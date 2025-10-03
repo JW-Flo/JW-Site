@@ -1,0 +1,37 @@
+name: Deploy Pages (jw-immersive)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/jw-immersive/**'
+      - '.github/workflows/deploy-pages.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Build jw-immersive
+        run: npm run build --workspace @atlasit/jw-immersive
+      - name: Deploy to Cloudflare Pages
+        run: |
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
+            echo "CF_API_TOKEN not set; attempting WRANGLER_API_TOKEN fallback";
+            export CLOUDFLARE_API_TOKEN="$WRANGLER_API_TOKEN";
+          fi
+          npx wrangler pages deploy apps/jw-immersive/dist --branch main --project-name jw-site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          WRANGLER_API_TOKEN: ${{ secrets.WRANGLER_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
