@@ -1,10 +1,10 @@
-# Astro (jw-immersive) Application Deprecated
+# Astro (jw-immersive) Application Fully Removed
 
-The former marketing/landing Astro app `jw-immersive` is no longer deployed.
+The former marketing/landing Astro app `jw-immersive` has been removed from the repository (directory deleted) and its Cloudflare Pages workflow disabled and slated for deletion.
 
 ## Replacement
 
-The functionality and surface now lives in the `atlasit-console` Cloudflare Worker (see parent monorepo `Project-AtlasIT`), which serves:
+All user-facing dashboard and mock API functionality lives in the `atlasit-console` Cloudflare Worker (primary platform repo). Active routes:
 
 - `/console*`
 - `/access-requests*`
@@ -14,24 +14,23 @@ The functionality and surface now lives in the `atlasit-console` Cloudflare Work
 
 ## Deployment Change
 
-The GitHub Actions workflow `.github/workflows/deploy-pages.yml` has been disabled (job guarded by `if: false`). No further Pages builds will run automatically.
+The Pages workflow was disabled, and the source directory removed. Future deploys will not rebuild the Astro site. Remove the deprecated workflow file when comfortable.
 
 ## Secrets
 
-- `WRANGLER_API_TOKEN` (with Workers + Pages scopes) and `CF_ACCOUNT_ID` remain required for worker deployments.
-- `CF_API_TOKEN` is optional unless future Pages projects are reintroduced.
+- `WRANGLER_API_TOKEN` (Workers + Pages scopes) and `CF_ACCOUNT_ID` support worker deployments.
+- `CF_API_TOKEN` no longer required unless a new Pages project is introduced.
 
-## Future Cleanup
+## Cleanup Status
 
-Once confirmed no consumers rely on legacy URLs served by the Pages project, you may:
+- [x] Workflow disabled
+- [x] Directory deleted
+- [ ] Pages project deletion (manual dashboard step)
+- [ ] Remove workflow file (optional final step)
 
-1. Delete the Cloudflare Pages project `jw-site`.
-2. Remove the `apps/jw-immersive` directory.
-3. Delete the deprecated workflow file entirely.
+## Next Manual Step
 
-## Rollback
-
-To restore the old deployment temporarily, remove the `if: false` gate in the workflow and re-enable build steps.
+In Cloudflare Dashboard, delete the Pages project `jw-site` to prevent accidental reactivation.
 
 ---
 Last updated: (auto)

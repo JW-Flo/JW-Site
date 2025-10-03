@@ -67,3 +67,7 @@ Required secrets now focus on Worker deployments:
 - (Optional) `CF_API_TOKEN` only if re-enabling Pages.
 
 If you re-enable Astro, remove the `if: false` in `.github/workflows/deploy-pages.yml`.
+
+### Astro Removal Update
+
+The legacy `jw-immersive` Astro Pages app has been fully removed from the repository. See `ASTRO_DEPRECATED.md` for status checklist and next manual step (delete Pages project `jw-site`).
