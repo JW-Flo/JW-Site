@@ -9,12 +9,12 @@ on:
 
 jobs:
     build-and-deploy:
-        if: false  # DEPRECATED: Astro jw-immersive deployment disabled; console worker replaces this.
+        if: false # DEPRECATED: Astro jw-immersive deployment disabled; console worker replaces this.
         runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
             - name: Deprecated Notice
               run: |
-                echo 'jw-immersive Astro deployment is deprecated and disabled.'
+                  echo 'jw-immersive Astro deployment is deprecated and disabled.'
                 echo 'Use atlasit-console worker deployment instead.'

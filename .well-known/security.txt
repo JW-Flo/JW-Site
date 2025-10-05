@@ -1,0 +1,5 @@
+Contact: mailto:security@atlasit.pro
+Contact: mailto:joe.whittle@atlasit.pro
+Policy: https://example.com/security-policy
+Preferred-Languages: en
+Canonical: https://atlasit.pro/.well-known/security.txt

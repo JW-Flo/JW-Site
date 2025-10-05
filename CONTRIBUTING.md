@@ -19,3 +19,7 @@
 
 - `npm run lint` and `npm run typecheck` must pass.
 - Add/adjust unit tests and Playwright specs as part of the PR.
+
+## Security Disclosure
+
+Report vulnerabilities privately to <security@atlasit.pro> (fallback: <joe.whittle@atlasit.pro>). Do not create public issues for security findings.
