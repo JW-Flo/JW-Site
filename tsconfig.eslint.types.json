@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.eslint.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "apps/atlasit-sveltekit/src/**/*.ts",
+    "apps/atlasit-sveltekit/src/**/*.tsx",
+    "apps/atlasit-sveltekit/src/**/*.svelte",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "apps/**/.svelte-kit/types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "**/.svelte-kit/**",
+    "**/coverage/**"
+  ]
+}

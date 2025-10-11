@@ -1,5 +1,6 @@
 <script lang="ts">
-  import '../app.css';
+	// Correct relative path to root app.css
+	import '../../app.css';
 </script>
 
 <slot />

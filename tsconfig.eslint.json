@@ -14,19 +14,13 @@
     "apps/**/*.{ts,tsx,vue,astro}",
     "packages/**/*.{ts,tsx}",
     "atlasit/**/*.{ts,tsx}",
-  "apps/**/.svelte-kit/types/**/*.{d.ts,ts}",
-  "apps/**/.svelte-kit/generated/**/*.{d.ts,ts,js}",
+    "apps/**/.svelte-kit/types/**/*.{d.ts,ts}",
+    "apps/**/.svelte-kit/generated/**/*.{d.ts,ts,js}",
     "**/*.cjs",
     "**/*.mjs",
     "scripts/**/*.{ts,js,mjs,cjs}",
     "*.cts",
     "*.mts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-  "coverage",
-  "**/.svelte-kit/**"
-  ]
+  "exclude": ["node_modules", "dist", "build", "coverage", "**/.svelte-kit/**"]
 }
