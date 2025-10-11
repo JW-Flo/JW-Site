@@ -28,6 +28,9 @@ yarn-error.log*
 coverage/
 tmp/
 
+# Local scratch demos
+_scratch/
+
 # Secrets (local-only stored rotated admin keys)
 .secrets/
 *.conflict.backup
