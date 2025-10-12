@@ -17,8 +17,8 @@ export default [
       "**/dist/**",
       "**/.svelte-kit/**",
       "**/.astro/**",
-  // Temporarily ignore authored Astro pages until they are cleaned up
-  "**/*.astro",
+      // Temporarily ignore authored Astro pages until they are cleaned up
+      "**/*.astro",
       "**/playwright-report/**",
       "**/coverage/**",
       "**/node_modules/**",
@@ -146,7 +146,7 @@ export default [
       "prefer-const": "error",
       "no-var": "error",
       "no-unused-vars": "warn",
-  "no-prototype-builtins": "warn",
+      "no-prototype-builtins": "warn",
     },
   },
   {
@@ -245,8 +245,8 @@ export default [
         TextDecoder: "readonly",
         crypto: "readonly",
         Buffer: "readonly",
-  btoa: "readonly",
-  atob: "readonly",
+        btoa: "readonly",
+        atob: "readonly",
       },
     },
   },
@@ -281,7 +281,11 @@ export default [
     },
   },
   {
-    files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/test/**/*.{ts,tsx}"],
+    files: [
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+      "**/test/**/*.{ts,tsx}",
+    ],
     rules: {
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",
@@ -314,10 +318,10 @@ export default [
         Headers: "readonly",
         Request: "readonly",
         Response: "readonly",
-  Buffer: "readonly",
-  RequestInit: "readonly",
-  KVNamespace: "readonly",
-  D1Database: "readonly",
+        Buffer: "readonly",
+        RequestInit: "readonly",
+        KVNamespace: "readonly",
+        D1Database: "readonly",
       },
     },
   },
