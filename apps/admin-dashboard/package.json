@@ -9,7 +9,7 @@
   "deploy": "astro build && npx wrangler pages deploy dist --branch=main"
   },
   "dependencies": {
-    "astro": "^5.13.5",
+    "astro": "^5.18.1",
     "@astrojs/cloudflare": "^12.6.8",
     "tailwindcss": "^3.4.7"
   },
